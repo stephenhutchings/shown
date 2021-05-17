@@ -1,0 +1,41 @@
+{
+  "name": "starch",
+  "version": "0.0.1-alpha.1",
+  "description": "Static, responsive SVG charts, without the need for client-side Javascript.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublish": "node ./src/lib/export.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stephenhutchings/starch.git"
+  },
+  "keywords": [
+    "pie",
+    "bar",
+    "line",
+    "area",
+    "donut",
+    "semantic",
+    "accessibility",
+    "a11y",
+    "flex",
+    "no-js",
+    "ssr",
+    "ssg"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stephenhutchings/starch/issues"
+  },
+  "homepage": "https://github.com/stephenhutchings/starch#readme",
+  "devDependencies": {
+    "pug": "^3.0.2"
+  },
+  "type": "module",
+  "files": [
+    "./src/**/*"
+  ]
+}
