@@ -1,4 +1,4 @@
-# starch
+# shown
 
 **This library is current in pre-release alpha.**
 
@@ -25,7 +25,7 @@ The library exposes template functions to render several chart types.
 ## Pie and Donut Charts
 
 ```js
-import { donut } from "starch"
+import { donut } from "shown"
 
 const output = donut({
   title: "My chart",
@@ -73,7 +73,7 @@ Coming soon…
 Renders a simple legend to label the different values included in the chart.
 
 ```js
-import { legend } from "starch"
+import { legend } from "shown"
 
 const output = legend({
   keys: ["Item 1", "Item 2"],
@@ -89,7 +89,7 @@ Coming soon…
 Wraps a chart inside a `<figure>` element, with `<figcaption>` and a legend included.
 
 ```js
-import { figure } from "starch"
+import { figure } from "shown"
 
 const output = legend({
   title: "My chart",
@@ -108,9 +108,9 @@ By default, only the minimal CSS needed is included in each template. This ensur
 However, if you want to get started quickly, you can include the additional CSS provided.
 
 ```js
-import css from "starch/css"
+import css from "shown/css"
 ```
 
 ```html
-<link rel="stylesheet" src="/path/to/starch.css" />
+<link rel="stylesheet" src="/path/to/shown.css" />
 ```

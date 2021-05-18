@@ -7,12 +7,12 @@ var pug_has_own_property=Object.prototype.hasOwnProperty;
 var pug_match_html=/["&<>]/;function template(locals) {var pug_html = "", pug_mixins = {}, pug_interp;;
     var locals_for_with = (locals || {});
     
-    (function (Math, colors, data, description, minVal, offset, sort, stroke, styles, title, values) {
+    (function (Math, colors, data, description, minVal, offset, sort, stroke, styles, title) {
       minVal = minVal || 4
 offset = offset || -25
 stroke = stroke || 20
 styles = styles || true
-values = (sort ? [...data].sort((a, b) => a < b ? 1 : -1) : data)
+const values = (sort ? [...data].sort((a, b) => a < b ? 1 : -1) : data)
 const radius = (100 - stroke) / 2
 const π = Math.PI
 const sum = data.reduce((m, v) => m + v, 0)
@@ -102,8 +102,6 @@ pug_html = pug_html + "\u003C\u002Fsvg\u003E\u003C\u002Fsvg\u003E";
         locals_for_with.styles :
         typeof styles !== 'undefined' ? styles : undefined, "title" in locals_for_with ?
         locals_for_with.title :
-        typeof title !== 'undefined' ? title : undefined, "values" in locals_for_with ?
-        locals_for_with.values :
-        typeof values !== 'undefined' ? values : undefined));
+        typeof title !== 'undefined' ? title : undefined));
     ;;return pug_html;};
 export default template;
