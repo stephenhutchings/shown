@@ -1,0 +1,12 @@
+mixin section-list(data)
+  .clearfix
+    each member in data.members
+      .border-bottom(id=format.slug(member.namespace))
+        .clearfix.small.pointer.toggle-sibling
+          .py1.contain
+            a.icon.pin-right.py1.dark-link.caret-right ▸
+            span.code.strong.truncate
+              +signature(member)
+
+      .clearfix.display-none.toggle-target
+        +section(member, true)

@@ -1,0 +1,7 @@
+mixin note(note)
+  .keyline-top-note
+    section.py2.clearfix
+      h2(id=format.slug(note.namespace))
+
+    if note.description
+      != format.md(note.description)

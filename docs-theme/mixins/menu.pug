@@ -1,0 +1,12 @@
+mixin menu(title, list)
+  if list && list.length
+    ul.list-reset.py1-ul.pl1
+      li.h5
+        span= title
+
+        each member in list
+          li
+            a.regular.pre-open(
+              href=`#${member.namespace}`
+            )
+              | ##{member.name}

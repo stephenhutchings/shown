@@ -1,0 +1,22 @@
+mixin param-property-row(property)
+  tr
+    td.break-word
+      span.code.bold= property.name
+      = " "
+
+    td.break-word
+      code!= format.type(property.type)
+
+
+    td.break-word
+      span!= format.md(property.description, true)
+
+      if property.default
+        strong
+          | The default value is 
+          code= property.default
+          = ". "
+
+  if property.properties && property.properties.length
+    each child in property.properties
+      +param-property-row(child)

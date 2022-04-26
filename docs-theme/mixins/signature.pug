@@ -1,0 +1,13 @@
+mixin signature(section, includeReturns)
+  if section.kind === "class"
+    = "new "
+
+  = section.name
+
+  if format.isFunction(section)
+    if section.returns.length
+      != format.parameters(section)
+
+    if includeReturns
+      = ": "
+      != format.type(section.returns[0].type)

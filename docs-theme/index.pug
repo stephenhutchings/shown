@@ -1,0 +1,75 @@
+include mixins/section-list
+include mixins/section
+include mixins/signature
+include mixins/note
+include mixins/menu
+include mixins/param-property-row
+include mixins/param-property-name
+
+html
+  head
+    meta(charset="utf-8")
+    title
+      =config["project-name"]
+
+    if config["project-description"]
+      meta(name="description" content=config["project-description"])
+    
+    link(rel="stylesheet" href="assets/bass.css")
+    link(rel="stylesheet" href="assets/style.css")
+    link(rel="stylesheet" href="assets/code.css")
+
+    if (config["favicon"])
+      link(rel="icon" href=config["favicon"])
+  
+    meta(
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    )
+
+  body.documentation.m0
+    header.py1.px2
+      .max-width-4.mx-auto
+        h1.mb0.no-anchor
+          = config["project-name"]
+
+          code.mb1
+            |  #{config["project-version"]}
+
+        if config["project-description"]
+          p= config["project-description"]
+
+        #toc
+          ul.list-reset.h5.py1-ul
+            each doc in docs
+              - const hasMembers = doc.members.static.length || doc.members.instance.length
+              li
+                a(
+                  href=`#${format.slug(doc.namespace)}`
+                  class=[
+                    doc.kind === "note" && "h5 bold black caps",
+                    hasMembers && "toggle-sibling"
+                  ]
+                )
+                  = doc.name
+
+                  if hasMembers
+                    span.icon ▸
+
+                if hasMembers
+                  .toggle.target.display-none
+                    +menu("Static members", doc.members.static)
+                    +menu("Inner members", doc.members.inner)
+                    +menu("Instance members", doc.members.instance)
+                    +menu("Events", doc.members.events)
+
+    main.bg-white.px2
+      .max-width-4.mx-auto
+        each section in docs
+          if section.kind === "note" && !section.children
+            +note({ note: section })
+          else
+            +section(section)
+
+  script(src="assets/anchor.js")
+  script(src="assets/site.js")

@@ -1,0 +1,166 @@
+- count = 0
+
+mixin section(section, nested)
+  section.py3.mb2.clearfix
+    if !nested || (section.context && section.context.github)
+      .flex
+        if !nested
+          h2.my0(
+            id=format.slug(section.namespace)
+          )
+            = section.name
+
+        if section.context && section.context.github
+          a.ml-auto(
+            href=section.context.github.url
+          )
+            span= section.context.github.path
+
+    != format.md(section.description)
+
+    .pre.p1.fill-light.mt0
+      +signature(section, true)
+
+    if section.type
+      p
+        | Type:
+        != format.type(section.type)
+
+    if section.augments && section.augments.length
+      p
+        | Extends
+        if section.augments
+          = section.augments.map(tag => format.autolink(tag.name)).join(', ')
+
+    if section.deprecated
+      div Deprecated: !{format.md(section.deprecated, true)}
+
+    if section.version
+      div Version: #{section.version}
+
+    if section.license
+      div License: #{section.license}
+
+    if section.author
+      div Author: #{section.author}
+
+    if section.copyright
+      div Copyright: !{format.md(section.copyright, true)}
+
+    if section.since
+      div Since: !{format.md(section.since, true)}
+
+    if section.params && section.params.length
+      h3.mt3.mb0.prose-big Parameters
+
+      .prose
+        each param in section.params
+          .space-bottom0
+            div
+              +param-property-name(param)
+              p.m0!= format.md(param.description, true)
+
+            if (param.properties && param.properties.length)
+              table.mt1.mb2.fixed-table.h5.col-12
+                colgroup
+                  col(width='20%')
+                  col(width='10%')
+                  col(width='70%')
+
+                thead
+                  tr.bold.fill-light
+                    th Name
+                    th Type
+                    th Description
+
+                tbody.mt1
+                  each property in param.properties
+                    +param-property-row(property)
+
+    if section.properties && section.properties.length
+      h3.mt3.mb0.prose-big Properties
+
+      div
+        each property in section.properties
+          .space-bottom0
+            +param-property-name(property)
+            if property.description
+              | : !{format.md(property.description, true)}
+
+            if property.properties && property.properties.length
+              ul
+                each prop in property.properties
+                  li
+                    code= property.name
+                    != format.type(property.type)
+                    
+                    if property.default
+                      | (default <code>#{property.default}</code>)
+
+                    != format.md(property.description)
+
+    if section.returns && section.returns.length
+      each r in section.returns
+        h3.mt3.mb0.prose-big Returns
+        code!= format.type(r.type)
+        if r.description
+          = " "
+          != format.md(r.description, true)
+
+    if section.sees && section.sees.length
+      h3.mt3.mb0.prose-big Related
+      each see in section.sees
+        if see.description
+          != format.md(see.description, true)
+
+    if section.throws && section.throws.length
+      h3.mt3.mb0.prose-big Throws
+      ul
+        each t in section.throws
+          li
+            != format.type(t.type)
+            |:
+            != format.md(t.description, true)
+
+    if section.examples && section.examples.length
+      h3.mt3.mb0.prose-big Example
+      each e in section.examples
+        .example.my1
+          if e.caption
+            p!= format.md(e.caption)
+
+          .sm-flex.items-stretch
+            .example-result
+              iframe(src=e.path width="100%" height="100%")
+
+            .example-code.flex-auto
+              != format.highlight(e.description)
+              != format.highlight(e.result, "html")
+
+    if section.members.static && section.members.static.length
+      h3.mt3.mb0.prose-big Static Members
+      +section-list({
+        members: section.members.static,
+        noun: 'Static Member'
+      })
+      
+    if section.members.instance && section.members.instance.length
+      h3.mt3.mb0.prose-big Instance Members
+      +section-list({
+        members: section.members.instance,
+        noun: 'Instance Member'
+      })
+
+    if section.members.inner && section.members.inner.length
+      h3.mt3.mb0.prose-big Inner Members
+      +section-list({
+        members: section.members.inner,
+        noun: 'Inner Member'
+      })
+
+    if section.members.events && section.members.events.length
+      h3.mt3.mb0.prose-big Events
+      +section-list({
+        members: section.members.events,
+        noun: 'Event'
+      })
