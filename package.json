@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "prepare": "node ./src/lib/export.js",
     "docs": "documentation build ./src/index.js -f html -g -o docs -t ./docs-theme/index.cjs"
   },
   "repository": {
