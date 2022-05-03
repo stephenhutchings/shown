@@ -2,7 +2,6 @@ const pug = require("pug")
 const path = require("path")
 const File = require("vinyl")
 const vfs = require("vinyl-fs")
-const pretty = require("pretty")
 const hljs = require("highlight.js")
 const concat = require("concat-stream")
 const documentation = require("documentation")
@@ -88,10 +87,8 @@ module.exports = function (comments, config) {
     import("../src/index.js").then((shown) => {
       examples.forEach((el, i) => {
         const body = new Function("shown", "return " + el.description)(shown)
-
         el.path = `examples/${i + 1}/index.html`
         el.contents = Buffer.from(pug.renderFile(iframe, { body }), "utf8")
-        el.result = pretty(body.replace(/(<\/?(svg|text))/g, "\n$1"))
         el.result = body
       })
 
