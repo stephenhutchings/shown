@@ -9,7 +9,7 @@ body {
 
 header {
   color: #b5bde0;
-  background: #1c2335 url("./gradient.png") no-repeat;
+  background: #1c2335 url("../img/gradient.png") no-repeat;
   background-size: 100% 4px;
 }
 
