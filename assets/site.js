@@ -1,8 +1,6 @@
-/* global anchors */
-
 // add anchor links to headers
 anchors.options.placement = "left"
-anchors.add("h2")
+anchors.add("h2, h3")
 
 // Filter UI
 var tocElements = document.getElementById("toc").getElementsByTagName("li")
@@ -49,7 +47,8 @@ function scrollIntoView(targetId) {
   }
 }
 
-function gotoCurrentTarget() {
+function gotoCurrentTarget(e) {
+  if (e) e.preventDefault()
   showHashTarget(location.hash.substring(1))
   scrollIntoView(location.hash.substring(1))
 }
@@ -73,11 +72,9 @@ function updateState() {
   history.replaceState({}, document.title)
 }
 
-function loadState(ev) {
-  if (ev) {
-    // Edge doesn't replace change history.state on popstate.
-    history.replaceState(ev.state, document.title)
-  }
+function loadState(e) {
+  // Edge doesn't replace change history.state on popstate.
+  if (e) history.replaceState(e.state, document.title)
 }
 
 window.addEventListener("load", function () {

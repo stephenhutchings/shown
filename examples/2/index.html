@@ -1,4 +1,4 @@
-<html><meta name="viewport" content="width=device-width, initial-scale=1"/><style>* {
+<html><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/shown.css"/><style>* {
   margin: 0
 }
 
@@ -7,28 +7,14 @@ html, body {
   overflow: hidden;
 }
 
-body {
-  display: flex;
+body {      
   padding: 1em;
   box-sizing: border-box;
+  font-family: system-ui, Helvetica, sans-serif;
 }
 
-#chart {
-  margin: auto;
-  max-width: 100%;
-  max-height: 100%;
-  aspect-ratio: 1 / 1;
+/* Firefox doesn't constrain the element */
+.shown {
+  height: 100%
 }
-
-#chart svg {
-  width: 100vw;
-  max-width: 100%;
-  max-height: 100%;
-}
-</style><body><div id="chart"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><title>Donut Chart</title>
-<svg x="50%" y="50%" role="presentation" overflow="visible" stroke-width="50%" text-anchor="middle"><g class="segment segment-1" aria-label="330" aria-description="Item 2"><circle class="segment-arc" role="presentation" r="25%" stroke-dasharray="77.37% 79.71%" stroke-dashoffset="196.35%" stroke="lightseagreen" fill="none"></circle>
-<text class="segment-label" x="24.99%" y="-0.59%" dy="0.33em" role="presentation">330</text></g><g class="segment segment-2" aria-label="192" aria-description="Item 3"><circle class="segment-arc" role="presentation" r="25%" stroke-dasharray="45.01% 112.07%" stroke-dashoffset="118.98%" stroke="mediumturquoise" fill="none"></circle>
-<text class="segment-label" x="-18.84%" y="16.44%" dy="0.33em" role="presentation">192</text></g><g class="segment segment-0" aria-label="145" aria-description="Item 1"><circle class="segment-arc" role="presentation" r="25%" stroke-dasharray="33.99% 123.08%" stroke-dashoffset="73.97%" stroke="darkcyan" fill="none"></circle>
-<text class="segment-label" x="-19.51%" y="-22.79%" dy="0.33em" role="presentation">145</text></g><g class="segment segment-3" aria-label="3" aria-description="Item 4"><circle class="segment-arc" role="presentation" r="25%" stroke-dasharray="0.7% 156.38%" stroke-dashoffset="39.97%" stroke="darkslategrey" fill="none"></circle>
-</g></svg>
-</svg></div></body></html>
+</style><body><div class="shown"><div class="chart chart-pie"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><title>Donut Chart</title><svg x="50%" y="50%" role="presentation" text-anchor="middle"><g class="segment segment-0" aria-label="$300 (50%)"><circle class="segment-arc" role="presentation" r="35%" stroke="#fa0" stroke-dasharray="109.96% 109.96%" stroke-dashoffset="54.98%" stroke-width="30%" fill="none"></circle><text class="segment-label" x="35%" y="0%" dy="0.33em" role="presentation">$300</text></g><g class="segment segment-1" aria-label="$180 (30%)"><circle class="segment-arc" role="presentation" r="35%" stroke="#fb3" stroke-dasharray="65.97% 153.94%" stroke-dashoffset="-54.98%" stroke-width="30%" fill="none"></circle><text class="segment-label" x="-28.32%" y="20.57%" dy="0.33em" role="presentation">$180</text></g><g class="segment segment-2" aria-label="$120 (20%)"><circle class="segment-arc" role="presentation" r="35%" stroke="#fc6" stroke-dasharray="43.98% 175.93%" stroke-dashoffset="-120.95%" stroke-width="30%" fill="none"></circle><text class="segment-label" x="-20.57%" y="-28.32%" dy="0.33em" role="presentation">$120</text></g></svg></svg></div></div></body></html>

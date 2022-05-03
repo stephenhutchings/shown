@@ -1,4 +1,4 @@
-<html><meta name="viewport" content="width=device-width, initial-scale=1"/><style>* {
+<html><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/shown.css"/><style>* {
   margin: 0
 }
 
@@ -7,27 +7,14 @@ html, body {
   overflow: hidden;
 }
 
-body {
-  display: flex;
+body {      
   padding: 1em;
   box-sizing: border-box;
+  font-family: system-ui, Helvetica, sans-serif;
 }
 
-#chart {
-  margin: auto;
-  max-width: 100%;
-  max-height: 100%;
-  aspect-ratio: 1 / 1;
+/* Firefox doesn't constrain the element */
+.shown {
+  height: 100%
 }
-
-#chart svg {
-  width: 100vw;
-  max-width: 100%;
-  max-height: 100%;
-}
-</style><body><div id="chart"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-<svg x="50%" y="50%" role="presentation" overflow="visible" stroke-width="20%" text-anchor="middle"><g class="segment segment-0" aria-label="60" aria-description="Item 1"><circle class="segment-arc" role="presentation" r="40%" stroke-dasharray="150.8% 100.53%" stroke-dashoffset="314.16%" stroke="#0c0786" fill="none"></circle>
-<text class="segment-label" x="38.04%" y="12.36%" dy="0.33em" role="presentation">60</text></g><g class="segment segment-1" aria-label="30" aria-description="Item 2"><circle class="segment-arc" role="presentation" r="40%" stroke-dasharray="75.4% 175.93%" stroke-dashoffset="163.36%" stroke="#ca4678" fill="none"></circle>
-<text class="segment-label" x="-40%" y="0%" dy="0.33em" role="presentation">30</text></g><g class="segment segment-2" aria-label="10" aria-description="Item 3"><circle class="segment-arc" role="presentation" r="40%" stroke-dasharray="25.13% 226.19%" stroke-dashoffset="87.96%" stroke="#eff821" fill="none"></circle>
-<text class="segment-label" x="-12.36%" y="-38.04%" dy="0.33em" role="presentation">10</text></g></svg>
-</svg></div></body></html>
+</style><body><div class="shown"><div class="chart chart-pie"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><svg x="50%" y="50%" role="presentation" text-anchor="middle"><g class="segment segment-0" aria-label="60 (60%)"><circle class="segment-arc" role="presentation" r="25%" stroke="#0036b0" stroke-dasharray="94.25% 62.83%" stroke-dashoffset="39.27%" stroke-width="50%" fill="none"></circle><text class="segment-label" x="23.78%" y="7.73%" dy="0.33em" role="presentation" color="#fff">60</text></g><g class="segment segment-1" aria-label="30 (30%)"><circle class="segment-arc" role="presentation" r="25%" stroke="#e44673" stroke-dasharray="47.12% 109.96%" stroke-dashoffset="-54.98%" stroke-width="50%" fill="none"></circle><text class="segment-label" x="-25%" y="0%" dy="0.33em" role="presentation" color="#fff">30</text></g><g class="segment segment-2" aria-label="10 (10%)"><circle class="segment-arc" role="presentation" r="25%" stroke="#ffca01" stroke-dasharray="15.71% 141.37%" stroke-dashoffset="-102.1%" stroke-width="50%" fill="none"></circle><text class="segment-label" x="-9.27%" y="-28.53%" dy="0.33em" role="presentation">10</text></g></svg></svg></div></div></body></html>

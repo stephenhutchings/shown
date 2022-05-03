@@ -13,7 +13,7 @@
   font-size: 1rem;
 }
 .h5 {
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
 }
 .h6 {
   font-size: 0.75rem;
@@ -38,6 +38,9 @@
 }
 .italic {
   font-style: italic;
+}
+.roman {
+  font-style: normal;
 }
 .caps {
   text-transform: uppercase;
