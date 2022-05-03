@@ -7,6 +7,11 @@
   -webkit-text-size-adjust: none;
 }
 
+.hljs::selection,
+.hljs ::selection {
+  background: #3f4d6f;
+}
+
 .hljs-comment,
 .diff .hljs-header,
 .hljs-javadoc {
@@ -21,7 +26,7 @@
 .hljs-subst,
 .hljs-request,
 .hljs-status {
-  color: #1184ce;
+  color: #899eff;
 }
 
 .hljs-number,

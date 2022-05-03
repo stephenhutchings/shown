@@ -1,0 +1,53 @@
+.shown svg {
+  overflow: visible;
+}
+
+.shown text {
+  fill: currentColor;
+}
+
+.shown .axis {
+  color: #333;
+  font-size: 85%;
+  user-select: none;
+}
+
+.shown .axis-base {
+  stroke: #ccc;
+}
+
+.shown .axis-line,
+.shown .axis-spine {
+  stroke: #ddd;
+}
+
+.shown .chart-pie {
+  aspect-ratio: 1/1;
+  max-height: 100%;
+  margin: auto;
+}
+
+.shown .chart-bar,
+.shown .chart-line {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.shown .legend {
+  list-style: none;
+  display: flex;
+  gap: 1em;
+  margin-top: 0.5em;
+}
+
+.shown .legend-marker {
+  width: 1.5em;
+  height: 0.75em;
+  margin-right: 0.5em;
+}
+
+.shown .symbol {
+  font-size: 10px;
+}

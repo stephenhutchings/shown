@@ -1,0 +1,24 @@
+nav#toc.px2
+  .max-width-4.mx-auto.py2
+    ul.list-reset.h5.py1-ul.flex.m0
+      each doc in docs
+        - const hasMembers = doc.members.static.length || doc.members.instance.length
+        li.mr2
+          a(
+            href=`#${format.slug(doc.namespace)}`
+            class=[
+              doc.kind === "note" && "h5 bold black caps",
+              hasMembers && "toggle-sibling"
+            ]
+          )
+            = format.toUpperCase(doc.name)
+
+            if hasMembers
+              span.icon ▸
+
+          if hasMembers
+            .toggle.target.display-none
+              +menu("Static members", doc.members.static)
+              +menu("Inner members", doc.members.inner)
+              +menu("Instance members", doc.members.instance)
+              +menu("Events", doc.members.events)

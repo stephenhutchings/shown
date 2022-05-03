@@ -1,0 +1,14 @@
+mixin property-table(properties)
+  table.mt1.mb2.fixed-table.h5.col-12
+    colgroup
+      col(width="30%")
+      col(width="70%")
+
+    thead
+      tr.bold.fill-light
+        th Name
+        th Description
+
+    tbody.mt1
+      each property in properties
+        +property-row(property)

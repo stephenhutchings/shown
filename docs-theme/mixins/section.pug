@@ -2,29 +2,28 @@
 
 mixin section(section, nested)
   section.py3.mb2.clearfix
-    if !nested || (section.context && section.context.github)
-      .flex
-        if !nested
-          h2.my0(
-            id=format.slug(section.namespace)
-          )
-            = section.name
+    if !nested
+      h2.my0(
+        id=format.slug(section.namespace)
+      )
+        = format.toUpperCase(section.name)
 
-        if section.context && section.context.github
-          a.ml-auto(
-            href=section.context.github.url
-          )
-            span= section.context.github.path
+    //- if section.context && section.context.github
+      a.ml-auto(
+        href=section.context.github.url
+      )
+        span= section.context.github.path
 
     != format.md(section.description)
 
-    .pre.p1.fill-light.mt0
-      +signature(section, true)
+    if section.kind !== "typedef"
+      .comment.pre.p1.fill-light.mt0
+        +signature(section, true)
 
-    if section.type
-      p
-        | Type:
-        != format.type(section.type)
+      if section.type
+        p
+          | Type:
+          != format.type(section.type)
 
     if section.augments && section.augments.length
       p
@@ -51,70 +50,48 @@ mixin section(section, nested)
       div Since: !{format.md(section.since, true)}
 
     if section.params && section.params.length
-      h3.mt3.mb0.prose-big Parameters
+      h3.mt3.mb0.prose-big(
+        id=format.slug(section.namespace) + "-params"
+      ) Parameters
 
-      .prose
+      .prose.table
         each param in section.params
-          .space-bottom0
-            div
-              +param-property-name(param)
-              p.m0!= format.md(param.description, true)
+          div
+            +property-name(param)
+            p.m0!= format.md(param.description, true)
 
-            if (param.properties && param.properties.length)
-              table.mt1.mb2.fixed-table.h5.col-12
-                colgroup
-                  col(width='20%')
-                  col(width='10%')
-                  col(width='70%')
-
-                thead
-                  tr.bold.fill-light
-                    th Name
-                    th Type
-                    th Description
-
-                tbody.mt1
-                  each property in param.properties
-                    +param-property-row(property)
+          +property-table(param.properties)
 
     if section.properties && section.properties.length
-      h3.mt3.mb0.prose-big Properties
+      h3.mt3.mb0.prose-big(
+        id=format.slug(section.namespace) + "-properties"
+      ) Properties
 
-      div
-        each property in section.properties
-          .space-bottom0
-            +param-property-name(property)
-            if property.description
-              | : !{format.md(property.description, true)}
-
-            if property.properties && property.properties.length
-              ul
-                each prop in property.properties
-                  li
-                    code= property.name
-                    != format.type(property.type)
-                    
-                    if property.default
-                      | (default <code>#{property.default}</code>)
-
-                    != format.md(property.description)
+      .prose
+        +property-table(section.properties)
 
     if section.returns && section.returns.length
       each r in section.returns
-        h3.mt3.mb0.prose-big Returns
+        h3.mt3.mb0.prose-big(
+          id=format.slug(section.namespace) + "-returns"
+        ) Returns
         code!= format.type(r.type)
         if r.description
           = " "
           != format.md(r.description, true)
 
     if section.sees && section.sees.length
-      h3.mt3.mb0.prose-big Related
+      h3.mt3.mb0.prose-big(
+        id=format.slug(section.namespace) + "-sees"
+      ) Related
       each see in section.sees
         if see.description
-          != format.md(see.description, true)
+          =JSON.stringify(see)
 
     if section.throws && section.throws.length
-      h3.mt3.mb0.prose-big Throws
+      h3.mt3.mb0.prose-big(
+        id=format.slug(section.namespace) + "-throws"
+      ) Throws
       ul
         each t in section.throws
           li
@@ -123,43 +100,53 @@ mixin section(section, nested)
             != format.md(t.description, true)
 
     if section.examples && section.examples.length
-      h3.mt3.mb0.prose-big Example
+      h3.mt3.mb0.prose-big(
+        id=format.slug(section.namespace) + "-examples"
+      ) Example#{section.examples.length > 1 ? "s" : ""}
       each e in section.examples
         .example.my1
           if e.caption
-            p!= format.md(e.caption)
+            != format.md(e.caption)
 
           .sm-flex.items-stretch
             .example-result
               iframe(src=e.path width="100%" height="100%")
 
-            .example-code.flex-auto
+            .example-code.flex-auto.comment
               != format.highlight(e.description)
               != format.highlight(e.result, "html")
 
     if section.members.static && section.members.static.length
-      h3.mt3.mb0.prose-big Static Members
+      h3.mt3.mb0.prose-big(
+        id=format.slug(section.namespace) + "-members-static"
+      ) Static Members
       +section-list({
         members: section.members.static,
         noun: 'Static Member'
       })
       
     if section.members.instance && section.members.instance.length
-      h3.mt3.mb0.prose-big Instance Members
+      h3.mt3.mb0.prose-big(
+        id=format.slug(section.namespace) + "-members-instance"
+      ) Instance Members
       +section-list({
         members: section.members.instance,
         noun: 'Instance Member'
       })
 
     if section.members.inner && section.members.inner.length
-      h3.mt3.mb0.prose-big Inner Members
+      h3.mt3.mb0.prose-big(
+        id=format.slug(section.namespace) + "-members-inner"
+      ) Inner Members
       +section-list({
         members: section.members.inner,
         noun: 'Inner Member'
       })
 
     if section.members.events && section.members.events.length
-      h3.mt3.mb0.prose-big Events
+      h3.mt3.mb0.prose-big(
+        id=format.slug(section.namespace) + "-members-events"
+      ) Events
       +section-list({
         members: section.members.events,
         noun: 'Event'

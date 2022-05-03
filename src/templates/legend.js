@@ -1,10 +1,28 @@
-import $ from "../lib/$/index.js"
-import { map as mapColors } from "../lib/colors.js"
+import $ from "../lib/dom/index.js"
 
 const shape = (type, color) => {
   let symbol = ""
 
-  if (type === "solid") {
+  if (type) {
+    symbol = [
+      $.line({
+        x2: "100%",
+        y1: "50%",
+        y2: "50%",
+        stroke: color,
+      }),
+      type !== "line" &&
+        $.use({
+          x: "50%",
+          y: "50%",
+          width: "1em",
+          height: "1em",
+          href: `#symbol-${type}`,
+          fill: color,
+          class: "symbol",
+        }),
+    ]
+  } else {
     symbol = $.rect({
       width: "100%",
       height: "100%",
@@ -12,29 +30,26 @@ const shape = (type, color) => {
     })
   }
 
-  if (type === "line") {
-    symbol = $.line({
-      x2: "100%",
-      y1: "50%",
-      y2: "50%",
-      stroke: color,
-    })
-  }
-
   return $.svg({
     role: "presentation",
-    width: "1.5em",
-    height: "0.75em",
+    class: "legend-marker",
   })(symbol)
 }
 
-export default ({ keys, type, colors } = {}) => {
-  if (keys && keys.length) {
-    return $.ul()(
-      keys.map((key, i) =>
-        $.li()([type && shape(type, colors[i]), $.span()(key)])
-      )
-    )
+export default (data) => {
+  if (!data) return
+
+  const keys = Object.values(
+    data.flat().reduce((m, d) => {
+      if (d.key && !m[d.key]) m[d.key] = d
+      return m
+    }, {})
+  )
+
+  if (keys && keys.length > 1) {
+    return $.ul({
+      class: "legend",
+    })(keys.map((d) => $.li()([shape(d.shape, d.color[0]), $.span()(d.key)])))
   } else {
     return ""
   }

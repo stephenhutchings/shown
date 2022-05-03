@@ -1,0 +1,13 @@
+header
+  .max-width-4.mx-auto.py3.px2
+    .flex.justify-between
+      div
+        h1.my0.no-anchor
+          code.mb1
+            = config["project-name"]
+
+        if config["project-description"]
+          p= config["project-description"]
+
+      div.py1
+        include links

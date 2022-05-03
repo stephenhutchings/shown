@@ -1,5 +1,5 @@
-import join from "../src/lib/$/join.js"
-import wrap from "../src/lib/$/wrap.js"
+import join from "../../src/lib/dom/join.js"
+import wrap from "../../src/lib/dom/wrap.js"
 
 describe("join", () => {
   test("is a function", () => {
@@ -20,6 +20,14 @@ describe("join", () => {
 
   test("skips `true` declarations", () => {
     expect(join({ "is-rendered": true })).toBe("is-rendered")
+  })
+
+  test("joins array of classes", () => {
+    expect(join({ class: ["a", "b"] })).toBe('class="a b"')
+  })
+
+  test("joins style object", () => {
+    expect(join({ style: { color: "red" } })).toBe('style="color:red"')
   })
 })
 

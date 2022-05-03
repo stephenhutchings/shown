@@ -3,8 +3,9 @@ include mixins/section
 include mixins/signature
 include mixins/note
 include mixins/menu
-include mixins/param-property-row
-include mixins/param-property-name
+include mixins/property-name
+include mixins/property-table
+include mixins/property-row
 
 html
   head
@@ -28,48 +29,20 @@ html
     )
 
   body.documentation.m0
-    header.py1.px2
-      .max-width-4.mx-auto
-        h1.mb0.no-anchor
-          = config["project-name"]
+    include partials/header
+    include partials/nav
+        
+    main.max-width-4.mx-auto.px2
+      article
+        include partials/intro
 
-          code.mb1
-            |  #{config["project-version"]}
-
-        if config["project-description"]
-          p= config["project-description"]
-
-        #toc
-          ul.list-reset.h5.py1-ul
-            each doc in docs
-              - const hasMembers = doc.members.static.length || doc.members.instance.length
-              li
-                a(
-                  href=`#${format.slug(doc.namespace)}`
-                  class=[
-                    doc.kind === "note" && "h5 bold black caps",
-                    hasMembers && "toggle-sibling"
-                  ]
-                )
-                  = doc.name
-
-                  if hasMembers
-                    span.icon ▸
-
-                if hasMembers
-                  .toggle.target.display-none
-                    +menu("Static members", doc.members.static)
-                    +menu("Inner members", doc.members.inner)
-                    +menu("Instance members", doc.members.instance)
-                    +menu("Events", doc.members.events)
-
-    main.bg-white.px2
-      .max-width-4.mx-auto
         each section in docs
           if section.kind === "note" && !section.children
             +note({ note: section })
           else
             +section(section)
+
+    include partials/footer
 
   script(src="assets/anchor.js")
   script(src="assets/site.js")

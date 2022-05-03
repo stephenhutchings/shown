@@ -4,6 +4,8 @@ html
     content="width=device-width, initial-scale=1"
   )
 
+  link(rel="stylesheet" href="../assets/shown.css")
+
   style.
     * {
       margin: 0
@@ -14,25 +16,16 @@ html
       overflow: hidden;
     }
 
-    body {
-      display: flex;
+    body {      
       padding: 1em;
       box-sizing: border-box;
+      font-family: system-ui, Helvetica, sans-serif;
     }
 
-    #chart {
-      margin: auto;
-      max-width: 100%;
-      max-height: 100%;
-      aspect-ratio: 1 / 1;
-    }
-
-    #chart svg {
-      width: 100vw;
-      max-width: 100%;
-      max-height: 100%;
+    /* Firefox doesn't constrain the element */
+    .shown {
+      height: 100%
     }
 
   body
-    #chart
-      !=body
+    !=body
