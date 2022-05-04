@@ -83,6 +83,7 @@ window.addEventListener("load", function () {
     loadState()
     // Update with initial scroll position.
     updateState()
+    document.documentElement.style.scrollBehavior = "smooth"
   }, 1)
 })
 
