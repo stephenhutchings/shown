@@ -12,7 +12,8 @@
     }
   },
   "scripts": {
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest && jest-coverage-badges",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "badge": "make-coverage-badge --output-path=coverage.svg",
     "docs": "documentation build ./src/index.js -f html -g -o docs -t ./docs-theme/index.cjs",
     "prepare": "esbuild src/index.js src/css/shown.css --bundle --platform=node --target=node10.4 --outdir=dist --out-extension:.js=.cjs"
   },
@@ -47,7 +48,7 @@
     "documentation": "^13.2.5",
     "esbuild": "^0.14.38",
     "jest": "^26.6.3",
-    "jest-coverage-badges": "^1.1.2",
+    "make-coverage-badge": "^1.2.0",
     "pug": "^3.0.2"
   },
   "files": [
