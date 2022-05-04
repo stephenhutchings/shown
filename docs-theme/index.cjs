@@ -51,6 +51,8 @@ const formatter = (comments, config) => {
     },
 
     md(ast, inline) {
+      if (!ast) return ""
+
       if (
         inline &&
         ast &&
