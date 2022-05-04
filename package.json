@@ -1,6 +1,6 @@
 {
   "name": "shown",
-  "version": "0.0.1-alpha.1",
+  "version": "0.1.0",
   "description": "Statically-generated, responsive charts, without the need for client-side Javascript.",
   "main": "index.js",
   "scripts": {
