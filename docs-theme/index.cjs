@@ -1,3 +1,4 @@
+const fs = require("fs")
 const pug = require("pug")
 const path = require("path")
 const File = require("vinyl")
@@ -92,11 +93,15 @@ module.exports = function (comments, config) {
         el.result = body
       })
 
-      vfs.src([__dirname + "/assets/**"], { base: __dirname }).pipe(
-        concat(function (files) {
+      vfs.src(["/assets/**"], { base: __dirname }).pipe(
+        concat(function (assets) {
           resolve(
-            files.concat(
+            assets.concat(
               examples.map((e) => new File(e)),
+              new File({
+                path: "assets/css/shown.css",
+                contents: fs.readFileSync("src/css/shown.css"),
+              }),
               new File({
                 path: "index.html",
                 contents: Buffer.from(

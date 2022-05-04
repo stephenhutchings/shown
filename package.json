@@ -2,10 +2,19 @@
   "name": "shown",
   "version": "0.1.0",
   "description": "Statically-generated, responsive charts, without the need for client-side Javascript.",
-  "main": "src/index.js",
+  "main": "dist/index.cjs",
+  "module": "src/index.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./src/index.js"
+    }
+  },
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest && jest-coverage-badges",
-    "docs": "documentation build ./src/index.js -f html -g -o docs -t ./docs-theme/index.cjs"
+    "docs": "documentation build ./src/index.js -f html -g -o docs -t ./docs-theme/index.cjs",
+    "prepare": "esbuild src/index.js src/css/shown.css --bundle --platform=node --target=node10.4 --outdir=dist --out-extension:.js=.cjs"
   },
   "repository": {
     "type": "git",
@@ -25,7 +34,10 @@
     "ssr",
     "ssg"
   ],
-  "author": "",
+  "author": {
+    "name": "Stephen Hutchings",
+    "url": "https://www.s-ings.com/"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/stephenhutchings/shown/issues"
@@ -33,14 +45,15 @@
   "homepage": "https://stephenhutchings.github.io/shown",
   "devDependencies": {
     "documentation": "^13.2.5",
+    "esbuild": "^0.14.38",
     "jest": "^26.6.3",
     "jest-coverage-badges": "^1.1.2",
     "pug": "^3.0.2"
   },
   "files": [
-    "./src/**/*"
+    "src/**/*.js",
+    "src/**/*.css"
   ],
-  "type": "module",
   "jest": {
     "coverageReporters": [
       "json-summary"

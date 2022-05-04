@@ -1,3 +1,5 @@
+.DS_Store
+
 # Logs
 logs
 *.log
@@ -10,4 +12,5 @@ node_modules/
 
 # Documentation output
 docs/
+dist/
 coverage/
