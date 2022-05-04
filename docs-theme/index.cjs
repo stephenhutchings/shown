@@ -93,7 +93,7 @@ module.exports = function (comments, config) {
         el.result = body
       })
 
-      vfs.src(["/assets/**"], { base: __dirname }).pipe(
+      vfs.src([__dirname + "/assets/**"], { base: __dirname }).pipe(
         concat(function (assets) {
           resolve(
             assets.concat(
