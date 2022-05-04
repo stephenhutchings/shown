@@ -12,6 +12,11 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - uses: tanmen/jest-reporter@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-file: coverage/result.json
+
       - name: Create badge
         run: npm run badge
 
@@ -19,8 +24,3 @@ jobs:
         with:
           commit_message: Update coverage badge
           file_pattern: coverage.svg
-
-      - uses: tanmen/jest-reporter@v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          result-file: coverage/result.json
