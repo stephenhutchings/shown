@@ -12,7 +12,7 @@
     }
   },
   "scripts": {
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest -json -o=coverage/result.json",
     "badge": "make-coverage-badge --output-path=coverage.svg",
     "docs": "documentation build ./src/index.js -f html -g -o docs -t ./docs-theme/index.cjs",
     "prepare": "esbuild src/index.js src/css/shown.css --bundle --platform=node --target=node10.4 --outdir=dist --out-extension:.js=.cjs"
