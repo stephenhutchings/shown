@@ -5,10 +5,12 @@ import { stepX, stepY, stepMidX, stepMidY } from "./curve/step.js"
 
 const FIXED = 2
 
+const filter = (p) => Number.isFinite(p[0]) && Number.isFinite(p[1])
+
 const wrap =
   (fn) =>
-  (...args) =>
-    fn(...args)
+  (p, ...args) =>
+    fn(p.filter(filter), ...args)
       .map(
         (v, i, a) =>
           (Number.isFinite(v) && Number.isFinite(a[i - 1]) ? " " : "") +

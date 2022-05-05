@@ -1,6 +1,7 @@
 import curve from "../../src/lib/curve.js"
 
 const points = [
+  [null, 0], // Include bad points to test for removal
   [0, 0], // Include duplicate points to test for removal
   [0, 0],
   [1, 0],
