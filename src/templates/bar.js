@@ -83,36 +83,6 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
 
   const fx = (i) => barGap + i * (barWidth + barGap)
   const fy = (y) => (y - yAxis.min) / (yAxis.max - yAxis.min)
-  // const vals = data.map(utils.sum)
-  // const { min, max } = utils.scaleLimit(Math.min(0, ...vals), Math.max(...vals))
-  // const ticks = utils.scaleTicks(min, max)
-
-  // yAxis = Object.assign({ ticks, min, max }, yAxis)
-
-  // const axis = $.svg({
-  //   "height": "100%",
-  //   "overflow": "visible",
-  //   "text-anchor": "end",
-  //   "class": "axis",
-  // })(
-  //   Array.from({ length: yAxis.ticks }, (n, i) => {
-  //     const y = 1 - i / (yAxis.ticks - 1)
-  //     const v = yAxis.min + (i / (yAxis.ticks - 1)) * (yAxis.max - yAxis.min)
-
-  //     return $.svg({
-  //       y: utils.percent(y),
-  //     })([
-  //       $.text({
-  //         x: "-0.5em",
-  //         dy: "0.33em",
-  //       })(utils.toPrecision(v, 4)),
-  //       $.line({
-  //         x2: "100%",
-  //         class: v == 0 ? "axis-base" : "axis-line",
-  //       }),
-  //     ])
-  //   })
-  // )
 
   const bars = $.g({ class: "series" })(
     data.map((data, j) =>
