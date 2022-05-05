@@ -32,7 +32,14 @@ const linePath = (points, toPoint) =>
 
       return m
     }, [])
-    .map((l) => curve[l.curve](l.points))
+    .map((l) => {
+      let args = []
+
+      if (Array.isArray(l.curve)) {
+        ;[l.curve, ...args] = l.curve
+      }
+      return curve[l.curve](l.points, ...args)
+    })
     .join("")
 
 /**
