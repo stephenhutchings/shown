@@ -2,6 +2,7 @@ import $ from "../lib/dom/index.js"
 import utils from "../lib/utils.js"
 import Map from "../lib/map.js"
 import wrap from "./wrap.js"
+import legendTemplate from "./legend.js"
 
 const tau = Math.PI * 2
 
@@ -147,10 +148,12 @@ export default ({
     ])
   })
 
+  const legend = legendTemplate(data)
+
   return wrap(
     $.div({
       class: "chart chart-pie",
-    })(
+    })([
       $.div({
         class: "chart-pie-wrap",
         style: {
@@ -174,7 +177,8 @@ export default ({
             "text-anchor": "middle",
           })(segments),
         ])
-      )
-    )
+      ),
+      legend,
+    ])
   )
 }
