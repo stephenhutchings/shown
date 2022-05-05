@@ -20,6 +20,11 @@ const TICKCOUNT_ORDER = [5, 4, 6, 7, 8, 9, 3]
  * value to a label. The function is passed the current value and index as
  * arguments. When supplying an array, the item at the corresponding index will
  * be selected.
+ * @property {number} [inset=0] - The amount to inset the first and last tick
+ * from the sides of the axis. The value is relative to the width of the chart
+ * and should fall between 0 and 1.
+ * @property {boolean} [spine=true] - Whether to render lines at the extreme
+ * ends of the axis. This value is only used with a non-zero inset.
  */
 
 /**
