@@ -1,4 +1,5 @@
 import monotone from "./curve/monotone.js"
+import bump from "./curve/bump.js"
 import linear from "./curve/linear.js"
 import { stepX, stepY, stepMidX, stepMidY } from "./curve/step.js"
 
@@ -22,4 +23,5 @@ export default {
   stepMidX: wrap(stepMidX),
   stepMidY: wrap(stepMidY),
   monotone: wrap(monotone),
+  bump: wrap(bump),
 }
