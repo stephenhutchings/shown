@@ -23,7 +23,6 @@ const getBounds = (t0, t1) => {
   if (t0 < 0 && t1 > 0) ts.push(0)
   if (t0 < 0.25 && t1 > 0.25) ts.push(0.25)
   if (t0 < 0.5 && t1 > 0.5) ts.push(0.5)
-  if (t0 < 0.75 && t1 > 0.75) ts.push(0.75)
 
   const xs = ts.map((t) => utils.toPrecision(Math.cos(t * tau) / 2))
   const ys = ts.map((t) => utils.toPrecision(Math.sin(t * tau) / 2))
@@ -87,6 +86,8 @@ export default ({
   startAngle = 0,
   endAngle = 1,
 }) => {
+  if (!data || data.length === 0) return
+
   map = new Map({ width: () => 1, ...map }, data, { minValue: 0.05 })
   data = map(data)
 

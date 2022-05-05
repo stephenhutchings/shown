@@ -49,7 +49,11 @@ export default (data) => {
   if (keys && keys.length > 1) {
     return $.ul({
       class: "legend",
-    })(keys.map((d) => $.li()([shape(d.shape, d.color[0]), $.span()(d.key)])))
+    })(
+      keys.map((d) =>
+        $.li()([shape(d.shape, d.color && d.color[0]), $.span()(d.key)])
+      )
+    )
   } else {
     return ""
   }
