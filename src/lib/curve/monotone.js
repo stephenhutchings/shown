@@ -1,3 +1,5 @@
+const TENSION = 1 / 3
+
 const sign = (x) => (x < 0 ? -1 : 1)
 
 const slope = (x0, y0, x1, y1, x2, y2) => {
@@ -13,13 +15,13 @@ const slope = (x0, y0, x1, y1, x2, y2) => {
   )
 }
 
-const curve = (x0, y0, x1, y1, s0, s1) => {
-  const dx0 = (x1 - x0) / 3
-  const dx1 = (x1 - x0) / 3
+const curve = (x0, y0, x1, y1, s0, s1, alpha) => {
+  const dx0 = (x1 - x0) * alpha
+  const dx1 = (x1 - x0) * alpha
   return ["C", x0 + dx0, y0 + dx0 * s0, x1 - dx1, y1 - dx1 * s1, x1, y1]
 }
 
-export default (points) => {
+export default (points, alpha = TENSION) => {
   const m = []
 
   let s0, s1
@@ -47,7 +49,7 @@ export default (points) => {
     if (i === 0) {
       m.push("M", x1, y1)
     } else if (x0 !== x1 || y0 !== y1) {
-      m.push(...curve(x0, y0, x1, y1, s0, s1))
+      m.push(...curve(x0, y0, x1, y1, s0, s1, alpha))
     }
 
     s0 = s1
