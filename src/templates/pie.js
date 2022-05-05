@@ -10,9 +10,10 @@ const arc = (t, r) => utils.percent((t % 1) * tau * r)
 
 /**
  * Calculate the bounds based on the portion of the circle
+ * @private
  * @param {number} t0 - Start angle (in turns)
  * @param {number} t1 - End angle (in turns)
- * @returns
+ * @returns {object} Circle bounds { x, y, w, h }
  */
 const getBounds = (t0, t1) => {
   const ts = [t0, t1]
@@ -44,12 +45,14 @@ const getBounds = (t0, t1) => {
  * `<title>` element for better accessibility.
  * @param {string} [options.description] - The description for this chart, set
  * to the `<desc>` element for better accessibility.
- * @param {number} [options.offset] - The initial rotation of the chart.
- * By default, the chart starts at the vertical top of the circle.
  * @param {boolean} [options.sorted] - Whether to sort the values.
  * @param {MapOptions} [options.map]
  * Controls for transforming data. See {@link MapOptions} for more details.
  * @returns {string} Rendered chart
+ * @param {number} [options.startAngle] - The initial rotation of the chart.
+ * Angle values should fall between zero and one.
+ * @param {number} [options.endAngle] - The final rotation of the chart.
+ * Angle values should fall between zero and one.
  *
  * @example
  * shown.pie({ data: [60, 30, 10] });
@@ -79,10 +82,10 @@ export default ({
   data,
   title,
   description,
-  startAngle = 0,
-  endAngle = 1,
   sorted = true,
   map,
+  startAngle = 0,
+  endAngle = 1,
 }) => {
   map = new Map({ width: () => 1, ...map }, data, { minValue: 0.05 })
   data = map(data)

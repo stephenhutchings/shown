@@ -54,7 +54,7 @@ mixin section(section, nested)
         id=format.slug(section.namespace) + "-params"
       ) Parameters
 
-      .prose.table
+      .prose
         each param in section.params
           div
             +property-name(param)
