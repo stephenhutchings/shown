@@ -16,7 +16,7 @@ const TICKCOUNT_ORDER = [5, 4, 6, 7, 8, 9, 3]
  * @property {number} [ticks] - The number of divisions to use for
  * this axis. The default value is a derived number between 2 and 9 that best
  * splits the difference between `min` and `max`.
- * @property {function|array} [labels] - A function to map an axis
+ * @property {function|array} [label] - A function to map an axis
  * value to a label. The function is passed the current value and index as
  * arguments. When supplying an array, the item at the corresponding index will
  * be selected.
