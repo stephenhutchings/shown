@@ -60,7 +60,8 @@ mixin section(section, nested)
             +property-name(param)
             p.m0!= format.md(param.description, true)
 
-          +property-table(param.properties)
+          if param.properties
+            +property-table(param.properties)
 
     if section.properties && section.properties.length
       h3.mt3.mb0.prose-big(
