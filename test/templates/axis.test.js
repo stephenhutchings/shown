@@ -44,6 +44,16 @@ describe("setup", () => {
     )
   })
 
+  test("ignores non-numeric values in data", () => {
+    expect(setup({}, [null, undefined, NaN, 5])).toEqual(
+      expect.objectContaining({
+        min: 0,
+        max: 5,
+        ticks: 6,
+      })
+    )
+  })
+
   test("creates keys with no data", () => {
     expect(setup({})).toEqual(
       expect.objectContaining({
