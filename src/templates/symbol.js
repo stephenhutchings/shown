@@ -24,6 +24,12 @@ const symbol = (type) => {
     })
   }
 
+  if (type === "diamond") {
+    symbol = $.polygon({
+      points: [0, -50, 50, 0, 0, 50, -50, 0].join(),
+    })
+  }
+
   return $.symbol({
     class: "symbol",
     id: `symbol-${type}`,
