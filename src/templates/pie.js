@@ -8,6 +8,33 @@ const tau = Math.PI * 2
 const arc = (t, r) => utils.percent((t % 1) * tau * r)
 
 /**
+ * Calculate the bounds based on the portion of the circle
+ * @param {number} t0 - Start angle (in turns)
+ * @param {number} t1 - End angle (in turns)
+ * @returns
+ */
+const getBounds = (t0, t1) => {
+  const ts = [t0, t1]
+
+  if (t0 < -0.5 && t1 > -0.5) ts.push(-0.5)
+  if (t0 < -0.25 && t1 > -0.25) ts.push(-0.25)
+  if (t0 < 0 && t1 > 0) ts.push(0)
+  if (t0 < 0.25 && t1 > 0.25) ts.push(0.25)
+  if (t0 < 0.5 && t1 > 0.5) ts.push(0.5)
+  if (t0 < 0.75 && t1 > 0.75) ts.push(0.75)
+
+  const xs = ts.map((t) => utils.toPrecision(Math.cos(t * tau) / 2))
+  const ys = ts.map((t) => utils.toPrecision(Math.sin(t * tau) / 2))
+
+  const maxX = Math.max(...xs)
+  const minX = Math.min(...xs)
+  const maxY = Math.max(...ys)
+  const minY = Math.min(...ys)
+
+  return { x: minX, y: minY, w: maxX - minX, h: maxY - minY }
+}
+
+/**
  * Generate a pie chart.
  * @param {Object} options - Data and display options for the chart.
  * @param {number[]} options.data - The data for this chart. Values can sum to
@@ -37,12 +64,22 @@ const arc = (t, r) => utils.percent((t % 1) * tau * r)
  *      width: 0.6
  *    },
  *  })
+ *
+ * @example
+ * shown.pie({
+ *   title: "Gauge Chart",
+ *   data: [60, 30, 10],
+ *   startAngle: -0.33,
+ *   endAngle: 0.33,
+ *   map: { width: 0.4, key: ["Item 1", "Item 2", "Item 3"] }
+ * });
  */
 export default ({
   data,
   title,
   description,
-  offset = -0.25,
+  startAngle = 0,
+  endAngle = 1,
   sorted = true,
   map,
 }) => {
@@ -53,36 +90,51 @@ export default ({
     data.sort((a, b) => (a.value < b.value ? 1 : -1))
   }
 
+  startAngle = (startAngle - 0.25) % 1
+  endAngle = (endAngle - 0.25) % 1
+
+  if (startAngle > endAngle) endAngle += 1
+
+  const bounds = getBounds(startAngle, endAngle)
+
   const values = data.map((d) => d.value)
   const total = utils.sum(values)
+  const scale = endAngle - startAngle
 
   const segments = data.map((d, i) => {
-    const t = d.value / total
-    const o = offset + utils.sum(values.slice(0, i)) / total
+    const t = (d.value / total) * scale
+    const o = startAngle + (utils.sum(values.slice(0, i)) / total) * scale
+
     const radius = (1 - d.width / 2) / 2
     const dashoffset = arc(-o, radius)
     const dasharray = [arc(t, radius), arc(1 - t, radius)].join(" ")
 
     const theta = tau * (o + t / 2)
-    const scale = d.width === 1 && t < 0.25 ? 1.2 : 1
+    const shift = d.width === 1 && t < 0.25 ? 1.2 : 1
 
-    const x = Math.cos(theta) * scale * radius
-    const y = Math.sin(theta) * scale * radius
+    const x = Math.cos(theta) * shift * radius
+    const y = Math.sin(theta) * shift * radius
 
     return $.g({
       "class": `segment segment-${i}`,
       "aria-label": `${d.label} (${utils.percent(t)})`,
     })([
-      $.circle({
-        "class": "segment-arc",
-        "role": "presentation",
-        "r": utils.percent(radius),
-        "stroke": d.color[0],
-        "stroke-dasharray": dasharray,
-        "stroke-dashoffset": dashoffset,
-        "stroke-width": utils.percent(d.width / 2),
-        "fill": "none",
-      }),
+      $.svg({
+        viewBox: "0 0 100 100",
+        width: "100%",
+        height: "100%",
+      })(
+        $.circle({
+          "class": "segment-arc",
+          "role": "presentation",
+          "r": utils.percent(radius),
+          "stroke": d.color[0],
+          "stroke-dasharray": dasharray,
+          "stroke-dashoffset": dashoffset,
+          "stroke-width": utils.percent(d.width / 2),
+          "fill": "none",
+        })
+      ),
       d.label &&
         $.text({
           class: "segment-label",
@@ -99,20 +151,30 @@ export default ({
     $.div({
       class: "chart chart-pie",
     })(
-      $.svg({
-        xmlns: "http://www.w3.org/2000/svg",
-        width: "100%",
-        height: "100%",
-      })([
-        title && $.title()(title),
-        description && $.desc()(description),
+      $.div({
+        class: "chart-pie-wrap",
+        style: {
+          "aspect-ratio": +(bounds.w / bounds.h).toFixed(3),
+        },
+      })(
         $.svg({
-          "x": "50%",
-          "y": "50%",
-          "role": "presentation",
-          "text-anchor": "middle",
-        })(segments),
-      ])
+          class: "chart-pie-svg",
+          xmlns: "http://www.w3.org/2000/svg",
+          width: +bounds.w.toFixed(3),
+          height: +bounds.h.toFixed(3),
+        })([
+          title && $.title()(title),
+          description && $.desc()(description),
+          $.svg({
+            "x": utils.percent(0.5 - (bounds.x + bounds.w / 2) / bounds.w),
+            "y": utils.percent(0.5 - (bounds.y + bounds.h / 2) / bounds.h),
+            "width": utils.percent(1 / bounds.w),
+            "height": utils.percent(1 / bounds.h),
+            "role": "presentation",
+            "text-anchor": "middle",
+          })(segments),
+        ])
+      )
     )
   )
 }
