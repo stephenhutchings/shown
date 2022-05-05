@@ -68,7 +68,7 @@ const getTicks = (min, max) => {
  * @param {Array} data - Flattened data from which to derive min, max and ticks.
  * @returns {AxisOptions}
  */
-export const update = (axis = {}, data) => {
+export const setup = (axis = {}, data) => {
   let min, max, ticks, label
 
   if (data || axis.min || axis.max) {

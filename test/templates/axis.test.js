@@ -1,4 +1,4 @@
-import { default as axis, update } from "../../src/templates/axis.js"
+import { default as axis, setup } from "../../src/templates/axis.js"
 
 const opts = { label: (i) => i, min: 0, max: 2, ticks: 3, inset: 0 }
 
@@ -29,13 +29,13 @@ describe("axis", () => {
   })
 })
 
-describe("update", () => {
+describe("setup", () => {
   test("is a function", () => {
-    expect(typeof update).toBe("function")
+    expect(typeof setup).toBe("function")
   })
 
   test("infers correct values from data", () => {
-    expect(update({}, [0, 5])).toEqual(
+    expect(setup({}, [0, 5])).toEqual(
       expect.objectContaining({
         min: 0,
         max: 5,
@@ -45,7 +45,7 @@ describe("update", () => {
   })
 
   test("creates keys with no data", () => {
-    expect(update({})).toEqual(
+    expect(setup({})).toEqual(
       expect.objectContaining({
         min: expect.any(Number),
         max: expect.any(Number),
@@ -56,7 +56,7 @@ describe("update", () => {
   })
 
   test("wraps label array to function", () => {
-    expect(update({ label: [0, 1, 2] })).toEqual(
+    expect(setup({ label: [0, 1, 2] })).toEqual(
       expect.objectContaining({
         label: expect.any(Function),
       })

@@ -4,7 +4,7 @@ import curve from "../lib/curve.js"
 import Map from "../lib/map.js"
 import legendTemplate from "./legend.js"
 import symbolTemplate from "./symbol.js"
-import { default as axisTemplate, update as setupAxis } from "./axis.js"
+import { default as axisTemplate, setup as setupAxis } from "./axis.js"
 import wrap from "./wrap.js"
 
 const SVGLINE_VIEWPORT_W = 100

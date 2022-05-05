@@ -3,7 +3,7 @@ import { get as getColor } from "../lib/colors.js"
 import utils from "../lib/utils.js"
 import Map from "../lib/map.js"
 import legendTemplate from "./legend.js"
-import { default as axisTemplate, update as setupAxis } from "./axis.js"
+import { default as axisTemplate, setup as setupAxis } from "./axis.js"
 import wrap from "./wrap.js"
 
 /**
