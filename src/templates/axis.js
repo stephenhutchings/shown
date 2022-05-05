@@ -76,7 +76,7 @@ export const setup = (axis = {}, data) => {
   }
 
   if (data) {
-    ;[min, max] = getBounds(data)
+    ;[min, max] = getBounds(data.filter(Number.isFinite))
   } else {
     min = 0
     max = axis.ticks - 1
