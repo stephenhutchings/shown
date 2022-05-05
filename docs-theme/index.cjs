@@ -12,16 +12,6 @@ const html = require("remark-html")
 
 const highlighter = require("documentation/src/output/highlighter")
 
-function isFunction(section) {
-  return (
-    section.kind === "function" ||
-    (section.kind === "typedef" &&
-      section.type &&
-      section.type.type === "NameExpression" &&
-      section.type.name === "Function")
-  )
-}
-
 const links = {
   npm: "https://www.npmjs.com/package/shown",
   github: "https://github.com/stephenhutchings/shown",
@@ -41,7 +31,6 @@ const formatter = (comments, config) => {
 
   return {
     slug,
-    isFunction,
     type: formatters.type,
     autolink: formatters.autolink,
     parameters: formatters.parameters,

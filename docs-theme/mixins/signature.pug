@@ -5,9 +5,8 @@ mixin signature(section, includeReturns)
 
     = section.name
 
-  if format.isFunction(section)
-    if section.returns.length
-      != format.parameters(section)
+  if section.returns.length
+    != format.parameters(section)
 
     if includeReturns && section.returns.length
       = ": "
