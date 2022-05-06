@@ -43,7 +43,8 @@ import utils from "./utils.js"
  * Supported shapes include `circle | square | triangle`.
  * @property {Function|Array|String} [curve]
  * Select a curve for the current line. Lines can include multiple curve types.
- * Supported curves include `linear | stepX | stepY | stepXMid | stepYMid | monotone`.
+ * Supported curves include `linear | stepX | stepY | stepXMid | stepYMid |
+ * monotone | bump`.
  * @property {Function|Array|Number} [width]
  * Change the size of the object. Return values should fall between 0 and 1.
  * @property {Function|Array|String} [key]
