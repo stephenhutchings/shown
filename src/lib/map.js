@@ -3,7 +3,7 @@ import utils from "./utils.js"
 
 /**
  * To render a chart, the data you supply is mapped to various
- * properties. `MapOtions` provides a flexible way to define how these
+ * properties. `MapOptions` provides a flexible way to define how these
  * properties, like `value`, `label` and `color`, will be selected.
  *
  * Each option can be declared as a function. The function is passed the
