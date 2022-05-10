@@ -1,4 +1,3 @@
-const fs = require("fs")
 const pug = require("pug")
 const path = require("path")
 const File = require("vinyl")
@@ -84,35 +83,39 @@ module.exports = function (comments, config) {
         el.result = body
       })
 
-      vfs.src([__dirname + "/assets/**"], { base: __dirname }).pipe(
-        concat(function (assets) {
-          resolve(
-            assets.concat(
-              examples.map((e) => new File(e)),
-              new File({
-                path: "assets/css/shown.css",
-                contents: fs.readFileSync("src/css/shown.css"),
-              }),
-              new File({
-                path: "index.html",
-                contents: Buffer.from(
-                  pug.renderFile(template, {
-                    docs: comments,
-                    links,
-                    config,
-                    format,
-                    filters: {
-                      hl: (text, options) =>
-                        format.highlight(text, options.lang),
-                    },
-                  }),
-                  "utf8"
-                ),
-              })
+      vfs
+        .src(
+          [
+            __dirname + "/public/**",
+            __dirname + "/public/shown/**", // glob won't crawl symlinks
+          ],
+          { base: __dirname + "/public" }
+        )
+        .pipe(
+          concat(function (assets) {
+            resolve(
+              assets.concat(
+                examples.map((e) => new File(e)),
+                new File({
+                  path: "index.html",
+                  contents: Buffer.from(
+                    pug.renderFile(template, {
+                      docs: comments,
+                      links,
+                      config,
+                      format,
+                      filters: {
+                        hl: (text, options) =>
+                          format.highlight(text, options.lang),
+                      },
+                    }),
+                    "utf8"
+                  ),
+                })
+              )
             )
-          )
-        })
-      )
+          })
+        )
     })
   })
 }
