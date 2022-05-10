@@ -1,16 +1,17 @@
 import $ from "../lib/dom/index.js"
 
-const shape = (type, color) => {
+const shape = (type, color, includeLine) => {
   let symbol = ""
 
   if (type) {
     symbol = [
-      $.line({
-        x2: "100%",
-        y1: "50%",
-        y2: "50%",
-        stroke: color,
-      }),
+      includeLine &&
+        $.line({
+          x2: "100%",
+          y1: "50%",
+          y2: "50%",
+          stroke: color,
+        }),
       type !== "line" &&
         $.use({
           x: "50%",
@@ -36,7 +37,7 @@ const shape = (type, color) => {
   })(symbol)
 }
 
-export default (data) => {
+export default (data, includeLine = false) => {
   if (!data) return
 
   const keys = Object.values(
@@ -51,7 +52,10 @@ export default (data) => {
       class: "legend",
     })(
       keys.map((d) =>
-        $.li()([shape(d.shape, d.color && d.color[0]), $.span()(d.key)])
+        $.li()([
+          shape(d.shape, d.color && d.color[0], includeLine),
+          $.span()(d.key),
+        ])
       )
     )
   } else {

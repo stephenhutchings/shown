@@ -200,7 +200,7 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
           labels,
         ])
       ),
-      legendTemplate(data),
+      legendTemplate(data, true),
     ])
   )
 }
