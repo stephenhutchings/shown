@@ -71,7 +71,7 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
   const barGap = (1 - barWidth * data.length) / (data.length + 1)
 
   const values = data.map(utils.sum)
-  yAxis = setupAxis(yAxis, values)
+  yAxis = setupAxis({ min: 0, ...yAxis }, values)
   const axisY = axisTemplate("y", yAxis)
 
   xAxis = setupAxis({
