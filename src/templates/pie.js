@@ -92,7 +92,7 @@ export default ({
   data = map(data)
 
   if (sorted) {
-    data.sort((a, b) => (a.value < b.value ? 1 : -1))
+    data.sort((a, b) => (a.value === b.value ? 0 : a.value < b.value ? 1 : -1))
   }
 
   startAngle = (startAngle - 0.25) % 1
