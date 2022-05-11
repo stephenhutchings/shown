@@ -96,6 +96,7 @@ header h1::before {
   height: auto;
   min-height: 250px;
   resize: both;
+  display: block;
 }
 
 .example-result iframe:not([style]) {

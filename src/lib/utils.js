@@ -1,4 +1,4 @@
-const DEFAULT_PRECISION = Math.ceil(Math.abs(Math.log10(Number.EPSILON)))
+const DEFAULT_PRECISION = Math.ceil(Math.abs(Math.log10(Number.EPSILON))) - 1
 
 /**
  * Add the values in an array, reading `item.value` where present.
@@ -6,7 +6,10 @@ const DEFAULT_PRECISION = Math.ceil(Math.abs(Math.log10(Number.EPSILON)))
  * @param {Array} array
  * @returns {number} total
  */
-const sum = (array) => array.reduce((m, v) => m + (v.value || v), 0)
+const sum = (array, precision = DEFAULT_PRECISION) => {
+  const f = Math.pow(10, precision)
+  return array.reduce((m, v) => (f * m + f * (v.value || v)) / f, 0)
+}
 
 /**
  * Convert a value between 0 and 1 to a percentage string.

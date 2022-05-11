@@ -1,4 +1,3 @@
-const fs = require("fs")
 const pug = require("pug")
 const path = require("path")
 const File = require("vinyl")
@@ -10,6 +9,7 @@ const GithubSlugger = require("github-slugger")
 const remark = require("remark")
 const html = require("remark-html")
 
+const rerouteLinks = require("documentation/src/output/util/reroute_links")
 const highlighter = require("documentation/src/output/highlighter")
 
 const links = {
@@ -53,7 +53,7 @@ const formatter = (comments, config) => {
           children: ast.children[0].children.concat(ast.children.slice(1)),
         }
       }
-
+      ast = rerouteLinks(linkerStack.link, ast)
       return remark().use(html, { sanitize: false }).stringify(highlighter(ast))
     },
 
@@ -84,35 +84,39 @@ module.exports = function (comments, config) {
         el.result = body
       })
 
-      vfs.src([__dirname + "/assets/**"], { base: __dirname }).pipe(
-        concat(function (assets) {
-          resolve(
-            assets.concat(
-              examples.map((e) => new File(e)),
-              new File({
-                path: "assets/css/shown.css",
-                contents: fs.readFileSync("src/css/shown.css"),
-              }),
-              new File({
-                path: "index.html",
-                contents: Buffer.from(
-                  pug.renderFile(template, {
-                    docs: comments,
-                    links,
-                    config,
-                    format,
-                    filters: {
-                      hl: (text, options) =>
-                        format.highlight(text, options.lang),
-                    },
-                  }),
-                  "utf8"
-                ),
-              })
+      vfs
+        .src(
+          [
+            __dirname + "/public/**",
+            __dirname + "/public/shown/**", // glob won't crawl symlinks
+          ],
+          { base: __dirname + "/public" }
+        )
+        .pipe(
+          concat(function (assets) {
+            resolve(
+              assets.concat(
+                examples.map((e) => new File(e)),
+                new File({
+                  path: "index.html",
+                  contents: Buffer.from(
+                    pug.renderFile(template, {
+                      docs: comments,
+                      links,
+                      config,
+                      format,
+                      filters: {
+                        hl: (text, options) =>
+                          format.highlight(text, options.lang),
+                      },
+                    }),
+                    "utf8"
+                  ),
+                })
+              )
             )
-          )
-        })
-      )
+          })
+        )
     })
   })
 }

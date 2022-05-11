@@ -13,15 +13,18 @@ const SVGLINE_VIEWPORT_H = SVGLINE_VIEWPORT_W
 // A line may include points with multiple curve types. This function
 // groups the points by curve type, renders these groups using their
 // respective curve functions, and joins them together into a path.
-const linePath = (points, toPoint) =>
+const linePath = (points, toPoint, skip) =>
   points
     .reduce((m, d, i) => {
       const l = m[m.length - 1]
       const p = toPoint(d, i)
 
       if (!p) {
-        // TODO: Get intersection with bounds
-        return [...m, { curve: d.curve, points: [] }]
+        if (skip) {
+          return [...m, { curve: d.curve, points: [] }]
+        } else {
+          return m
+        }
       }
 
       if (l) l.points.push(p)
@@ -58,10 +61,14 @@ const linePath = (points, toPoint) =>
  * Overrides for the x-axis. See {@link AxisOptions} for more details.
  * @param {AxisOptions} [options.yAxis]
  * Overrides for the y-axis. See {@link AxisOptions} for more details.
+ * @param {Boolean} [options.showGaps]
+ * Points in the line with non-numeric values are rendered as broken lines
+ * where data is unavailable. Set to `false` to ignore missing values instead.
  * @returns {string} Rendered chart
  *
  * @example
  * shown.line({
+ *   title: "Custom axis",
  *   data: [
  *     -0.0327,  0.05811,  0.18046,  0.27504,  0.43335,  0.43815,
  *     0.54249,  0.57011,  0.54897,  0.60961,  0.58727,  0.53557,
@@ -70,35 +77,62 @@ const linePath = (points, toPoint) =>
  *     -0.5720,  -0.6065,  -0.5761,  -0.5724,  -0.6096,  -0.5314,
  *     -0.4492,  -0.4007,  -0.3008,  -0.1924,  -0.0696,  0.00279,
  *   ],
- *   xAxis: { ticks: 6, min: 1988, max: 2023 },
- *   yAxis: { ticks: 15, label: v => (v * 10 % 2 === 0) && v.toFixed(1) },
+ *   xAxis: { min: 1988, max: 2023 },
+ *   yAxis: { ticks: 15, label: (v, i) => (i % 2 !== 0) && v.toFixed(1) },
  * })
  *
  * @example
  * shown.line({
- *   title: "Line Chart",
+ *   title: "Map x and y data",
+ *   data: [{x: 0, y: 1}, {x: 1, y: -1}, {x: 2, y: 1}],
+ *   map: {
+ *     x: (d) => d.x,
+ *     y: (d) => d.y,
+ *     curve: "bump"
+ *   }
+ * })
+ *
+ * @example
+ * shown.line({
+ *   title: "Multiple lines, curves and shapes",
  *   data: [
  *      [52.86, 10.65, 14.54, 10.09, 41.86],
  *      [21.97, 31.71, 56.94, 17.85, 23.53],
  *      [ 6.73, 20.84, 37.62, 45.79, 53.32],
- *      [34.44, 54.79, 22.31, 31.82,  7.64],
+ *      [38.44, 50.79, 22.31, 31.82,  7.64],
  *   ],
  *   map: {
  *     curve: ["linear", "bump", "monotone", "stepX"],
  *     shape: ["circle", "square", "triangle", "diamond"],
- *     key: ["α", "β", "γ", "δ"]
+ *     key: ["α", "β", "γ", "δ"],
  *   },
  *   xAxis: { label: ["A", "B", "C", "D", "E"], inset: 0.1 },
  * })
  */
 
-export default ({ data, title, description, map, xAxis, yAxis }) => {
+export default ({
+  data,
+  title,
+  description,
+  map,
+  xAxis,
+  yAxis,
+  showGaps = true,
+}) => {
   data = Array.isArray(data[0]) ? data : [data]
+
+  const maxLength = Math.max(...data.map((d) => d.length))
 
   map = new Map(
     {
       curve: () => "linear",
       shape: () => false,
+      x: (d, j, i) => {
+        const min = xAxis.min ?? 0
+        const max = xAxis.max ?? min + (maxLength - 1)
+        return min + (i / (maxLength - 1)) * (max - min)
+      },
+      y: (d) => d,
       ...map,
     },
     data,
@@ -107,27 +141,21 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
 
   data = map(data)
 
-  const length = data[0].length
+  // prettier-ignore
+  const axes = {
+    x: setupAxis( xAxis, data.flat().map((d) => d.x), false ),
+    y: setupAxis( yAxis, data.flat().map((d) => d.y) )
+  }
 
-  const values = data.flat().map((d) => d.value)
-  yAxis = setupAxis(yAxis, values)
-  const axisY = axisTemplate("y", yAxis)
-
-  xAxis = setupAxis({ ticks: length, ...xAxis })
-  const axisX = axisTemplate("x", xAxis)
-
-  const padX = (t) => xAxis.inset + (1 - xAxis.inset * 2) * t
-  const padY = (t) => yAxis.inset + (1 - yAxis.inset * 2) * t
-
-  const fx = (i) => padX(i / (length - 1))
-  const fy = (y) => padY((y - yAxis.min) / (yAxis.max - yAxis.min))
+  const axisX = axisTemplate("x", axes.x)
+  const axisY = axisTemplate("y", axes.y)
 
   const lines = $.svg({
     width: "100%",
     height: "100%",
     viewBox: `0 0 ${SVGLINE_VIEWPORT_W} ${SVGLINE_VIEWPORT_H}`,
     preserveAspectRatio: "none",
-    style: "overflow: hidden;",
+    style: (axes.x.hasOverflow || axes.y.hasOverflow) && "overflow: hidden;",
   })(
     data.map((line) =>
       $.path({
@@ -136,11 +164,13 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
         "fill": "none",
         "d": linePath(
           line,
-          (d, i) =>
-            Number.isFinite(d.value) && [
-              SVGLINE_VIEWPORT_W * fx(i),
-              SVGLINE_VIEWPORT_H * (1 - fy(d.value)),
-            ]
+          (d) =>
+            Number.isFinite(d.x) &&
+            Number.isFinite(d.y) && [
+              SVGLINE_VIEWPORT_W * axes.x.scale(d.x),
+              SVGLINE_VIEWPORT_H * (1 - axes.y.scale(d.y)),
+            ],
+          showGaps
         ),
       })
     )
@@ -158,8 +188,8 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
         return (
           d.shape &&
           $.use({
-            x: utils.percent(fx(i)),
-            y: utils.percent(1 - fy(d.value)),
+            x: utils.percent(axes.x.scale(d.x)),
+            y: utils.percent(1 - axes.y.scale(d.y)),
             href: `#symbol-${d.shape}`,
             fill: d.color[0],
             width: "1em",
@@ -182,8 +212,8 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
           "flex-grow": 1,
           "height": 0,
           "padding-top": "0.5em",
-          "padding-left": yAxis && "2em",
-          "padding-bottom": xAxis ? "1.5em" : "0.5em",
+          "padding-bottom": axisX ? "1.5em" : "0.5em",
+          "padding-left": axisY && "2em",
           "box-sizing": "border-box",
         },
       })(
@@ -200,7 +230,7 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
           labels,
         ])
       ),
-      legendTemplate(data),
+      legendTemplate(data, true),
     ])
   )
 }

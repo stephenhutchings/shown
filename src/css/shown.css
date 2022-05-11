@@ -1,4 +1,5 @@
-.shown svg {
+.shown svg,
+.symbol {
   overflow: visible;
 }
 
@@ -21,11 +22,16 @@
   stroke: #ddd;
 }
 
-.shown .chart-pie {
-  height: 100%;
-  margin: auto;
+.shown .chart {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.shown .chart-pie {
+  margin: auto;
+  width: auto;
   align-items: center;
   justify-content: center;
 }
@@ -40,14 +46,6 @@
   height: 100%;
   display: block;
   margin: auto;
-}
-
-.shown .chart-bar,
-.shown .chart-line {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
 }
 
 .shown .legend {
