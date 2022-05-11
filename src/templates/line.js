@@ -13,15 +13,18 @@ const SVGLINE_VIEWPORT_H = SVGLINE_VIEWPORT_W
 // A line may include points with multiple curve types. This function
 // groups the points by curve type, renders these groups using their
 // respective curve functions, and joins them together into a path.
-const linePath = (points, toPoint) =>
+const linePath = (points, toPoint, skip) =>
   points
     .reduce((m, d, i) => {
       const l = m[m.length - 1]
       const p = toPoint(d, i)
 
       if (!p) {
-        // TODO: Get intersection with bounds
-        return [...m, { curve: d.curve, points: [] }]
+        if (skip) {
+          return [...m, { curve: d.curve, points: [] }]
+        } else {
+          return m
+        }
       }
 
       if (l) l.points.push(p)
@@ -107,7 +110,15 @@ const linePath = (points, toPoint) =>
  * })
  */
 
-export default ({ data, title, description, map, xAxis, yAxis }) => {
+export default ({
+  data,
+  title,
+  description,
+  map,
+  xAxis,
+  yAxis,
+  showGaps = true,
+}) => {
   data = Array.isArray(data[0]) ? data : [data]
 
   const maxLength = Math.max(...data.map((d) => d.length))
@@ -153,11 +164,13 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
         "fill": "none",
         "d": linePath(
           line,
-          (d, i) =>
-            Number.isFinite(d.value) && [
-              SVGLINE_VIEWPORT_W * fx(i),
-              SVGLINE_VIEWPORT_H * (1 - fy(d.value)),
-            ]
+          (d) =>
+            Number.isFinite(d.x) &&
+            Number.isFinite(d.y) && [
+              SVGLINE_VIEWPORT_W * axes.x.scale(d.x),
+              SVGLINE_VIEWPORT_H * (1 - axes.y.scale(d.y)),
+            ],
+          showGaps
         ),
       })
     )
