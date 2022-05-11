@@ -178,7 +178,18 @@ export const setup = (axis = {}, data, guessBounds = true) => {
 
   const scale = (v) => pad((v - min) / (max - min), inset)
 
-  return { grid, ticks, min, max, label, inset, scale, spine, hasOverflow }
+  return {
+    ...axis,
+    grid,
+    ticks,
+    min,
+    max,
+    label,
+    inset,
+    scale,
+    spine,
+    hasOverflow,
+  }
 }
 
 export default (type, axis) => {
@@ -194,6 +205,16 @@ export default (type, axis) => {
 
   const lineProps = type === "x" ? { y2: "100%" } : { x2: "100%" }
 
+  const altOffset = (0.5 - axis.inset) / (axis.ticks - 1)
+  const altLProps =
+    type === "x"
+      ? { x1: utils.percent(-altOffset), x2: utils.percent(-altOffset) }
+      : { y1: utils.percent(-altOffset), y2: utils.percent(-altOffset) }
+  const altRProps =
+    type === "x"
+      ? { x1: utils.percent(altOffset), x2: utils.percent(altOffset) }
+      : { y1: utils.percent(altOffset), y2: utils.percent(altOffset) }
+
   const children = axis.grid.map((t, i) => {
     const v = axis.min + (axis.max - axis.min) * t
 
@@ -206,10 +227,27 @@ export default (type, axis) => {
         : { y: utils.percent(pad(1 - t, axis.inset)) }
     )([
       hasLabel && $.text(txtProps)(label),
-      $.line({
-        class: v == 0 ? "axis-base" : "axis-line",
-        ...lineProps,
-      }),
+      ...(axis.group
+        ? [
+            (axis.inset || i > 0) &&
+              $.line({
+                class: "axis-line",
+                ...lineProps,
+                ...altLProps,
+              }),
+            i === axis.grid.length - 1 &&
+              $.line({
+                class: "axis-line",
+                ...lineProps,
+                ...altRProps,
+              }),
+          ]
+        : [
+            $.line({
+              class: v == 0 ? "axis-base" : "axis-line",
+              ...lineProps,
+            }),
+          ]),
     ])
   })
 
