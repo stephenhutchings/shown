@@ -29,6 +29,23 @@ import utils from "./utils.js"
  * Parse the raw value from the supplied data. This function is useful if your
  * data structure wraps each value in an object.
  * The default function returns the value unchanged.
+ * @property {Function|Array|Number} [x]
+ * Parse the x-axis value from the data. This function is useful if your
+ * data structure wraps each value in an object.
+ * The default function returns the index of the item, scaled between the `min`
+ * and `max` value on the x-axis.
+ * **Line and Scatter Chart only**
+ * @property {Function|Array|Number} [y]
+ * Parse the y-axis value from the data. This function is useful if your
+ * data structure wraps each value in an object.
+ * The default function returns the value of the item.
+ * **Line and Scatter Chart only**
+ * @property {Function|Array|Number} [r]
+ * Parse the radial size from the data. This function is useful if you want to
+ * visualise another dimension in the data. If the radius is not greater
+ * than zero, the item isn't be rendered.
+ * The default function returns a radial size of 1.
+ * **Scatter Chart only**
  * @property {Function|Array|String} [label]
  * Convert the data into a formatted string.
  * The default function returns the value fixed to the same number of decimals
@@ -57,9 +74,9 @@ const defaults = {
 }
 
 // Recur down the tree, mapping each datum to an object with keys from the map.
-const recur = (map, data, indices = []) => {
-  if (Array.isArray(data[0])) {
-    return data.map((list, i) => recur(map, list, [...indices, i]))
+const recur = (map, data, depth, indices = []) => {
+  if (Array.isArray(data[0]) && (!depth || indices.length < depth - 1)) {
+    return data.map((list, i) => recur(map, list, depth, [...indices, i]))
   } else {
     return data.map((d, i) =>
       Object.fromEntries(
@@ -69,7 +86,11 @@ const recur = (map, data, indices = []) => {
   }
 }
 
-const Map = function (options, data = [], { minValue = 0, sum = false } = {}) {
+const Map = function (
+  options,
+  data = [],
+  { minValue = 0, sum = false, maxDepth } = {}
+) {
   const map = Object.assign({}, defaults, options)
 
   // Maps may use a shorthand syntax by providing an array rather than a
@@ -110,7 +131,7 @@ const Map = function (options, data = [], { minValue = 0, sum = false } = {}) {
   // key/val pairs matching those found in the map options. If the value is
   // a function, it will be called with the datum and relevant indices. If
   // the value is an array, the item matching the first index is used.
-  const convert = (data) => recur(map, data)
+  const convert = (data) => recur(map, data, maxDepth)
 
   // The return function contains references to each mapping function in cases
   // where the defaults need to be accessed at other times
