@@ -9,6 +9,7 @@ const GithubSlugger = require("github-slugger")
 const remark = require("remark")
 const html = require("remark-html")
 
+const rerouteLinks = require("documentation/src/output/util/reroute_links")
 const highlighter = require("documentation/src/output/highlighter")
 
 const links = {
@@ -52,7 +53,7 @@ const formatter = (comments, config) => {
           children: ast.children[0].children.concat(ast.children.slice(1)),
         }
       }
-
+      ast = rerouteLinks(linkerStack.link, ast)
       return remark().use(html, { sanitize: false }).stringify(highlighter(ast))
     },
 
