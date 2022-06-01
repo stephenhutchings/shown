@@ -8,7 +8,10 @@ const DEFAULT_PRECISION = Math.ceil(Math.abs(Math.log10(Number.EPSILON))) - 1
  */
 const sum = (array, precision = DEFAULT_PRECISION) => {
   const f = Math.pow(10, precision)
-  return array.reduce((m, v = 0) => f * m + f * ((v && v.value) || +v || 0), 0)
+  return array.reduce(
+    (m, v = 0) => (f * m + f * ((v && v.value) || +v || 0)) / f,
+    0
+  )
 }
 
 /**
