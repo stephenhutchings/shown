@@ -18,12 +18,13 @@ import wrap from "./wrap.js"
  * to the `<desc>` element for better accessibility.
  * @param {MapOptions} [options.map]
  * Controls for transforming data. See {@link MapOptions} for more details.
+ * @param {Boolean} [options.stack]
+ * Whether to stack nested values or render them side-by-side. If values are
+ * nested three-levels deep, items will always be stacked.
  * @param {AxisOptions} [options.xAxis]
  * Overrides for the x-axis. See {@link AxisOptions} for more details.
  * @param {AxisOptions} [options.yAxis]
  * Overrides for the y-axis. See {@link AxisOptions} for more details.
- * @param {Boolean} [options.stack]
- * Whether to stack nested values or render them side-by-side.
  * @returns {string} Rendered chart
  *
  *
@@ -46,9 +47,7 @@ import wrap from "./wrap.js"
  *      [4197, 1853],
  *      [3444, 1479],
  *   ],
- *   map: {
- *     key: ["A", "B"],
- *   },
+ *   map: { key: ["A", "B"] },
  *   xAxis: { label: ["I", "II", "III"] }
  * })
  *
@@ -68,6 +67,29 @@ import wrap from "./wrap.js"
  *   stack: true,
  *   xAxis: { label: ["I", "II", "III"] }
  * })
+ *
+ * @example
+ * shown.bar({
+ *   title: "Stacked Series",
+ *   data: [
+ *     [
+ *       [10.65, 14.54],
+ *       [18.53, 11.71],
+ *       [14.79, 30.64],
+ *     ], [
+ *       [10.09, 21.86],
+ *       [17.85, 19.94],
+ *       [18.31, 11.82],
+ *     ]
+ *   ],
+ *   map: {
+ *     key: ["In", "Out"],
+ *     series: ["A", "B", "C"],
+ *     tally: Math.round,
+ *     label: Math.round,
+ *   },
+ *   xAxis: { label: ["I", "II"] }
+ * })
  */
 
 export default ({
@@ -75,36 +97,57 @@ export default ({
   title,
   description,
   map,
+  stack = false,
   xAxis,
   yAxis,
-  stack = false,
 }) => {
   data = data.map((v) => (Array.isArray(v) ? v : [v]))
 
-  const maxLength = Math.max(...data.map((d) => d.length))
+  if (!Array.isArray(data[0][0])) {
+    data = stack ? data.map((d) => [d]) : data.map((d) => d.map((d) => [d]))
+  } else {
+    stack = true
+  }
+
+  const maxStack = Math.max(...data.flat(1).map((d) => d.length))
+  const maxSeries = Math.max(...data.map((d) => d.length))
+
+  // For unstacked charts, tally results rather than label.
+  if (maxStack === 1 && (!map || !map.label)) {
+    map = {
+      label: false,
+      tally: true,
+      ...map,
+    }
+  }
+
+  if (map && map.series && Array.isArray(map.key)) {
+    const arr = map.key
+    map.key = (v, i, j) => arr[j]
+  }
 
   map = new Map(
     {
-      color: (v, i, j) => getColor(i / (maxLength - 1)),
-      width: () => 0.75,
+      color: (v, i, j) =>
+        getColor(maxStack === 1 ? i / (maxSeries - 1) : j / (maxStack - 1)),
+      width: 0.75,
       ...map,
     },
-    data,
+    data.flat(),
     { sum: stack, minValue: 0.05 }
   )
 
   data = data.map(map)
 
-  const maxWidth = Math.max(...data.flat().map((d) => d.width))
-  const barWidth = (1 / data.length) * maxWidth
-  const barGap = (1 - barWidth * data.length) / (data.length + 1)
+  const maxWidth = Math.max(...data.flat(2).map((d) => d.width))
 
-  const values = stack ? data.map(utils.sum) : data.flat().map((d) => d.value)
+  const values = data.flat().map(utils.sum)
 
   xAxis = {
     ticks: data.length,
-    inset: barGap + barWidth / 2,
+    hasSeries: map.series,
     group: true,
+    line: maxSeries > 1,
     ...xAxis,
   }
 
@@ -121,93 +164,85 @@ export default ({
   const axisX = axisTemplate("x", axes.x)
   const axisY = axisTemplate("y", axes.y)
 
-  let bars
+  const bars = $.g({ class: "values" })(
+    data.map((series, k) =>
+      $.svg({
+        x: utils.percent(axes.x.scale(k - 0.5)),
+        width: utils.percent(axes.x.scale(1) - axes.x.scale(0)),
+        height: "100%",
+        class: ["series", "series-" + k],
+      })(
+        series.map((stack, j) => {
+          const g = (1 - maxWidth) / (maxSeries + 1)
+          const w = maxWidth / maxSeries
+          const x = g * (j + 1) + w * (j + 0.5)
 
-  if (stack) {
-    bars = $.g({ class: "series" })(
-      data.map((data, j) =>
-        $.svg({
-          x: utils.percent(axes.x.scale(j) - barWidth / 2),
-          width: utils.percent(barWidth),
-          height: "100%",
-          class: "stack",
-        })(
-          data.map((d, i) => {
-            const h = axes.y.scale(d.value)
-            const y = axes.y.scale(axes.y.max - utils.sum(data.slice(0, i + 1)))
+          const tally = map.tally(utils.sum(stack))
 
-            const x = (1 - d.width) / 2
-            const w = d.width
+          return $.svg({
+            class: ["group", "group-" + j],
+            x: utils.percent(x),
+            width: utils.percent(w),
+            height: "100%",
+          })([
+            ...stack.map((d, i) => {
+              if (!d.value) return
 
-            return $.g()([
-              $.rect({
-                width: utils.percent(w),
-                height: utils.percent(h),
-                x: utils.percent(x),
+              const h = axes.y.scale(d.value)
+              const y = axes.y.scale(
+                axes.y.max - utils.sum(stack.slice(0, i + 1))
+              )
+
+              const rect = $.rect({
+                x: utils.percent(-d.width / 2),
                 y: utils.percent(y),
+                height: utils.percent(h),
+                width: utils.percent(d.width),
                 fill: d.color[0],
-              }),
-              d.label &&
+              })
+
+              const text =
+                d.label &&
                 $.text({
                   y: utils.percent(y + h / 2),
-                  x: "50%",
                   dy: "0.33em",
                   color: d.color[1],
-                })(d.label),
-            ])
-          })
-        )
+                })(d.label)
+
+              return $.svg({ class: ["value", "value-" + i] })([rect, text])
+            }),
+            tally &&
+              $.text({
+                y: utils.percent(axes.y.scale(axes.y.max - utils.sum(stack))),
+                dy: "-0.5em",
+              })(tally),
+            stack[0] &&
+              stack[0].series &&
+              $.text({
+                class: "series-label",
+                y: "100%",
+                dy: "1.5em",
+              })(stack[0].series),
+          ])
+        })
       )
     )
-  } else {
-    bars = $.g({ class: "series" })(
-      data.map((data, j) =>
-        $.svg({
-          x: utils.percent(axes.x.scale(j) - barWidth / 2),
-          width: utils.percent(barWidth),
-          height: "100%",
-          class: "group",
-        })(
-          data.map((d, i) => {
-            const h = axes.y.scale(d.value)
-            const y = 1 - h
-
-            const x = (i + 0.5) / data.length
-            const w = d.width / data.length
-
-            return $.svg({
-              x: utils.percent(x),
-            })([
-              $.rect({
-                x: utils.percent(-w / 2),
-                y: utils.percent(y),
-                width: utils.percent(w),
-                height: utils.percent(h),
-                fill: d.color[0],
-              }),
-              d.label &&
-                $.text({
-                  y: utils.percent(y),
-                  dy: "-0.5em",
-                })(d.label),
-            ])
-          })
-        )
-      )
-    )
-  }
+  )
 
   return wrap(
     $.div({
-      class: "chart chart-bar",
+      class: [
+        "chart",
+        "chart-bar",
+        axes.x.label && "has-xaxis xaxis-w" + axes.x.width,
+        axes.y.label && "has-yaxis yaxis-w" + axes.y.width,
+        map.series && "has-series",
+      ],
     })([
       $.div({
         style: {
           "flex-grow": 1,
           "height": 0,
-          "padding-top": "0.5em",
-          "padding-left": "2em",
-          "padding-bottom": axisX ? "1.5em" : "0.5em",
           "text-anchor": "middle",
           "box-sizing": "border-box",
         },
@@ -224,7 +259,7 @@ export default ({
           bars,
         ])
       ),
-      legendTemplate(data),
+      legendTemplate(data.flat()),
     ])
   )
 }

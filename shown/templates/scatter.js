@@ -47,8 +47,8 @@ import wrap from "./wrap.js"
  *     x: (d) => d.x,
  *     y: (d) => d.y,
  *   },
- *   xAxis: { min: 0 },
- *   yAxis: { min: 0 },
+ *   xAxis: { min: 0, line: (v) => v === 0 || v === 50 },
+ *   yAxis: { min: 0, line: (v) => v === 0 || v === 50 },
  * })
  *
  */
@@ -79,26 +79,30 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
   const axisX = axisTemplate("x", axes.x)
   const axisY = axisTemplate("y", axes.y)
 
-  const labels = data.map((data, j) =>
-    $.svg({
-      "class": "stack",
-      "width": "100%",
-      "height": "100%",
-      "text-anchor": "middle",
-    })(
-      data.map(
-        (d) =>
-          d.r > 0 &&
-          d.shape &&
-          $.use({
-            x: utils.percent(axes.x.scale(d.x)),
-            y: utils.percent(1 - axes.y.scale(d.y)),
-            href: `#symbol-${d.shape}`,
-            fill: d.color[0],
-            width: `${d.r}em`,
-            height: `${d.r}em`,
-            class: "symbol",
-          })
+  const symbols = $.svg({
+    class: "symbols",
+  })(
+    data.map((data, j) =>
+      $.svg({
+        "class": ["series", "series-" + j],
+        "width": "100%",
+        "height": "100%",
+        "text-anchor": "middle",
+      })(
+        data.map(
+          (d) =>
+            d.r > 0 &&
+            d.shape &&
+            $.use({
+              x: utils.percent(axes.x.scale(d.x)),
+              y: utils.percent(1 - axes.y.scale(d.y)),
+              href: `#symbol-${d.shape}`,
+              fill: d.color[0],
+              width: `${d.r}em`,
+              height: `${d.r}em`,
+              class: "symbol",
+            })
+        )
       )
     )
   )
@@ -107,15 +111,17 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
 
   return wrap(
     $.div({
-      class: "chart chart-scatter",
+      class: [
+        "chart",
+        "chart-scatter",
+        axes.x.label && "has-xaxis xaxis-w" + axes.x.width,
+        axes.y.label && "has-yaxis yaxis-w" + axes.y.width,
+      ],
     })([
       $.div({
         style: {
           "flex-grow": 1,
           "height": 0,
-          "padding-top": "0.5em",
-          "padding-left": axisY && "2em",
-          "padding-bottom": axisX ? "1.5em" : "0.5em",
           "box-sizing": "border-box",
         },
       })(
@@ -127,8 +133,9 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
           defs && $.defs()(defs),
           title && $.title()(title),
           description && $.desc()(description),
-          $.g()([axisY, axisX]),
-          labels,
+          axisY,
+          axisX,
+          symbols,
         ])
       ),
       legendTemplate(data),

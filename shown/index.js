@@ -5,5 +5,5 @@ export { default as scatter } from "./templates/scatter.js"
 export { default as legend } from "./templates/legend.js"
 
 // Import these options to include their type definitions
-import map from "./lib/map.js"
-import axis from "./templates/axis.js"
+export * as map from "./lib/map.js"
+export * as axis from "./templates/axis.js"

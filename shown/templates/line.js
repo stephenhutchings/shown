@@ -115,9 +115,9 @@ export default ({
   title,
   description,
   map,
+  showGaps = true,
   xAxis,
   yAxis,
-  showGaps = true,
 }) => {
   data = Array.isArray(data[0]) ? data : [data]
 
@@ -127,10 +127,10 @@ export default ({
     {
       curve: () => "linear",
       shape: () => false,
-      x: (d, j, i) => {
-        const min = xAxis.min ?? 0
-        const max = xAxis.max ?? min + (maxLength - 1)
-        return min + (i / (maxLength - 1)) * (max - min)
+      x: (d, i, j) => {
+        const min = (xAxis || {}).min ?? 0
+        const max = (xAxis || {}).max ?? min + (maxLength - 1)
+        return min + (j / (maxLength - 1)) * (max - min)
       },
       y: (d) => d,
       ...map,
@@ -151,14 +151,16 @@ export default ({
   const axisY = axisTemplate("y", axes.y)
 
   const lines = $.svg({
+    class: "lines",
     width: "100%",
     height: "100%",
     viewBox: `0 0 ${SVGLINE_VIEWPORT_W} ${SVGLINE_VIEWPORT_H}`,
     preserveAspectRatio: "none",
     style: (axes.x.hasOverflow || axes.y.hasOverflow) && "overflow: hidden;",
   })(
-    data.map((line) =>
+    data.map((line, i) =>
       $.path({
+        "class": ["series", "series-" + i],
         "vector-effect": "non-scaling-stroke",
         "stroke": line[0].color[0],
         "fill": "none",
@@ -176,28 +178,33 @@ export default ({
     )
   )
 
-  const labels = data.map((data, j) =>
-    $.svg({
-      "class": "stack",
-      "width": "100%",
-      "height": "100%",
-      "text-anchor": "middle",
-    })(
-      data.map((d, i) => {
-        // d.label && $.text()(d.label),
-        return (
-          d.shape &&
-          $.use({
-            x: utils.percent(axes.x.scale(d.x)),
-            y: utils.percent(1 - axes.y.scale(d.y)),
-            href: `#symbol-${d.shape}`,
-            fill: d.color[0],
-            width: "1em",
-            height: "1em",
-            class: "symbol",
+  const symbols = $.svg({
+    class: "symbols",
+  })(
+    data.map(
+      (data, j) =>
+        data.find((d) => d.shape) &&
+        $.svg({
+          "class": ["series", "series-" + j],
+          "width": "100%",
+          "height": "100%",
+          "text-anchor": "middle",
+        })(
+          data.map((d) => {
+            return (
+              d.shape &&
+              $.use({
+                x: utils.percent(axes.x.scale(d.x)),
+                y: utils.percent(1 - axes.y.scale(d.y)),
+                href: `#symbol-${d.shape}`,
+                fill: d.color[0],
+                width: "1em",
+                height: "1em",
+                class: "symbol",
+              })
+            )
           })
         )
-      })
     )
   )
 
@@ -205,15 +212,17 @@ export default ({
 
   return wrap(
     $.div({
-      class: "chart chart-line",
+      class: [
+        "chart",
+        "chart-line",
+        axes.x.label && "has-xaxis xaxis-w" + axes.x.width,
+        axes.y.label && "has-yaxis yaxis-w" + axes.y.width,
+      ],
     })([
       $.div({
         style: {
           "flex-grow": 1,
           "height": 0,
-          "padding-top": "0.5em",
-          "padding-bottom": axisX ? "1.5em" : "0.5em",
-          "padding-left": axisY && "2em",
           "box-sizing": "border-box",
         },
       })(
@@ -225,9 +234,10 @@ export default ({
           defs && $.defs()(defs),
           title && $.title()(title),
           description && $.desc()(description),
-          $.g()([axisY, axisX]),
+          axisY,
+          axisX,
           lines,
-          labels,
+          symbols,
         ])
       ),
       legendTemplate(data, true),
