@@ -37,8 +37,10 @@ describe("axis", () => {
     )
   })
 
-  test("renders nothing without a label", () => {
-    expect(axis("x", { label: false })).toEqual(undefined)
+  test("renders no text without a label", () => {
+    expect(axis("x", setup({ label: false }))).toEqual(
+      expect.not.stringContaining("<text")
+    )
   })
 })
 

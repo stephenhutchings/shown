@@ -29,7 +29,11 @@ const pad = (t, inset = 0) => inset + (1 - inset * 2) * t
  * @property {function|array} [label] - A function to map an axis
  * value to a label. The function is passed the current value and index as
  * arguments. When supplying an array, the item at the corresponding index will
- * be selected.
+ * be selected
+ * @property {function|array} [line] - A function to toggle an axis
+ * line. The function is passed the current value and index as
+ * arguments. When supplying an array, the item at the corresponding index will
+ * be selected
  * @property {number} [inset=0] - The amount to inset the first and last tick
  * from the sides of the axis. The value is relative to the width of the chart
  * and should fall between 0 and 1.
@@ -118,9 +122,11 @@ const getTicks = (min, max) => {
  * @returns {AxisOptions}
  */
 export const setup = (axis = {}, data, guessBounds = true) => {
-  let showLabel = data || axis.min || axis.max
-  let { min, max, ticks, label, spine, inset } = axis
-  let _min, _max, hasOverflow
+  let { min, max, ticks, label, line, spine, inset } = axis
+  let _min, _max, hasOverflow, width
+
+  const showLabel =
+    !!data || Number.isFinite(axis.min) || Number.isFinite(axis.max)
 
   if (data) {
     if (guessBounds) {
@@ -140,14 +146,26 @@ export const setup = (axis = {}, data, guessBounds = true) => {
   ticks = ticks ?? getTicks(min, max)
   inset = inset ?? 0
 
-  if (showLabel && !label) {
-    label = (v, i) => (ticks < 8 || i % 2 === 0) && utils.toPrecision(v, 4)
-  }
-
   // If the label is an array, wrap in a function
   if (Array.isArray(label)) {
     const arr = label
     label = (v, i) => arr[i]
+  } else if (label !== undefined && typeof label !== "function") {
+    const val = label
+    label = () => val
+  } else if (showLabel && !label) {
+    label = (v, i) => (ticks < 8 || i % 2 === 0) && utils.toPrecision(v, 7)
+  }
+
+  // If the label is an array, wrap in a function
+  if (Array.isArray(line)) {
+    const arr = line
+    line = (v, i) => arr[i]
+  } else if (line !== undefined && typeof line !== "function") {
+    const val = line
+    line = () => val
+  } else if (!line) {
+    line = (v, i) => true
   }
 
   let grid = Array.from({ length: ticks }, (n, i) => i / (ticks - 1))
@@ -176,7 +194,20 @@ export const setup = (axis = {}, data, guessBounds = true) => {
     }
   }
 
+  // If the axis displays groups, the inset shifts inwards
+  if (axis.group) inset = (0.5 + inset) / ticks
+
   const scale = (v) => pad((v - min) / (max - min), inset)
+
+  if (label) {
+    width = Math.max(
+      ...grid
+        .map((t) => min + t * (max - min))
+        .map(label)
+        .filter((t) => t.length || Number.isFinite(t))
+        .map((t) => t.toString().length)
+    )
+  }
 
   return {
     ...axis,
@@ -185,50 +216,58 @@ export const setup = (axis = {}, data, guessBounds = true) => {
     min,
     max,
     label,
+    line,
     inset,
     scale,
     spine,
     hasOverflow,
+    width,
   }
 }
 
 export default (type, axis) => {
-  if (!axis.label) return
-
   const svgProps =
     type === "x"
       ? { "width": "100%", "text-anchor": "middle" }
       : { "height": "100%", "text-anchor": "end" }
 
   const txtProps =
-    type === "x" ? { y: "100%", dy: "1.25em" } : { x: "-0.5em", dy: "0.33em" }
+    type === "x" ? { y: "100%", dy: "1.5em" } : { x: "-0.5em", dy: "0.33em" }
 
   const lineProps = type === "x" ? { y2: "100%" } : { x2: "100%" }
 
-  const altOffset = (0.5 - axis.inset) / (axis.ticks - 1)
-  const altLProps =
-    type === "x"
-      ? { x1: utils.percent(-altOffset), x2: utils.percent(-altOffset) }
-      : { y1: utils.percent(-altOffset), y2: utils.percent(-altOffset) }
-  const altRProps =
-    type === "x"
-      ? { x1: utils.percent(altOffset), x2: utils.percent(altOffset) }
-      : { y1: utils.percent(altOffset), y2: utils.percent(altOffset) }
+  if (axis.hasSeries && type === "x") txtProps.dy = "3em"
 
   const children = axis.grid.map((t, i) => {
-    const v = axis.min + (axis.max - axis.min) * t
+    const v = utils.toPrecision(axis.min + (axis.max - axis.min) * t, 7)
+    const lines = []
 
-    const label = axis.label(utils.toPrecision(v, 7), i)
-    const hasLabel = label || label === 0
+    if (axis.label) {
+      const label = axis.label(v, i)
+      if (label || label === 0) lines.push($.text(txtProps)(label))
+    }
 
-    return $.svg(
-      type === "x"
-        ? { x: utils.percent(pad(t, axis.inset)) }
-        : { y: utils.percent(pad(1 - t, axis.inset)) }
-    )([
-      hasLabel && $.text(txtProps)(label),
-      ...(axis.group
-        ? [
+    if (axis.line(v, i)) {
+      if (axis.group) {
+        if (axis.ticks !== 1) {
+          const altOffset = (0.5 - axis.inset) / (axis.ticks - 1)
+
+          const altLProps =
+            type === "x"
+              ? {
+                  x1: utils.percent(-altOffset),
+                  x2: utils.percent(-altOffset),
+                }
+              : {
+                  y1: utils.percent(-altOffset),
+                  y2: utils.percent(-altOffset),
+                }
+          const altRProps =
+            type === "x"
+              ? { x1: utils.percent(altOffset), x2: utils.percent(altOffset) }
+              : { y1: utils.percent(altOffset), y2: utils.percent(altOffset) }
+
+          lines.push(
             (axis.inset || i > 0) &&
               $.line({
                 class: "axis-line",
@@ -240,22 +279,31 @@ export default (type, axis) => {
                 class: "axis-line",
                 ...lineProps,
                 ...altRProps,
-              }),
-          ]
-        : [
-            $.line({
-              class: v == 0 ? "axis-base" : "axis-line",
-              ...lineProps,
-            }),
-          ]),
-    ])
+              })
+          )
+        }
+      } else {
+        lines.push(
+          $.line({
+            class: v == 0 ? "axis-base" : "axis-line",
+            ...lineProps,
+          })
+        )
+      }
+    }
+
+    return $.svg(
+      type === "x"
+        ? { x: utils.percent(pad(t, axis.inset)) }
+        : { y: utils.percent(pad(1 - t, axis.inset)) }
+    )(lines)
   })
 
   if (axis.spine) {
     const spineProps = { class: "axis-spine", ...lineProps }
 
     // Add an initial line if the first line is inset
-    if (pad(axis.grid[0], axis.inset) > 0) {
+    if (!axis.line(axis.min, 0) || pad(axis.grid[0], axis.inset) > 0) {
       if (type === "x") {
         children.unshift($.line(spineProps))
       } else {
@@ -264,7 +312,10 @@ export default (type, axis) => {
     }
 
     // Add a final line if the last line is inset
-    if (pad(axis.grid[axis.grid.length - 1], axis.inset) < 1) {
+    if (
+      !axis.line(axis.max, axis.ticks - 1) ||
+      pad(axis.grid[axis.grid.length - 1], axis.inset) < 1
+    ) {
       if (type === "x") {
         children.push($.line({ x1: "100%", x2: "100%", ...spineProps }))
       } else {

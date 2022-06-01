@@ -9,8 +9,11 @@
 
 .shown .axis {
   color: #333;
-  font-size: 85%;
   user-select: none;
+}
+.shown .axis,
+.shown .series-label {
+  font-size: 85%;
 }
 
 .shown .axis-base {
@@ -48,12 +51,62 @@
   margin: auto;
 }
 
+.shown .chart-bar > div {
+  padding-bottom: 0.5em;
+}
+
+.shown .has-xaxis > div,
+.shown .has-series > div {
+  padding-bottom: 1.5em;
+}
+
+.shown .has-xaxis.has-series > div {
+  padding-bottom: 2em;
+}
+
+.shown .has-yaxis > div {
+  padding-top: 0.5em;
+  padding-left: 3em;
+}
+
+.shown .yaxis-w4 > div {
+  padding-left: 2.5em;
+}
+
+.shown .yaxis-w3 > div {
+  padding-left: 2em;
+}
+
+.shown .yaxis-w2 > div {
+  padding-left: 1.5em;
+}
+
+.shown .yaxis-w1 > div {
+  padding-left: 1em;
+}
+
+.shown .xaxis-w4 > div {
+  padding-right: 1.25em;
+}
+
+.shown .xaxis-w3 > div {
+  padding-right: 1em;
+}
+
+.shown .xaxis-w2 > div {
+  padding-right: 0.75em;
+}
+
+.shown .xaxis-w1 > div {
+  padding-right: 0.5em;
+}
+
 .shown .legend {
   list-style: none;
   display: flex;
   flex-wrap: wrap;
   gap: 1em;
-  margin: 1em auto 0;
+  margin: 0.75em auto 0;
   padding: 0;
 }
 

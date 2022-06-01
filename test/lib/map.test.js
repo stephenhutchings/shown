@@ -10,7 +10,7 @@ describe("map", () => {
     const d = [[[1]]]
     const o = { minValue: 0 }
     expect(map(m, d, o)(d)).toStrictEqual([
-      [[{ color: ["#0036b0", "#fff"], label: "1", value: 1 }]],
+      [[{ color: ["#0036b0", "#fff"], label: "1", tally: false, value: 1 }]],
     ])
   })
 
@@ -23,6 +23,7 @@ describe("map", () => {
         c: "0",
         color: ["#0036b0", "#fff"],
         label: "1",
+        tally: false,
         value: 1,
       },
     ])
@@ -37,11 +38,13 @@ describe("map", () => {
           color: ["#0036b0", "#fff"],
           label: false,
           value: 1,
+          tally: false,
         },
         {
           color: ["#0036b0", "#fff"],
           label: "2",
           value: 2,
+          tally: false,
         },
       ],
     ])

@@ -51,6 +51,13 @@ import utils from "./utils.js"
  * The default function returns the value fixed to the same number of decimals
  * as the most precise value in the dataset. Return `false` to prevent this
  * label from being rendered.
+ * @property {Function|Array|String} [tally]
+ * Add an additional label summing the total values into a formatted string.
+ * If true, the default function returns the value fixed to the same number of
+ * decimals as the most precise value in the dataset. Return `false` to prevent
+ * the tally from being rendered. When only a single series is present, the bar
+ * chart defaults to using a tally rather than a label.
+ * **Bar Chart only**
  * @property {Function|Array|String} [color]
  * Select a color for the supplied data.
  * The default function returns evenly distributed colors from the default
@@ -67,10 +74,14 @@ import utils from "./utils.js"
  * @property {Function|Array|String} [key]
  * Select the legend key for the supplied data. A legend is only rendered when
  * there is more than one unique key.
+ * @property {Function|Array|String} [series]
+ * Select the series key for the supplied data.
+ * **Bar Chart only**
  */
 
 const defaults = {
-  value: (v) => v,
+  value: (v) => (v > 0 ? v : 0),
+  tally: false,
 }
 
 // Recur down the tree, mapping each datum to an object with keys from the map.
@@ -105,6 +116,12 @@ const Map = function (
     }
   })
 
+  const values = data.map((v) => (Array.isArray(v) ? v : [v]).map(map.value))
+  const places = Math.min(
+    Math.max(...values.flat().map(utils.decimalPlaces)),
+    2
+  )
+
   // A color function can return a background color, or an array of background
   // and foreground color. This wrapper ensures an array is always returned by
   // the color function.
@@ -115,16 +132,13 @@ const Map = function (
   // specified by a chart. It uses the largest number of decimal places found
   // across all values in the provided data.
   if (!map.label) {
-    const v = data.map((v) => (Array.isArray(v) ? v : [v]).map(map.value))
-    const m = Math.max(...(sum ? v.map(utils.sum) : v.flat()))
-    const d = Math.max(...v.flat().map(utils.decimalPlaces))
-    const n = Math.max(Math.min(d, 2), 0)
+    const max = Math.max(...(sum ? values.map(utils.sum) : values.flat()))
 
     map.label = (v) =>
       (v = map.value(v)) &&
       Number.isFinite(v) &&
-      v / m >= minValue &&
-      v.toFixed(n)
+      v / max >= minValue &&
+      v.toFixed(places)
   }
 
   // The class returns a function which maps each datum to an object with
@@ -132,6 +146,13 @@ const Map = function (
   // a function, it will be called with the datum and relevant indices. If
   // the value is an array, the item matching the first index is used.
   const convert = (data) => recur(map, data, maxDepth)
+
+  // By default, a tally is formatted using the largest number of decimal
+  // places found across all values in the provided data.
+  if (map.tally() === true) {
+    map.tally = (v) =>
+      (v = map.value(v)) && Number.isFinite(v) && v.toFixed(places)
+  }
 
   // The return function contains references to each mapping function in cases
   // where the defaults need to be accessed at other times
