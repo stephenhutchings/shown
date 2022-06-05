@@ -11,6 +11,8 @@ describe("utils", () => {
 
   test("to convert to a percent", () => {
     expect(utils.percent(0.1)).toBe("10%")
+    expect(utils.percent(0)).toBe("0")
+    expect(utils.percent(-0.1111111)).toBe("-11.11%")
   })
 
   test("to convert to a precision", () => {
