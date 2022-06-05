@@ -188,16 +188,17 @@ export default ({
             ...stack.map((d, i) => {
               if (!d.value) return
 
+              const w = d.width / maxWidth
               const h = axes.y.scale(d.value)
               const y = axes.y.scale(
                 axes.y.max - utils.sum(stack.slice(0, i + 1))
               )
 
               const rect = $.rect({
-                x: utils.percent(-d.width / 2),
+                x: utils.percent(-w / 2),
                 y: utils.percent(y),
                 height: utils.percent(h),
-                width: utils.percent(d.width),
+                width: utils.percent(w),
                 fill: d.color[0],
               })
 
