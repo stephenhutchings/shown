@@ -130,7 +130,7 @@ export default ({
     {
       color: (v, i, j) =>
         getColor(maxStack === 1 ? i / (maxSeries - 1) : j / (maxStack - 1)),
-      width: 0.75,
+      width: 0.6,
       ...map,
     },
     data.flat(),
