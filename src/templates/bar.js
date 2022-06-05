@@ -169,7 +169,6 @@ export default ({
       $.svg({
         x: utils.percent(axes.x.scale(k - 0.5)),
         width: utils.percent(axes.x.scale(1) - axes.x.scale(0)),
-        height: "100%",
         class: ["group", "group-" + k],
       })(
         series.map((stack, j) => {
@@ -183,7 +182,6 @@ export default ({
             class: ["series", "series-" + j],
             x: utils.percent(x),
             width: utils.percent(w),
-            height: "100%",
           })([
             ...stack.map((d, i) => {
               if (!d.value) return
