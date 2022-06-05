@@ -152,8 +152,6 @@ export default ({
 
   const lines = $.svg({
     class: "lines",
-    width: "100%",
-    height: "100%",
     viewBox: `0 0 ${SVGLINE_VIEWPORT_W} ${SVGLINE_VIEWPORT_H}`,
     preserveAspectRatio: "none",
     style: (axes.x.hasOverflow || axes.y.hasOverflow) && "overflow: hidden;",
@@ -186,8 +184,6 @@ export default ({
         data.find((d) => d.shape) &&
         $.svg({
           "class": ["series", "series-" + j],
-          "width": "100%",
-          "height": "100%",
           "text-anchor": "middle",
         })(
           data.map((d) => {

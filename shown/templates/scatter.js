@@ -85,8 +85,6 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
     data.map((data, j) =>
       $.svg({
         "class": ["series", "series-" + j],
-        "width": "100%",
-        "height": "100%",
         "text-anchor": "middle",
       })(
         data.map(

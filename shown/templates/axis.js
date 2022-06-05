@@ -244,7 +244,8 @@ export default (type, axis) => {
 
     if (axis.label) {
       const label = axis.label(v, i)
-      if (label || label === 0) lines.push($.text(txtProps)(label))
+      if (label || label === 0)
+        lines.push($.text({ class: "axis-label", ...txtProps })(label))
     }
 
     if (axis.line(v, i)) {

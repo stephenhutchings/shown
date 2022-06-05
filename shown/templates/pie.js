@@ -126,8 +126,6 @@ export default ({
     })([
       $.svg({
         viewBox: "0 0 100 100",
-        width: "100%",
-        height: "100%",
       })(
         $.circle({
           "class": "segment-arc",

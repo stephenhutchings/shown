@@ -130,7 +130,7 @@ export default ({
     {
       color: (v, i, j) =>
         getColor(maxStack === 1 ? i / (maxSeries - 1) : j / (maxStack - 1)),
-      width: 0.75,
+      width: 0.6,
       ...map,
     },
     data.flat(),
@@ -164,40 +164,39 @@ export default ({
   const axisX = axisTemplate("x", axes.x)
   const axisY = axisTemplate("y", axes.y)
 
-  const bars = $.g({ class: "values" })(
+  const bars = $.svg({ class: "values" })(
     data.map((series, k) =>
       $.svg({
         x: utils.percent(axes.x.scale(k - 0.5)),
         width: utils.percent(axes.x.scale(1) - axes.x.scale(0)),
-        height: "100%",
-        class: ["series", "series-" + k],
+        class: ["group", "group-" + k],
       })(
         series.map((stack, j) => {
-          const g = (1 - maxWidth) / (maxSeries + 1)
+          const g = (1 - maxWidth) / (maxSeries + 2)
           const w = maxWidth / maxSeries
-          const x = g * (j + 1) + w * (j + 0.5)
+          const x = g * (j + 1.5) + w * (j + 0.5)
 
           const tally = map.tally(utils.sum(stack))
 
           return $.svg({
-            class: ["group", "group-" + j],
+            class: ["series", "series-" + j],
             x: utils.percent(x),
             width: utils.percent(w),
-            height: "100%",
           })([
             ...stack.map((d, i) => {
               if (!d.value) return
 
+              const w = d.width / maxWidth
               const h = axes.y.scale(d.value)
               const y = axes.y.scale(
                 axes.y.max - utils.sum(stack.slice(0, i + 1))
               )
 
               const rect = $.rect({
-                x: utils.percent(-d.width / 2),
+                x: utils.percent(-w / 2),
                 y: utils.percent(y),
                 height: utils.percent(h),
-                width: utils.percent(d.width),
+                width: utils.percent(w),
                 fill: d.color[0],
               })
 

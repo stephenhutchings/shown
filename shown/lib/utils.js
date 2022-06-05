@@ -15,13 +15,15 @@ const sum = (array, precision = DEFAULT_PRECISION) => {
 }
 
 /**
- * Convert a value between 0 and 1 to a percentage string.
+ * Convert a value between 0 and 1 to a percentage string. The suffix is ignored
+ * for zero.
  * @private
  * @param {number} value
  * @param {string} [units]
  * @returns {string} percent
  */
-const percent = (value, units = "%") => +(value * 100).toFixed(2) + units
+const percent = (value, units = "%") =>
+  value !== 0 ? +(value * 100).toFixed(2) + units : "0"
 
 /**
  * Convert a value to a specified precision to avoid floating point errors
