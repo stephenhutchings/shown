@@ -170,7 +170,7 @@ export default ({
         x: utils.percent(axes.x.scale(k - 0.5)),
         width: utils.percent(axes.x.scale(1) - axes.x.scale(0)),
         height: "100%",
-        class: ["series", "series-" + k],
+        class: ["group", "group-" + k],
       })(
         series.map((stack, j) => {
           const g = (1 - maxWidth) / (maxSeries + 1)
@@ -180,7 +180,7 @@ export default ({
           const tally = map.tally(utils.sum(stack))
 
           return $.svg({
-            class: ["group", "group-" + j],
+            class: ["series", "series-" + j],
             x: utils.percent(x),
             width: utils.percent(w),
             height: "100%",
