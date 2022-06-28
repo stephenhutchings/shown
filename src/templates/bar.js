@@ -21,6 +21,8 @@ import wrap from "./wrap.js"
  * @param {Boolean} [options.stack]
  * Whether to stack nested values or render them side-by-side. If values are
  * nested three-levels deep, items will always be stacked.
+ * @param {Boolean} [options.vertical]
+ * Whether to render a vertical (columns) or horizontal layout.
  * @param {AxisOptions} [options.xAxis]
  * Overrides for the x-axis. See {@link AxisOptions} for more details.
  * @param {AxisOptions} [options.yAxis]
@@ -88,7 +90,8 @@ import wrap from "./wrap.js"
  *     tally: Math.round,
  *     label: Math.round,
  *   },
- *   xAxis: { label: ["I", "II"] }
+ *   xAxis: { label: ["I", "II"] },
+ *   vertical: false
  * })
  */
 
@@ -98,9 +101,13 @@ export default ({
   description,
   map,
   stack = false,
+  vertical = true,
   xAxis,
   yAxis,
 }) => {
+  const daxis = vertical ? ["x", "y"] : ["y", "x"]
+  const dsize = vertical ? ["width", "height"] : ["height", "width"]
+
   data = data.map((v) => (Array.isArray(v) ? v : [v]))
 
   if (!Array.isArray(data[0][0])) {
@@ -161,16 +168,35 @@ export default ({
     y: setupAxis(yAxis, values),
   }
 
-  const axisX = axisTemplate("x", axes.x)
-  const axisY = axisTemplate("y", axes.y)
+  if (!vertical) {
+    axes.x.labelOffset = Math.max(
+      ...axes.x.grid
+        .map((t) =>
+          utils.toPrecision(axes.x.min + (axes.x.max - axes.x.min) * t, 7)
+        )
+        .map(axes.x.label)
+        .map((s) => (s ? s.toString().length * 0.5 : 0))
+    )
+
+    if (axes.x.hasSeries) {
+      axes.x.seriesOffset = Math.max(
+        ...data.flat(3).map((d) => d.series.length * 0.5)
+      )
+    }
+  }
+
+  const axisX = axisTemplate(daxis[0], axes.x)
+  const axisY = axisTemplate(daxis[1], axes.y)
 
   const bars = $.svg({ class: "values" })(
     data.map((series, k) =>
-      $.svg({
-        x: utils.percent(axes.x.scale(k - 0.5)),
-        width: utils.percent(axes.x.scale(1) - axes.x.scale(0)),
-        class: ["group", "group-" + k],
-      })(
+      $.svg(
+        Object.fromEntries([
+          [daxis[0], utils.percent(axes.x.scale(k - 0.5))],
+          [dsize[0], utils.percent(axes.x.scale(1) - axes.x.scale(0))],
+          ["class", ["group", "group-" + k]],
+        ])
+      )(
         series.map((stack, j) => {
           const g = (1 - maxWidth) / (maxSeries + 2)
           const w = maxWidth / maxSeries
@@ -178,50 +204,78 @@ export default ({
 
           const tally = map.tally(utils.sum(stack))
 
-          return $.svg({
-            class: ["series", "series-" + j],
-            x: utils.percent(x),
-            width: utils.percent(w),
-          })([
+          return $.svg(
+            Object.fromEntries([
+              [daxis[0], utils.percent(x)],
+              [dsize[0], utils.percent(w)],
+              ["class", ["series", "series-" + j]],
+            ])
+          )([
             ...stack.map((d, i) => {
               if (!d.value) return
 
               const w = d.width / maxWidth
               const h = axes.y.scale(d.value)
               const y = axes.y.scale(
-                axes.y.max - utils.sum(stack.slice(0, i + 1))
+                vertical
+                  ? axes.y.max - utils.sum(stack.slice(0, i + 1))
+                  : utils.sum(stack.slice(0, i))
               )
 
-              const rect = $.rect({
-                x: utils.percent(-w / 2),
-                y: utils.percent(y),
-                height: utils.percent(h),
-                width: utils.percent(w),
-                fill: d.color[0],
-              })
+              const rect = $.rect(
+                Object.fromEntries([
+                  [daxis[0], utils.percent(-w / 2)],
+                  [daxis[1], utils.percent(y)],
+                  [dsize[0], utils.percent(w)],
+                  [dsize[1], utils.percent(h)],
+                  ["fill", d.color[0]],
+                ])
+              )
 
               const text =
                 d.label &&
-                $.text({
-                  y: utils.percent(y + h / 2),
-                  dy: "0.33em",
-                  color: d.color[1],
-                })(d.label)
+                $.text(
+                  Object.fromEntries([
+                    [daxis[1], utils.percent(y + h / 2)],
+                    ["dy", "0.33em"],
+                    ["color", d.color[1]],
+                  ])
+                )(d.label)
 
               return $.svg({ class: ["value", "value-" + i] })([rect, text])
             }),
             tally &&
-              $.text({
-                y: utils.percent(axes.y.scale(axes.y.max - utils.sum(stack))),
-                dy: "-0.5em",
-              })(tally),
+              $.text(
+                vertical
+                  ? {
+                      y: utils.percent(
+                        axes.y.scale(axes.y.max - utils.sum(stack))
+                      ),
+                      dy: "-0.5em",
+                    }
+                  : {
+                      "x": utils.percent(axes.y.scale(utils.sum(stack))),
+                      "dx": "0.5em",
+                      "dy": "0.33em",
+                      "text-anchor": "start",
+                    }
+              )(tally),
             stack[0] &&
               stack[0].series &&
-              $.text({
-                class: "series-label",
-                y: "100%",
-                dy: "1.5em",
-              })(stack[0].series),
+              $.text(
+                vertical
+                  ? {
+                      class: "series-label",
+                      y: "100%",
+                      dy: "1.5em",
+                    }
+                  : {
+                      "class": "series-label",
+                      "dx": "-1em",
+                      "dy": "0.33em",
+                      "text-anchor": "end",
+                    }
+              )(stack[0].series),
           ])
         })
       )
@@ -236,6 +290,7 @@ export default ({
         axes.x.label && "has-xaxis xaxis-w" + axes.x.width,
         axes.y.label && "has-yaxis yaxis-w" + axes.y.width,
         map.series && "has-series",
+        vertical ? "vertical" : "horizontal",
       ],
     })([
       $.div({
@@ -244,6 +299,10 @@ export default ({
           "height": 0,
           "text-anchor": "middle",
           "box-sizing": "border-box",
+
+          "padding-left":
+            !vertical &&
+            2 + (axes.x.seriesOffset || 0) + (axes.x.labelOffset || 0) + "em",
         },
       })(
         $.svg({

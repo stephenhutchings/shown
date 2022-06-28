@@ -237,6 +237,8 @@ export default (type, axis) => {
   const lineProps = type === "x" ? { y2: "100%" } : { x2: "100%" }
 
   if (axis.hasSeries && type === "x") txtProps.dy = "3em"
+  if (axis.hasSeries && type === "y")
+    txtProps.dx = -2 - axis.seriesOffset + "em"
 
   const children = axis.grid.map((t, i) => {
     const v = utils.toPrecision(axis.min + (axis.max - axis.min) * t, 7)
