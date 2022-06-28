@@ -60,7 +60,7 @@
   padding-bottom: 1.5em;
 }
 
-.shown .has-xaxis.has-series > div {
+.shown .vertical.has-xaxis.has-series > div {
   padding-bottom: 2.75em;
 }
 

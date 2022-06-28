@@ -175,12 +175,12 @@ export default ({
           utils.toPrecision(axes.x.min + (axes.x.max - axes.x.min) * t, 7)
         )
         .map(axes.x.label)
-        .map((s) => (s ? s.toString().length * 0.5 : 0))
+        .map((s) => (s ? s.toString().length * 0.45 : 0))
     )
 
     if (axes.x.hasSeries) {
       axes.x.seriesOffset = Math.max(
-        ...data.flat(3).map((d) => d.series.toString().length * 0.5)
+        ...data.flat(3).map((d) => d.series.toString().length * 0.45)
       )
     }
   }
@@ -287,8 +287,8 @@ export default ({
       class: [
         "chart",
         "chart-bar",
-        axes.x.label && "has-xaxis xaxis-w" + axes.x.width,
-        axes.y.label && "has-yaxis yaxis-w" + axes.y.width,
+        axes[daxis[0]].label && "has-xaxis xaxis-w" + axes[daxis[0]].width,
+        axes[daxis[1]].label && "has-yaxis yaxis-w" + axes[daxis[1]].width,
         map.series && "has-series",
         vertical ? "vertical" : "horizontal",
       ],
