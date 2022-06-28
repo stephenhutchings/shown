@@ -180,7 +180,7 @@ export default ({
 
     if (axes.x.hasSeries) {
       axes.x.seriesOffset = Math.max(
-        ...data.flat(3).map((d) => d.series.length * 0.5)
+        ...data.flat(3).map((d) => d.series.toString().length * 0.5)
       )
     }
   }
