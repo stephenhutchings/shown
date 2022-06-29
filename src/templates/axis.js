@@ -297,8 +297,8 @@ export default (type, axis) => {
 
     return $.svg(
       type === "x"
-        ? { x: utils.percent(pad(t, axis.inset)) }
-        : { y: utils.percent(pad(1 - t, axis.inset)) }
+        ? { x: utils.percent(pad(axis.reverse ? 1 - t : t, axis.inset)) }
+        : { y: utils.percent(pad(axis.reverse ? t : 1 - t, axis.inset)) }
     )(lines)
   })
 

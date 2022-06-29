@@ -169,6 +169,7 @@ export default ({
   }
 
   if (!vertical) {
+    axes.x.reverse = true
     axes.x.labelOffset = Math.max(
       ...axes.x.grid
         .map((t) =>
