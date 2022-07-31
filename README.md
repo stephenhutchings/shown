@@ -11,7 +11,7 @@ Statically-generated, responsive charts, without the need for client-side Javasc
 npm install shown
 ```
 
-Read the docs [here](documentation).
+Read the docs [here][documentation].
 
 [version img]: https://img.shields.io/npm/v/shown.svg
 [version url]: https://npmjs.org/package/shown
