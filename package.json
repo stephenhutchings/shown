@@ -1,6 +1,6 @@
 {
   "name": "shown",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Statically-generated, responsive charts, without the need for client-side Javascript.",
   "main": "dist/index.cjs",
   "module": "src/index.js",
