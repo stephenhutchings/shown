@@ -3,7 +3,7 @@
   overflow: visible;
 }
 
-.shown text {
+.shown svg {
   fill: currentColor;
 }
 
