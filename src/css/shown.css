@@ -1,14 +1,14 @@
 .shown svg,
-.symbol {
+.shown .symbol {
   overflow: visible;
 }
 
-.shown text {
+.shown svg {
   fill: currentColor;
 }
 
 .shown .axis {
-  color: #333;
+  fill-opacity: 0.9;
   user-select: none;
 }
 .shown .axis,
