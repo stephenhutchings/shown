@@ -62,7 +62,7 @@ const linePath = (points, toPoint, skip) =>
  * @param {AxisOptions} [options.yAxis]
  * Overrides for the y-axis. See {@link AxisOptions} for more details.
  * @param {Boolean} [options.showGaps]
- * Points in the line with non-numeric values are rendered as broken lines
+ * Points in the line with non-finite values are rendered as broken lines
  * where data is unavailable. Set to `false` to ignore missing values instead.
  * @returns {string} Rendered chart
  *
@@ -156,24 +156,26 @@ export default ({
     preserveAspectRatio: "none",
     style: (axes.x.hasOverflow || axes.y.hasOverflow) && "overflow: hidden;",
   })(
-    data.map((line, i) =>
-      $.path({
-        "class": ["series", "series-" + i],
-        "vector-effect": "non-scaling-stroke",
-        "stroke": line[0].color[0],
-        "fill": "none",
-        "d": linePath(
-          line,
-          (d) =>
-            Number.isFinite(d.x) &&
-            Number.isFinite(d.y) && [
-              SVGLINE_VIEWPORT_W * axes.x.scale(d.x),
-              SVGLINE_VIEWPORT_H * (1 - axes.y.scale(d.y)),
-            ],
-          showGaps
-        ),
-      })
-    )
+    data
+      .filter((line) => line.length > 0)
+      .map((line, i) =>
+        $.path({
+          "class": ["series", "series-" + i],
+          "vector-effect": "non-scaling-stroke",
+          "stroke": line[0].color[0],
+          "fill": "none",
+          "d": linePath(
+            line,
+            (d) =>
+              Number.isFinite(d.x) &&
+              Number.isFinite(d.y) && [
+                SVGLINE_VIEWPORT_W * axes.x.scale(d.x),
+                SVGLINE_VIEWPORT_H * (1 - axes.y.scale(d.y)),
+              ],
+            showGaps
+          ),
+        })
+      )
   )
 
   const symbols = $.svg({
@@ -188,6 +190,8 @@ export default ({
         })(
           data.map((d) => {
             return (
+              Number.isFinite(d.x) &&
+              Number.isFinite(d.y) &&
               d.shape &&
               $.use({
                 x: utils.percent(axes.x.scale(d.x)),
