@@ -32,6 +32,10 @@ export default (points, alpha = TENSION) => {
     p1 = p2 || points[i + 0]
     p2 = points[i + 1]
 
+    if (!p0 && !p2) {
+      return m
+    }
+
     if (!p0) {
       p0 = [p1[0] - (p2[0] - p1[0]) / 2, p1[1] - (p2[1] - p1[1]) / 2]
     }

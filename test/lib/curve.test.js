@@ -1,11 +1,15 @@
 import curve from "../../src/lib/curve.js"
 
 const points = [
-  [null, 0], // Include bad points to test for removal
-  [0, 0], // Include duplicate points to test for removal
+  // Include empty points to test for removal
+  [null, 0],
+  [0, 0],
+  // Include duplicate points to test for removal
   [0, 0],
   [1, 0],
   [2, 3],
+  [null, 3],
+  // Include point with no adjacent data to test for removal
   [2, 2],
 ]
 
