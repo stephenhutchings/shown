@@ -190,6 +190,8 @@ export default ({
         })(
           data.map((d) => {
             return (
+              Number.isFinite(d.x) &&
+              Number.isFinite(d.y) &&
               d.shape &&
               $.use({
                 x: utils.percent(axes.x.scale(d.x)),
