@@ -134,4 +134,24 @@ describe("setup", () => {
     testTicks(0.41, 0.55, 8)
     testTicks(41, 44, 4)
   })
+
+  test("ignores line as specified", () => {
+    expect(axis("x", setup({ line: (v, i) => i % 2 === 0 }, [0, 1]))).toEqual(
+      expect.stringContaining(`1</text></svg>`)
+    )
+
+    expect(axis("x", setup({ line: false }, [0, 1]))).toEqual(
+      expect.not.stringContaining(`<line`)
+    )
+
+    expect(axis("x", setup({ line: [true, false] }, [0, 1]))).toEqual(
+      expect.stringContaining(`1</text></svg>`)
+    )
+  })
+
+  test("offsets lines when grouped", () => {
+    expect(axis("x", { ...opts, group: true })).toEqual(
+      expect.stringContaining(`x1="25%" x2="25%"`)
+    )
+  })
 })
