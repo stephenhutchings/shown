@@ -62,7 +62,7 @@ const linePath = (points, toPoint, skip) =>
  * @param {AxisOptions} [options.yAxis]
  * Overrides for the y-axis. See {@link AxisOptions} for more details.
  * @param {Boolean} [options.showGaps]
- * Points in the line with non-numeric values are rendered as broken lines
+ * Points in the line with non-finite values are rendered as broken lines
  * where data is unavailable. Set to `false` to ignore missing values instead.
  * @returns {string} Rendered chart
  *
