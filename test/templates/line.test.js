@@ -10,4 +10,10 @@ describe("line", () => {
       expect.stringContaining('<div class="shown"><div class="chart chart-line')
     )
   })
+
+  test("handles empty lines", () => {
+    expect(line({ data: [] })).toEqual(
+      expect.stringContaining('<div class="shown"><div class="chart chart-line')
+    )
+  })
 })
