@@ -175,7 +175,7 @@ export const setup = (axis = {}, data, guessBounds = true) => {
     const d = max - min
     const z = -min / d
 
-    if (!grid.includes(z)) {
+    if (!grid.some((g) => Math.abs(z - g) > Number.EPSILON)) {
       const limit = Math.min(-min, max)
       const count = getTicks(-limit, limit)
       const base = z > 0.5 ? -1 + 2 * z : 0
