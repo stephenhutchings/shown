@@ -226,7 +226,7 @@ export const setup = (axis = {}, data, guessBounds = true) => {
     const val = line
     line = () => val
   } else if (!line) {
-    line = (v, i) => true
+    line = () => true
   }
 
   let grid = Array.from({ length: ticks }, (n, i) => i / (ticks - 1))
