@@ -150,8 +150,6 @@ export default ({
     ])
   })
 
-  const legend = legendTemplate(data)
-
   return wrap(
     $.div({
       class: "chart chart-pie",
@@ -180,7 +178,7 @@ export default ({
           })(segments),
         ])
       ),
-      legend,
+      legendTemplate({ data }),
     ])
   )
 }

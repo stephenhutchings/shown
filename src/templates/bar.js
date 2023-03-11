@@ -258,7 +258,7 @@ export default ({
           bars,
         ])
       ),
-      legendTemplate(data.flat()),
+      legendTemplate({ data: data.flat() }),
     ])
   )
 }

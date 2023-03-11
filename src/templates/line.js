@@ -240,7 +240,7 @@ export default ({
           symbols,
         ])
       ),
-      legendTemplate(data, true),
+      legendTemplate({ data, line: true }),
     ])
   )
 }

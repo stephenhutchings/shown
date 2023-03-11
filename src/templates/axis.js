@@ -93,14 +93,14 @@ const getScale = (min, max) => {
  * @returns {number[]} bounds
  */
 const getBounds = (values) => {
-  if (values.length === 0) return [0, 0]
+  if (values.length === 0) return [0, 1]
 
   let min = utils.toPrecision(Math.min(...values), 9)
   let max = utils.toPrecision(Math.max(...values), 9)
 
   if (min === max) {
     // All values are zero
-    if (max === 0) return [0, 0]
+    if (max === 0) return [0, 1]
     // The bounds should be between zero and max
     else min = 0
   }

@@ -10,12 +10,14 @@ describe("legend", () => {
   })
 
   test("renders with arguments", () => {
-    expect(legend([{ key: 1 }, { key: 2 }])).toEqual(
+    expect(legend({ data: [{ key: 1 }, { key: 2 }] })).toEqual(
       expect.stringContaining(`<ul class="legend"><li>`)
     )
 
     expect(
-      legend([{ color: ["red"], shape: "circle", key: 1 }, { key: 2 }])
+      legend({
+        data: [{ color: ["red"], shape: "circle", key: 1 }, { key: 2 }],
+      })
     ).toEqual(expect.stringContaining(`<ul class="legend"><li>`))
   })
 })
