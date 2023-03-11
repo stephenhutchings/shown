@@ -14,6 +14,14 @@ const TICKCOUNT_ORDER = [5, 4, 6, 7, 8, 9, 3, 10, 11, 12, 13]
 const pad = (t, inset = 0) => inset + (1 - inset * 2) * t
 
 /**
+ * Calculate the magnitude of a number (power of 10)
+ * @private
+ * @param {number} n
+ * @returns {number}
+ */
+const magnitude = (n) => Math.floor(Math.log10(Math.abs(n)))
+
+/**
  * For charts that feature an x- or y-axis, `shown` will automatically try to
  * guess the best way to display the axis based on the chart data. When you
  * need to, use axis options to override the way an axis is displayed. Any
@@ -42,6 +50,42 @@ const pad = (t, inset = 0) => inset + (1 - inset * 2) * t
  */
 
 /**
+ * Calculate the scale to use when calculating bounds or ticks.
+ * @private
+ * @param {number} min
+ * @param {number} max
+ * @returns {number} scale
+ */
+const getScale = (min, max) => {
+  let m = Math.max(magnitude(min), magnitude(max))
+
+  // The magnitude should be no greater than the difference
+  m = Math.min(m, magnitude(max - min))
+
+  // Deal with integers from here
+  let scale = Math.pow(10, m)
+
+  min /= scale
+  max /= scale
+
+  const d = max - min
+
+  // Increase the scale when the difference is too small
+  // For example, min=0 and max=1 should have more than 2 ticks
+  if (d >= 1) {
+    if (d < 1.5) {
+      scale /= 8
+    } else if (d < 2) {
+      scale /= 4
+    } else if (d <= 3) {
+      scale /= 2
+    }
+  }
+
+  return scale
+}
+
+/**
  * Calculate the min and max bounds to contain the values. The precision
  * of the values is used to calculate appropriate containing bounds.
  * @private
@@ -49,41 +93,46 @@ const pad = (t, inset = 0) => inset + (1 - inset * 2) * t
  * @returns {number[]} bounds
  */
 const getBounds = (values) => {
-  let _min = utils.toPrecision(Math.min(...values), 9)
-  let _max = utils.toPrecision(Math.max(...values), 9)
+  if (values.length === 0) return [0, 0]
 
-  if (_min === _max) _min = 0
+  let min = utils.toPrecision(Math.min(...values), 9)
+  let max = utils.toPrecision(Math.max(...values), 9)
 
-  let p = Math.max(
-    Math.floor(Math.log10(Math.abs(_min))),
-    Math.floor(Math.log10(Math.abs(_max)))
-  )
-
-  if (_max !== _min && _min !== 0) {
-    p = Math.min(p, Math.floor(Math.log10(Math.abs(_max - _min))))
+  if (min === max) {
+    // All values are zero
+    if (max === 0) return [0, 0]
+    // The bounds should be between zero and max
+    else min = 0
   }
 
-  const f = Math.pow(10, p)
+  // Unless every number is an integer, assume zero should
+  // appear on either end of the scale
+  if ((min > 0 || max < 0) && !values.every(Number.isInteger)) {
+    if (min > 0) min = 0
+    if (max < 0) max = 0
+  }
 
-  let min = utils.toPrecision(_min, -p)
-  let max = utils.toPrecision(_max, -p)
+  const f = getScale(min, max)
+  min /= f
+  max /= f
 
-  if (max < _max) max += Math.ceil((_max - max) / f) * f
-  if (min > _min) min -= Math.ceil((min - _min) / f) * f
+  let _min = Math.floor(min)
+  let _max = Math.ceil(max)
 
-  const d = utils.toPrecision((max - min) / f, 7)
+  const d = _max - _min
 
   // The distance should be divisible by a low prime number
-  // to produce a sensible number of ticks
+  // to produce a sensible number of ticks. If it isn't, adding
+  // one will ensure it is divisible by two.
   if (d > 1 && d % 2 > 0 && d % 3 > 0 && d % 5 > 0 && d % 7 > 0) {
-    if (Math.abs(_max % f) > Math.abs(_min % f)) {
-      max += Math.abs(max % f)
+    if (Math.abs(_max) % 2 === 1) {
+      _max += 1
     } else {
-      min -= Math.abs(min % f)
+      _min -= 1
     }
   }
 
-  return [utils.toPrecision(min), utils.toPrecision(max)]
+  return [utils.toPrecision(_min * f, 7), utils.toPrecision(_max * f, 7)]
 }
 
 /**
@@ -93,24 +142,36 @@ const getBounds = (values) => {
  * @private
  * @param {number} min
  * @param {number} max
- * @returns {number} ticks
+ * @returns {number} count
  */
 const getTicks = (min, max) => {
-  const d = max - min
-  const l = max.toString().length
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return 0
+  if (min === max) return 0
 
-  const p = Math.max(
-    Math.floor(Math.log10(Math.abs(min))),
-    Math.floor(Math.log10(Math.abs(max)))
+  const f = getScale(min, max)
+
+  // If both values are integers and min is positive,
+  // assume all ticks should occur at integer positions
+  const shouldRound = !(
+    Number.isInteger(max) &&
+    Number.isInteger(min) &&
+    min > 0 &&
+    max - min > 1 &&
+    f < 100
   )
 
+  let _min = shouldRound ? Math.round(min / f) : min
+  let _max = shouldRound ? Math.round(max / f) : max
+
+  const l = _max.toString().length
+  const d = _max - _min
+
   return (
-    TICKCOUNT_ORDER.find(
-      (n) =>
-        utils.toPrecision(max % (d / (n - 1)), p) === 0 &&
-        utils.toPrecision(min % (d / (n - 1)), p) === 0 &&
-        l >= utils.toPrecision(d / (n - 1), 7).toString().length
-    ) || 2
+    TICKCOUNT_ORDER.find((n) => {
+      let mod = d / (n - 1)
+
+      return _max % mod === 0 && _min % mod === 0 && l >= mod.toString().length
+    }) || 2
   )
 }
 

@@ -116,28 +116,33 @@ describe("setup", () => {
       )
     }
 
+    testBounds(0, 12.5, 0, 12.5)
     testBounds(-0.51, 0.69, -0.6, 0.8)
-    testBounds(-0.59, 0.61, -0.7, 0.7)
-    testBounds(-6.9, 5.6, -7, 6)
-    testBounds(-0.41, 0.55, -0.5, 0.7)
+    testBounds(...[-0.51, 0.69, -0.6, 0.8].map((n) => n * 1000000000))
+    testBounds(-0.59, 0.61, -0.6, 0.8)
+    testBounds(...[-0.59, 0.61, -0.6, 0.8].map((n) => n * 1000000000))
+    testBounds(-6.9, 5.6, -8, 6)
+    testBounds(-0.41, 0.55, -0.6, 0.6)
     testBounds(0.55, 0.55, 0, 0.6)
   })
 
   test("will calculate expected tick count", () => {
     const testTicks = (min, max, ticks) => {
-      expect(setup({ min, max })).toEqual(expect.objectContaining({ ticks }))
+      expect(setup({}, [min, max])).toEqual(expect.objectContaining({ ticks }))
     }
 
-    testTicks(-0.59, 0.61, 3)
-    testTicks(-0.51, 0.69, 4)
-    testTicks(-6.9, 5.6, 5)
-    testTicks(0.41, 0.55, 8)
+    testTicks(-0.59, 0.61, 8)
+    testTicks(0.59, -0.61, 8)
+    testTicks(-0.51, 0.69, 8)
+    testTicks(0.51, -0.69, 8)
+    testTicks(-6.9, 5.6, 8)
+    testTicks(0.41, 0.55, 4)
     testTicks(41, 44, 4)
   })
 
   test("ignores line as specified", () => {
-    expect(axis("x", setup({ line: (v, i) => i % 2 === 0 }, [0, 1]))).toEqual(
-      expect.stringContaining(`1</text></svg>`)
+    expect(axis("x", setup({ line: (v, i) => i % 2 === 0 }, [0, 1]))).toMatch(
+      /\d<\/text><\/svg>/
     )
 
     expect(axis("x", setup({ line: false }, [0, 1]))).toEqual(
