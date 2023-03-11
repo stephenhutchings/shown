@@ -8,8 +8,9 @@ import wrap from "./wrap.js"
 
 /**
  * Generate a scatter chart.
+ * @alias module:shown.scatter
  * @param {Object} options - Data and display options for the chart.
- * @param {Array[]} options.data - The data for this chart. Data can
+ * @param {any[]} options.data - The data for this chart. Data can
  * be passed either as an array of `[x, y]` points, or nested arrays
  * for multiple series.
  * @param {string} [options.title] - The title for this chart, set to the

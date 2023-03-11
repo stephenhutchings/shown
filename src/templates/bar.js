@@ -8,8 +8,9 @@ import wrap from "./wrap.js"
 
 /**
  * Generate a bar chart.
+ * @alias module:shown.bar
  * @param {Object} options - Data and display options for the chart.
- * @param {number[]|Array[]} options.data - The data for this chart. Data can
+ * @param {any[]} options.data - The data for this chart. Data can
  * be passed either as a flat array of numbers, or a array of arrays for a
  * stacked bar chart.
  * @param {string} [options.title] - The title for this chart, set to the
@@ -26,7 +27,6 @@ import wrap from "./wrap.js"
  * @param {AxisOptions} [options.yAxis]
  * Overrides for the y-axis. See {@link AxisOptions} for more details.
  * @returns {string} Rendered chart
- *
  *
  * @example
  * shown.bar({

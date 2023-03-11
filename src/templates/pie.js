@@ -37,6 +37,7 @@ const getBounds = (t0, t1) => {
 
 /**
  * Generate a pie chart.
+ * @alias module:shown.pie
  * @param {Object} options - Data and display options for the chart.
  * @param {number[]} options.data - The data for this chart. Values can sum to
  * any number, and percentages will be calculated as needed.
@@ -47,11 +48,11 @@ const getBounds = (t0, t1) => {
  * @param {boolean} [options.sorted] - Whether to sort the values.
  * @param {MapOptions} [options.map]
  * Controls for transforming data. See {@link MapOptions} for more details.
- * @returns {string} Rendered chart
  * @param {number} [options.startAngle] - The initial rotation of the chart.
  * Angle values should fall between zero and one.
  * @param {number} [options.endAngle] - The final rotation of the chart.
  * Angle values should fall between zero and one.
+ * @returns {string} Rendered chart
  *
  * @example
  * shown.pie({ data: [60, 30, 10] });

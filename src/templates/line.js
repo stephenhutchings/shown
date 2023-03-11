@@ -10,9 +10,35 @@ import wrap from "./wrap.js"
 const SVGLINE_VIEWPORT_W = 100
 const SVGLINE_VIEWPORT_H = SVGLINE_VIEWPORT_W
 
-// A line may include points with multiple curve types. This function
-// groups the points by curve type, renders these groups using their
-// respective curve functions, and joins them together into a path.
+/**
+ * @private
+ * @typedef {string[]} Color
+ */
+
+/**
+ * @private
+ * @typedef {Object} Point
+ * @property {number} x
+ * @property {number} y
+ * @property {number} value
+ * @property {boolean} tally
+ * @property {string} curve
+ * @property {string} shape
+ * @property {string} key
+ * @property {Color} color
+ * @property {string} label
+ */
+
+/**
+ * A line may include points with multiple curve types. This function
+ * groups the points by curve type, renders these groups using their
+ * respective curve functions, and joins them together into a path.
+ * @private
+ * @param {number[]} points
+ * @param {function(Point, number): boolean} toPoint
+ * @param {boolean} skip
+ * @returns {number} ticks
+ */
 const linePath = (points, toPoint, skip) =>
   points
     .reduce((m, d, i) => {
@@ -47,8 +73,9 @@ const linePath = (points, toPoint, skip) =>
 
 /**
  * Generate a line chart.
+ * @alias module:shown.line
  * @param {Object} options - Data and display options for the chart.
- * @param {number[]|Array[]} options.data - The data for this chart. Data can
+ * @param {any[]} options.data - The data for this chart. Data can
  * be passed either as a flat array for a single line, or nested arrays
  * for multiple lines.
  * @param {string} [options.title] - The title for this chart, set to the

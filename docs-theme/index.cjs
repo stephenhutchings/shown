@@ -36,7 +36,7 @@ const formatter = (comments, config) => {
     parameters: formatters.parameters,
 
     toUpperCase(s) {
-      return s[0].toUpperCase() + s.slice(1)
+      return s ? s[0].toUpperCase() + s.slice(1) : ""
     },
 
     md(ast, inline) {
@@ -68,6 +68,15 @@ const formatter = (comments, config) => {
 module.exports = function (comments, config) {
   const template = path.join(__dirname, "index.pug")
   const iframe = path.join(__dirname, "iframe.pug")
+
+  comments = comments
+    .filter((item) => item.kind !== "module")
+    .map((item) => ({
+      ...item,
+      name: item.name?.replace("module:shown.", ""),
+      namespace: item.namespace?.replace("module:shown.", ""),
+      alias: item.alias?.replace("module:shown.", ""),
+    }))
 
   hljs.configure(config.hljs || {})
 
