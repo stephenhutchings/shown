@@ -197,7 +197,9 @@ export const setup = (axis = {}, data, guessBounds = true) => {
   // If the axis displays groups, the inset shifts inwards
   if (axis.group) inset = (0.5 + inset) / ticks
 
-  const scale = (v) => pad((v - min) / (max - min), inset)
+  if (max === min) inset = 0.5
+
+  const scale = (v) => (max === min ? 0.5 : pad((v - min) / (max - min), inset))
 
   if (label) {
     width = Math.max(
