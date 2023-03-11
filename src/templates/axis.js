@@ -215,7 +215,12 @@ export const setup = (axis = {}, data, guessBounds = true) => {
     const val = label
     label = () => val
   } else if (showLabel && !label) {
-    label = (v, i) => (ticks < 8 || i % 2 === 0) && utils.toPrecision(v, 7)
+    const length = Math.max(Math.abs(max), Math.abs(min)).toString().length
+
+    label = (v, i) =>
+      (ticks < 8 || i % 2 === 0) &&
+      Math.abs(v).toString().length <= length &&
+      utils.toPrecision(v, 7)
   }
 
   // If the label is an array, wrap in a function
