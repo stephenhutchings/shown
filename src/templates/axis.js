@@ -132,8 +132,8 @@ export const setup = (axis = {}, data, guessBounds = true) => {
     if (guessBounds) {
       ;[_min, _max] = getBounds([min, max, ...data].filter(Number.isFinite))
     } else {
-      _min = Math.min(...data)
-      _max = Math.max(...data)
+      _min = Math.min(...data.filter(Number.isFinite))
+      _max = Math.max(...data.filter(Number.isFinite))
     }
   } else {
     _min = 0
