@@ -12,7 +12,6 @@ const shape = (type, color, includeLine) => {
           x2: "100%",
           y1: "50%",
           y2: "50%",
-          stroke: color,
         }),
       type !== "line" &&
         $.use({
@@ -21,7 +20,6 @@ const shape = (type, color, includeLine) => {
           width: "1em",
           height: "1em",
           href: `#symbol-${type}`,
-          fill: color,
           class: "symbol",
         }),
     ]
@@ -29,18 +27,19 @@ const shape = (type, color, includeLine) => {
     symbol = $.rect({
       width: "100%",
       height: "100%",
-      fill: color,
     })
   }
 
   return $.svg({
     role: "presentation",
     class: "legend-marker",
+    color,
   })(symbol)
 }
 
 /**
  * Generate a chart legend.
+ * @alias module:shown.legend
  * @param {Object} options
  * @param {Object[]} options.data - Mapped data. See {@link MapOptions} for more details.
  * @param {string} options.data[].key - Label for this legend item.

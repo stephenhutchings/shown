@@ -187,6 +187,7 @@ export default ({
         $.svg({
           "class": ["series", "series-" + j],
           "text-anchor": "middle",
+          "color": data[0]?.color[0],
         })(
           data.map((d) => {
             return (
@@ -197,10 +198,10 @@ export default ({
                 x: utils.percent(axes.x.scale(d.x)),
                 y: utils.percent(1 - axes.y.scale(d.y)),
                 href: `#symbol-${d.shape}`,
-                fill: d.color[0],
                 width: "1em",
                 height: "1em",
                 class: "symbol",
+                color: data[0].color[0] !== d.color[0] && d.color[0],
               })
             )
           })
