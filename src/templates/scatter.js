@@ -48,8 +48,8 @@ import wrap from "./wrap.js"
  *     x: (d) => d.x,
  *     y: (d) => d.y,
  *   },
- *   xAxis: { min: 0, line: (v) => v === 0 || v === 50 },
- *   yAxis: { min: 0, line: (v) => v === 0 || v === 50 },
+ *   xAxis: { min: 0, line: (v, i, axis) => v === axis.min || v === axis.max },
+ *   yAxis: { min: 0, line: (v, i, axis) => v === axis.min || v === axis.max },
  * })
  *
  */
@@ -101,6 +101,7 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
               height: `${d.r}em`,
               class: "symbol",
               color: data[0].color[0] !== d.color[0] && d.color[0],
+              attrs: d.attrs,
             })
         )
       )

@@ -229,6 +229,7 @@ export default ({
                 height: "1em",
                 class: "symbol",
                 color: data[0].color[0] !== d.color[0] && d.color[0],
+                attrs: d.attrs,
               })
             )
           })

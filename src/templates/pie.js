@@ -75,7 +75,11 @@ const getBounds = (t0, t1) => {
  *   data: [60, 30, 10],
  *   startAngle: -0.33,
  *   endAngle: 0.33,
- *   map: { width: 0.4, key: ["Item 1", "Item 2", "Item 3"] }
+ *   map: {
+ *     width: 0.4,
+ *     key: ["Item 1", "Item 2", "Item 3"],
+ *     attrs: (d) => ({ "data-value": d })
+ *   }
  * });
  */
 export default ({
@@ -124,6 +128,7 @@ export default ({
     return $.g({
       "class": `segment segment-${i}`,
       "aria-label": `${d.label} (${utils.percent(t)})`,
+      "attrs": d.attrs,
     })([
       $.svg({
         viewBox: "0 0 100 100",

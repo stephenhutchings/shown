@@ -87,6 +87,7 @@ import wrap from "./wrap.js"
  *     series: ["A", "B", "C"],
  *     tally: Math.round,
  *     label: Math.round,
+ *     attrs: (d) => ({ "data-value": d })
  *   },
  *   xAxis: { label: ["I", "II"] }
  * })
@@ -208,7 +209,10 @@ export default ({
                   color: d.color[1],
                 })(d.label)
 
-              return $.svg({ class: ["value", "value-" + i] })([rect, text])
+              return $.svg({ class: ["value", "value-" + i], attrs: d.attrs })([
+                rect,
+                text,
+              ])
             }),
             tally &&
               $.text({

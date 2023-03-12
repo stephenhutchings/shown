@@ -57,6 +57,7 @@ declare module "shown" {
      *     series: ["A", "B", "C"],
      *     tally: Math.round,
      *     label: Math.round,
+     *     attrs: (d) => ({ "data-value": d })
      *   },
      *   xAxis: { label: ["I", "II"] }
      * })
@@ -206,7 +207,11 @@ declare module "shown" {
      *   data: [60, 30, 10],
      *   startAngle: -0.33,
      *   endAngle: 0.33,
-     *   map: { width: 0.4, key: ["Item 1", "Item 2", "Item 3"] }
+     *   map: {
+     *     width: 0.4,
+     *     key: ["Item 1", "Item 2", "Item 3"],
+     *     attrs: (d) => ({ "data-value": d })
+     *   }
      * });
      * @param options - Data and display options for the chart.
      * @param options.data - The data for this chart. Values can sum to
@@ -256,8 +261,8 @@ declare module "shown" {
      *     x: (d) => d.x,
      *     y: (d) => d.y,
      *   },
-     *   xAxis: { min: 0, line: (v) => v === 0 || v === 50 },
-     *   yAxis: { min: 0, line: (v) => v === 0 || v === 50 },
+     *   xAxis: { min: 0, line: (v, i, axis) => v === axis.min || v === axis.max },
+     *   yAxis: { min: 0, line: (v, i, axis) => v === axis.min || v === axis.max },
      * })
      * @param options - Data and display options for the chart.
      * @param options.data - The data for this chart. Data can
@@ -309,12 +314,11 @@ declare module "shown" {
  * The default function returns the value unchanged.
  * @property [x] - Parse the x-axis value from the data. This function is useful if your
  * data structure wraps each value in an object.
- * The default function returns the index of the item, scaled between the `min`
- * and `max` value on the x-axis.
+ * The default function returns the _index_ of the item.
  * **Line and Scatter Chart only**
  * @property [y] - Parse the y-axis value from the data. This function is useful if your
  * data structure wraps each value in an object.
- * The default function returns the value of the item.
+ * The default function returns the _value_ of the item.
  * **Line and Scatter Chart only**
  * @property [r] - Parse the radial size from the data. This function is useful if you want to
  * visualise another dimension in the data. If the radius is not greater
@@ -343,7 +347,9 @@ declare module "shown" {
  * @property [key] - Select the legend key for the supplied data. A legend is only rendered when
  * there is more than one unique key.
  * @property [series] - Select the series key for the supplied data.
- * **Bar Chart only**
+ * @property [attrs] - Set attributes on the DOM element that corresponds to a data point. This
+ * function is useful if you want to override or add arbitrary attributes on the
+ * chart.
  */
 declare type MapOptions = {
     value?: ((...params: any[]) => any) | number[] | number;
@@ -358,6 +364,7 @@ declare type MapOptions = {
     width?: ((...params: any[]) => any) | number[] | number;
     key?: ((...params: any[]) => any) | string[] | string;
     series?: ((...params: any[]) => any) | string[] | string;
+    attrs?: ((...params: any[]) => any) | object[] | any;
 };
 
 /**
