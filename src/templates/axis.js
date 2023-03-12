@@ -35,11 +35,11 @@ const magnitude = (n) => Math.floor(Math.log10(Math.abs(n)))
  * this axis. The default value is a derived number between 2 and 13 that best
  * splits the difference between `min` and `max`.
  * @property {function|array} [label] - A function to map an axis
- * value to a label. The function is passed the current value and index as
+ * value to a label. The function is passed the current value, index and axis as
  * arguments. When supplying an array, the item at the corresponding index will
  * be selected
  * @property {function|array} [line] - A function to toggle an axis
- * line. The function is passed the current value and index as
+ * line. The function is passed the current value, index and axis as
  * arguments. When supplying an array, the item at the corresponding index will
  * be selected
  * @property {number} [inset=0] - The amount to inset the first and last tick
@@ -316,7 +316,7 @@ export default (type, axis) => {
         lines.push($.text({ class: "axis-label", ...txtProps })(label))
     }
 
-    if (axis.line(v, i)) {
+    if (axis.line(v, i, axis)) {
       if (axis.group) {
         if (axis.ticks !== 1) {
           const altOffset = (0.5 - axis.inset) / (axis.ticks - 1)
@@ -372,7 +372,7 @@ export default (type, axis) => {
     const spineProps = { class: "axis-spine", ...lineProps }
 
     // Add an initial line if the first line is inset
-    if (!axis.line(axis.min, 0) || pad(axis.grid[0], axis.inset) > 0) {
+    if (!axis.line(axis.min, 0, axis) || pad(axis.grid[0], axis.inset) > 0) {
       if (type === "x") {
         children.unshift($.line(spineProps))
       } else {
@@ -382,7 +382,7 @@ export default (type, axis) => {
 
     // Add a final line if the last line is inset
     if (
-      !axis.line(axis.max, axis.ticks - 1) ||
+      !axis.line(axis.max, axis.ticks - 1, axis) ||
       pad(axis.grid[axis.grid.length - 1], axis.inset) < 1
     ) {
       if (type === "x") {

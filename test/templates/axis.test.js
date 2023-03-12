@@ -154,6 +154,21 @@ describe("setup", () => {
     )
   })
 
+  test("passes axis to functions", () => {
+    const opts = setup(
+      {
+        custom: true,
+        line: (v, i, axis) => axis.custom === false,
+        label: (v, i, axis) => typeof axis,
+      },
+      [0, 1]
+    )
+
+    expect(axis("x", opts)).toEqual(expect.stringContaining(`object</text>`))
+
+    expect(axis("x", opts)).toEqual(expect.not.stringContaining(`<line`))
+  })
+
   test("offsets lines when grouped", () => {
     expect(axis("x", { ...opts, group: true })).toEqual(
       expect.stringContaining(`x1="25%" x2="25%"`)
