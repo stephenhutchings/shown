@@ -33,7 +33,7 @@ const shape = (type, color, includeLine) => {
   return $.svg({
     role: "presentation",
     class: "legend-marker",
-    color,
+    style: { color },
   })(symbol)
 }
 
