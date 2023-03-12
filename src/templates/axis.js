@@ -79,9 +79,12 @@ const getScale = (min, max) => {
 
   // Increase the scale when the difference is too small
   // For example, min=0 and max=1 should have more than 2 ticks
-  if (d <= 3) {
+  if (d < 2) {
     d *= 10
     scale /= 10
+  } else if (d <= 3) {
+    d *= 5
+    scale /= 5
   }
 
   // Reduce by primes that neatly fit to help ensure tick counts
