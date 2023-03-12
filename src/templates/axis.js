@@ -2,7 +2,11 @@ import $ from "../lib/dom/index.js"
 import utils from "../lib/utils.js"
 
 // The number of ticks to use, in preferential order.
-const TICKCOUNT_ORDER = [5, 4, 6, 7, 8, 9, 3, 10, 11, 12, 13]
+const TICKCOUNT_ORDER = [5, 6, 7, 8, 4, 9, 3, 10, 11, 12, 13]
+const MAX_PRECISION = 7
+
+// Primes under 10 are used to calculate divisions
+const LOW_PRIMES = [7, 5, 3, 2]
 
 /**
  * Calculate the transformed position after including the offset
@@ -12,14 +16,6 @@ const TICKCOUNT_ORDER = [5, 4, 6, 7, 8, 9, 3, 10, 11, 12, 13]
  * @returns {number}
  */
 const pad = (t, inset = 0) => inset + (1 - inset * 2) * t
-
-/**
- * Calculate the magnitude of a number (power of 10)
- * @private
- * @param {number} n
- * @returns {number}
- */
-const magnitude = (n) => Math.floor(Math.log10(Math.abs(n)))
 
 /**
  * For charts that feature an x- or y-axis, `shown` will automatically try to
@@ -57,30 +53,44 @@ const magnitude = (n) => Math.floor(Math.log10(Math.abs(n)))
  * @returns {number} scale
  */
 const getScale = (min, max) => {
-  let m = Math.max(magnitude(min), magnitude(max))
+  let m = Math.max(utils.magnitude(min), utils.magnitude(max))
 
   // The magnitude should be no greater than the difference
-  m = Math.min(m, magnitude(max - min))
+  m = Math.min(m, utils.magnitude(max - min))
 
   // Deal with integers from here
   let scale = Math.pow(10, m)
 
+  // If both values are integers and min is positive,
+  // all ticks should only occur at integer positions
+  if (
+    Number.isInteger(max) &&
+    Number.isInteger(min) &&
+    min > 0 &&
+    scale === 1
+  ) {
+    return 1
+  }
+
   min /= scale
   max /= scale
 
-  const d = max - min
+  let d = max - min
 
   // Increase the scale when the difference is too small
   // For example, min=0 and max=1 should have more than 2 ticks
-  if (d >= 1) {
-    if (d < 1.5) {
-      scale /= 8
-    } else if (d < 2) {
-      scale /= 4
-    } else if (d <= 3) {
-      scale /= 2
-    }
+  if (d <= 3) {
+    d *= 10
+    scale /= 10
   }
+
+  // Reduce by primes that neatly fit to help ensure tick counts
+  // in preferential order are not chosen when others fit better
+  LOW_PRIMES.forEach((p) => {
+    if (min > 0 || max < 0 ? d % p === 0 : min % p === 0 && max % p === 0) {
+      scale /= p
+    }
+  })
 
   return scale
 }
@@ -95,44 +105,40 @@ const getScale = (min, max) => {
 const getBounds = (values) => {
   if (values.length === 0) return [0, 1]
 
-  let min = utils.toPrecision(Math.min(...values), 9)
-  let max = utils.toPrecision(Math.max(...values), 9)
+  let min = utils.toPrecision(Math.min(...values), MAX_PRECISION)
+  let max = utils.toPrecision(Math.max(...values), MAX_PRECISION)
 
   if (min === max) {
     // All values are zero
     if (max === 0) return [0, 1]
+
     // The bounds should be between zero and max
+    if (min < 0) max = 0
     else min = 0
   }
 
-  // Unless every number is an integer, assume zero should
-  // appear on either end of the scale
-  if ((min > 0 || max < 0) && !values.every(Number.isInteger)) {
-    if (min > 0) min = 0
-    if (max < 0) max = 0
-  }
-
   const f = getScale(min, max)
-  min /= f
-  max /= f
 
-  let _min = Math.floor(min)
-  let _max = Math.ceil(max)
+  min = Math.floor(min / f)
+  max = Math.ceil(max / f)
 
-  const d = _max - _min
+  const d = max - min
 
   // The distance should be divisible by a low prime number
   // to produce a sensible number of ticks. If it isn't, adding
   // one will ensure it is divisible by two.
-  if (d > 1 && d % 2 > 0 && d % 3 > 0 && d % 5 > 0 && d % 7 > 0) {
-    if (Math.abs(_max) % 2 === 1) {
-      _max += 1
+  if (d % 2 > 0 && !LOW_PRIMES.some((p) => d % p === 0)) {
+    if (Math.abs(max) % 2 === 1) {
+      max += 1
     } else {
-      _min -= 1
+      min -= 1
     }
   }
 
-  return [utils.toPrecision(_min * f, 7), utils.toPrecision(_max * f, 7)]
+  return [
+    utils.toPrecision(min * f, MAX_PRECISION),
+    utils.toPrecision(max * f, MAX_PRECISION),
+  ]
 }
 
 /**
@@ -150,27 +156,30 @@ const getTicks = (min, max) => {
 
   const f = getScale(min, max)
 
-  // If both values are integers and min is positive,
-  // assume all ticks should occur at integer positions
-  const shouldRound = !(
-    Number.isInteger(max) &&
-    Number.isInteger(min) &&
-    min > 0 &&
-    max - min > 1 &&
-    f < 100
-  )
+  min = utils.toPrecision(min / f, MAX_PRECISION)
+  max = utils.toPrecision(max / f, MAX_PRECISION)
 
-  let _min = shouldRound ? Math.round(min / f) : min
-  let _max = shouldRound ? Math.round(max / f) : max
+  let d = max - min
 
-  const l = _max.toString().length
-  const d = _max - _min
+  if (min >= 0 || max <= 0) {
+    LOW_PRIMES.forEach((p) => {
+      if (d > Math.max(10, 10 * f) && d % p === 0) {
+        d /= p
+      }
+    })
+  }
+
+  const maxDecimals = utils.decimalPlaces(utils.toPrecision(d, MAX_PRECISION))
 
   return (
     TICKCOUNT_ORDER.find((n) => {
-      let mod = d / (n - 1)
+      const mod = utils.toPrecision(d / (n - 1), MAX_PRECISION)
+      const dec = utils.toPrecision(mod, MAX_PRECISION)
 
-      return _max % mod === 0 && _min % mod === 0 && l >= mod.toString().length
+      return (
+        utils.decimalPlaces(dec) <= maxDecimals &&
+        (min > 0 || max < 0 || (min % mod === 0 && max % mod === 0))
+      )
     }) || 2
   )
 }
@@ -191,7 +200,15 @@ export const setup = (axis = {}, data, guessBounds = true) => {
 
   if (data) {
     if (guessBounds) {
-      ;[_min, _max] = getBounds([min, max, ...data].filter(Number.isFinite))
+      const values = [min, max, ...data].filter(Number.isFinite)
+
+      // Unless every number is an integer, assume zero should
+      // appear on either end of the scale
+      if (values.some((n) => !Number.isInteger(n))) {
+        values.push(0)
+      }
+
+      ;[_min, _max] = getBounds(values)
     } else {
       _min = Math.min(...data.filter(Number.isFinite))
       _max = Math.max(...data.filter(Number.isFinite))
@@ -215,12 +232,15 @@ export const setup = (axis = {}, data, guessBounds = true) => {
     const val = label
     label = () => val
   } else if (showLabel && !label) {
+    // Labels will only show if their length is the same or shorter
+    // than the min and max label lengths. If there are many ticks,
+    // only every second tick will be labeled.
     const length = Math.max(Math.abs(max), Math.abs(min)).toString().length
 
     label = (v, i) =>
       (ticks < 8 || i % 2 === 0) &&
       Math.abs(v).toString().length <= length &&
-      utils.toPrecision(v, 7)
+      utils.toPrecision(v, MAX_PRECISION)
   }
 
   // If the label is an array, wrap in a function
@@ -251,7 +271,9 @@ export const setup = (axis = {}, data, guessBounds = true) => {
         return base + ((t * limit) / d) * 2
       })
 
-      while (utils.toPrecision(1 - grid[grid.length - 1], 7) >= grid[1]) {
+      while (
+        utils.toPrecision(1 - grid[grid.length - 1], MAX_PRECISION) >= grid[1]
+      ) {
         grid.push(grid[grid.length - 1] + grid[1])
       }
 
@@ -307,11 +329,14 @@ export default (type, axis) => {
   if (axis.hasSeries && type === "x") txtProps.dy = "3em"
 
   const children = axis.grid.map((t, i) => {
-    const v = utils.toPrecision(axis.min + (axis.max - axis.min) * t, 7)
+    const v = utils.toPrecision(
+      axis.min + (axis.max - axis.min) * t,
+      MAX_PRECISION
+    )
     const lines = []
 
     if (axis.label) {
-      const label = axis.label(v, i)
+      const label = axis.label(v, i, axis)
       if (label || label === 0)
         lines.push($.text({ class: "axis-label", ...txtProps })(label))
     }

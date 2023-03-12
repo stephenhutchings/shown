@@ -44,23 +44,30 @@ const toPrecision = (value, precision = DEFAULT_PRECISION) => {
  * @param {number} value
  * @returns {number} decimals places
  */
-const decimalPlaces = (value) => {
-  const s = (+value).toString()
-  const ie = s.indexOf("e")
-  const id = s.indexOf(".")
+const decimalPlaces = (n, precision = DEFAULT_PRECISION) => {
+  let count = 0
+  n = Math.abs(n)
 
-  // Get exponent in exponential notation eg "1e-6"
-  const e = ie > -1 ? s.slice(ie + 2) * (s[ie + 1] === "-" ? 1 : -1) : 0
+  while (toPrecision(n % 1, precision) > 0 && count < precision) {
+    count++
+    n *= 10
+  }
 
-  // Subtract index of period from length of string, excluding exponent
-  const d = id > -1 ? (ie > -1 ? ie : s.length) - id - 1 : 0
-
-  return Math.max(0, e + d)
+  return count
 }
+
+/**
+ * Calculate the magnitude of a number (power of 10)
+ * @private
+ * @param {number} n
+ * @returns {number}
+ */
+const magnitude = (n) => Math.floor(Math.log10(Math.abs(n)))
 
 export default {
   sum,
   percent,
   toPrecision,
   decimalPlaces,
+  magnitude,
 }

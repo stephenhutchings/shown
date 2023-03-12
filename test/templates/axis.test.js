@@ -116,7 +116,8 @@ describe("setup", () => {
       )
     }
 
-    testBounds(0, 12.5, 0, 12.5)
+    testBounds(0, 11.068351843, 0, 12)
+    testBounds(0, 12.5, 0, 14)
     testBounds(-0.51, 0.69, -0.6, 0.8)
     testBounds(...[-0.51, 0.69, -0.6, 0.8].map((n) => n * 1000000000))
     testBounds(-0.59, 0.61, -0.6, 0.8)
@@ -126,18 +127,28 @@ describe("setup", () => {
     testBounds(0.55, 0.55, 0, 0.6)
   })
 
-  test("will calculate expected tick count", () => {
+  test("will calculate expected tick count from values", () => {
     const testTicks = (min, max, ticks) => {
       expect(setup({}, [min, max])).toEqual(expect.objectContaining({ ticks }))
     }
 
+    testTicks(624, 912, 6)
     testTicks(-0.59, 0.61, 8)
     testTicks(0.59, -0.61, 8)
     testTicks(-0.51, 0.69, 8)
     testTicks(0.51, -0.69, 8)
     testTicks(-6.9, 5.6, 8)
-    testTicks(0.41, 0.55, 4)
+    testTicks(0.41, 0.55, 7)
     testTicks(41, 44, 4)
+  })
+
+  test("will calculate expected tick count from explicit extremes", () => {
+    const testTicks = (min, max, ticks) => {
+      expect(setup({ min, max })).toEqual(expect.objectContaining({ ticks }))
+    }
+
+    testTicks(1821, 2001, 7)
+    testTicks(1901, 2021, 5)
   })
 
   test("ignores line as specified", () => {
