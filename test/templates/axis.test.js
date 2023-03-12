@@ -176,7 +176,6 @@ describe("setup", () => {
     )
 
     expect(axis("x", opts)).toEqual(expect.stringContaining(`object</text>`))
-
     expect(axis("x", opts)).toEqual(expect.not.stringContaining(`<line`))
   })
 
@@ -184,5 +183,20 @@ describe("setup", () => {
     expect(axis("x", { ...opts, group: true })).toEqual(
       expect.stringContaining(`x1="25%" x2="25%"`)
     )
+  })
+
+  test("fails gracefully given bad input", () => {
+    const testBounds = (...values) => {
+      expect(setup({}, values)).toEqual(
+        expect.objectContaining({
+          min: 0,
+          max: 1,
+        })
+      )
+    }
+
+    testBounds(0, null, false, NaN, undefined)
+    testBounds()
+    testBounds(1, 1, 1)
   })
 })
