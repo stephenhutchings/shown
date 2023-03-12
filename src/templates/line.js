@@ -64,9 +64,12 @@ const linePath = (points, toPoint, skip) =>
     .map((l) => {
       let args = []
 
+      // Some curve types allow other parameters to be passed to the curve
+      // function. For example, setting the tension on "monotone" or "bump".
       if (Array.isArray(l.curve)) {
         ;[l.curve, ...args] = l.curve
       }
+
       return curve[l.curve](l.points, ...args)
     })
     .join("")

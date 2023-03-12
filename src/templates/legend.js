@@ -2,6 +2,14 @@ import $ from "../lib/dom/index.js"
 import wrap from "./wrap.js"
 import symbolTemplate from "./symbol.js"
 
+/**
+ * Create a shape marker for a legend item
+ * @private
+ * @param {string} [type]
+ * @param {string} color
+ * @param {boolean} includeLine
+ * @returns
+ */
 const shape = (type, color, includeLine) => {
   let symbol = ""
 
@@ -41,10 +49,7 @@ const shape = (type, color, includeLine) => {
  * Generate a chart legend.
  * @alias module:shown.legend
  * @param {Object} options
- * @param {Object[]} options.data - Mapped data. See {@link MapOptions} for more details.
- * @param {string} options.data[].key - Label for this legend item.
- * @param {string} options.data[].color - Color for this legend item
- * @param {string} options.data[].shape - Shape for this legend item
+ * @param {LegendItem[]} options.data - Mapped data. See {@link LegendItem} for more details.
  * @param {boolean} [options.line] - Include a line with each symbol, for use
  * alongside a line chart.
  * @param {boolean} [options.wrap] - Wrap the template with `<div class="shown"
@@ -109,3 +114,15 @@ export default ({
     return ""
   }
 }
+
+/**
+ * Charts render a {@link #legend|Legend} when needed, passing their internally
+ * mapped data. When supplying data for a standalone legend, each item in should
+ * define these properties.
+ * @typedef {Object} LegendItem
+ * @property {string} shape - Select a shape for the legend item. Supported
+ * shapes include `circle | square | triangle | diamond | cross`.
+ * @property {string} key - Select the legend key for this item. A legend is only rendered when there is more than one unique key.
+ * @property {string|string[]} color - Select a color for this item. When an
+ * array is passed, the first item in the array is used.
+ */

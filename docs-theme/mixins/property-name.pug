@@ -1,7 +1,8 @@
 mixin property-name(property)
-  span.code.bold= property.name
-  = " "
-  code!= format.type(property.type)
+  span.code
+    span.bold= property.name
+    = " "
+    != format.type(property.type)
 
-  if property.default
-    |  (default <code>#{property.default}</code>)
+    if property.default
+      |  (default <code>#{property.default}</code>)

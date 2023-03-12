@@ -58,7 +58,10 @@ mixin section(section, nested)
         each param in section.params
           div
             +property-name(param)
-            p.m0!= format.md(param.description, true)
+
+            if param.description
+              p.m0
+                != format.md(param.description, true)
 
           if param.properties
             +property-table(param.properties)

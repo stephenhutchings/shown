@@ -96,10 +96,7 @@ declare module "shown" {
      *   line: true,
      *   wrap: true,
      * });
-     * @param options.data - Mapped data. See {@link MapOptions} for more details.
-     * @param options.data[].key - Label for this legend item.
-     * @param options.data[].color - Color for this legend item
-     * @param options.data[].shape - Shape for this legend item
+     * @param options.data - Mapped data. See {@link LegendItem} for more details.
      * @param [options.line] - Include a line with each symbol, for use
      * alongside a line chart.
      * @param [options.wrap] - Wrap the template with `<div class="shown"
@@ -111,11 +108,7 @@ declare module "shown" {
      * @returns Rendered legend
      */
     function legend(options: {
-        data: {
-            key: string;
-            color: string;
-            shape: string;
-        }[];
+        data: LegendItem[];
         line?: boolean;
         wrap?: boolean;
         defs?: boolean;
@@ -344,7 +337,7 @@ declare module "shown" {
  * The default function returns evenly distributed colors from the default
  * palette. Return an array of two colors to change the color of the label.
  * @property [shape] - Select a shape for the supplied data.
- * Supported shapes include `circle | square | triangle | cross`.
+ * Supported shapes include `circle | square | triangle | diamond | cross`.
  * @property [curve] - Select a curve for the current line. Lines can include multiple curve types.
  * Supported curves include `linear | stepX | stepY | stepXMid | stepYMid |
  * monotone | bump`.
@@ -406,5 +399,21 @@ declare type AxisOptions = {
     line?: ((...params: any[]) => any) | any[];
     inset?: number;
     spine?: boolean;
+};
+
+/**
+ * Charts render a {@link #legend|Legend} when needed, passing their internally
+ * mapped data. When supplying data for a standalone legend, each item in should
+ * define these properties.
+ * @property shape - Select a shape for the legend item. Supported
+ * shapes include `circle | square | triangle | diamond | cross`.
+ * @property key - Select the legend key for this item. A legend is only rendered when there is more than one unique key.
+ * @property color - Select a color for this item. When an
+ * array is passed, the first item in the array is used.
+ */
+declare type LegendItem = {
+    shape: string;
+    key: string;
+    color: string | string[];
 };
 
