@@ -76,7 +76,7 @@ declare module "shown" {
      * @returns Rendered chart
      */
     function bar(options: {
-        data: number[] | any[][];
+        data: any[];
         title?: string;
         description?: string;
         map?: MapOptions;
@@ -273,7 +273,7 @@ declare module "shown" {
      * @returns Rendered chart
      */
     function scatter(options: {
-        data: any[][];
+        data: any[];
         title?: string;
         description?: string;
         map?: MapOptions;
@@ -373,11 +373,11 @@ declare type MapOptions = {
  * this axis. The default value is a derived number between 2 and 13 that best
  * splits the difference between `min` and `max`.
  * @property [label] - A function to map an axis
- * value to a label. The function is passed the current value and index as
+ * value to a label. The function is passed the current value, index and axis as
  * arguments. When supplying an array, the item at the corresponding index will
  * be selected
  * @property [line] - A function to toggle an axis
- * line. The function is passed the current value and index as
+ * line. The function is passed the current value, index and axis as
  * arguments. When supplying an array, the item at the corresponding index will
  * be selected
  * @property [inset = 0] - The amount to inset the first and last tick
