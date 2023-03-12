@@ -19,5 +19,12 @@ describe("legend", () => {
         data: [{ color: ["red"], shape: "circle", key: 1 }, { key: 2 }],
       })
     ).toEqual(expect.stringContaining(`<ul class="legend"><li>`))
+
+    expect(
+      legend({
+        data: [{ color: ["red"], shape: "circle", key: 1 }, { key: 2 }],
+        wrap: true,
+      })
+    ).toEqual(expect.stringContaining(`class="shown"`))
   })
 })
