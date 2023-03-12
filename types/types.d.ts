@@ -255,11 +255,16 @@ declare module "shown" {
      *   data: [
      *     {x: 11, y: 14}, {x: 32, y: 23}, {x: 25, y: 34}, {x: 45, y: 43},
      *     {x: 31, y: 24}, {x: 31, y: 28}, {x: 29, y: 19}, {x: 40, y: 33},
-     *     {x: 21, y: 34}, {x: 21, y: 38}, {x: 39, y: 29}, {x: 30, y: 33}
+     *     {x: 21, y: 34}, {x: 21, y: 38}, {x: 39, y: 29}, {x: 30, y: 33},
+     *     {x: 25, y: 25, special: true}
      *   ],
      *   map: {
      *     x: (d) => d.x,
      *     y: (d) => d.y,
+     *     shape: d => d.special ? "cross" : "circle",
+     *     attrs: (d) => d.special && {
+     *       style: { color: "#fe772b" }
+     *     }
      *   },
      *   xAxis: { min: 0, line: (v, i, axis) => v === axis.min || v === axis.max },
      *   yAxis: { min: 0, line: (v, i, axis) => v === axis.min || v === axis.max },
@@ -339,7 +344,7 @@ declare module "shown" {
  * The default function returns evenly distributed colors from the default
  * palette. Return an array of two colors to change the color of the label.
  * @property [shape] - Select a shape for the supplied data.
- * Supported shapes include `circle | square | triangle`.
+ * Supported shapes include `circle | square | triangle | cross`.
  * @property [curve] - Select a curve for the current line. Lines can include multiple curve types.
  * Supported curves include `linear | stepX | stepY | stepXMid | stepYMid |
  * monotone | bump`.

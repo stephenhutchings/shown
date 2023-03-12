@@ -16,6 +16,7 @@ describe("symbol", () => {
         { key: 1, shape: "triangle" },
         { key: 1, shape: "diamond" },
         { key: 1, shape: "circle" },
+        { key: 1, shape: "cross" },
       ])[0]
     ).toEqual(expect.stringContaining(`square`))
   })
