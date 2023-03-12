@@ -259,32 +259,6 @@ export const setup = (axis = {}, data, guessBounds = true) => {
 
   let grid = Array.from({ length: ticks }, (n, i) => i / (ticks - 1))
 
-  // If we cross zero, ensure zero is on the axis
-  if (min < 0 && max > 0 && !axis.ticks) {
-    const d = max - min
-    const z = -min / d
-
-    if (!grid.some((n) => Math.abs(z - n) > Number.EPSILON)) {
-      const limit = Math.min(-min, max)
-      const count = getTicks(-limit, limit)
-      const base = z > 0.5 ? -1 + 2 * z : 0
-
-      grid = Array.from({ length: count }, (n, i) => {
-        const t = i / (count - 1)
-        return base + ((t * limit) / d) * 2
-      })
-
-      while (
-        utils.toPrecision(1 - grid[grid.length - 1], MAX_PRECISION) >= grid[1]
-      ) {
-        grid.push(grid[grid.length - 1] + grid[1])
-      }
-
-      ticks = grid.length
-      spine = spine ?? true
-    }
-  }
-
   // If the axis displays groups, the inset shifts inwards
   if (axis.group) inset = (0.5 + inset) / ticks
 
