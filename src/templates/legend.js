@@ -8,7 +8,7 @@ import symbolTemplate from "./symbol.js"
  * @param {string} [type]
  * @param {string} color
  * @param {boolean} includeLine
- * @returns
+ * @returns {Function}
  */
 const shape = (type, color, includeLine) => {
   let symbol = ""
