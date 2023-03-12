@@ -45,10 +45,38 @@ header h1::before {
   height: 4em;
 }
 
-#toc > div {
-  background-color: white;
-  background-clip: padding-box;
-  border-bottom: 1px solid #001d683b;
+#toc::before {
+  content: "";
+  position: absolute;
+  inset: 100% 1rem -1px;
+  background-color: #001d683b;
+  height: 1px;
+}
+
+#toc:after {
+  content: "";
+  position: absolute;
+  inset: 1rem 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    white,
+    #fff0 1rem,
+    #fff0 calc(100% - 1rem),
+    white
+  );
+}
+
+#toc .scroll {
+  overflow: auto;
+}
+
+#toc ul {
+  width: fit-content;
+}
+
+#toc li + li {
+  margin-inline-start: 1rem;
 }
 
 .documentation {
