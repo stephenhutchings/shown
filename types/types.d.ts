@@ -403,7 +403,7 @@ declare type AxisOptions = {
 
 /**
  * Charts render a {@link #legend|Legend} when needed, passing their internally
- * mapped data. When supplying data for a standalone legend, each item in should
+ * mapped data. When supplying data for a standalone legend, each item should
  * define these properties.
  * @property shape - Select a shape for the legend item. Supported
  * shapes include `circle | square | triangle | diamond | cross`.
