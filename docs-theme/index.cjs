@@ -69,6 +69,8 @@ module.exports = function (comments, config) {
   const template = path.join(__dirname, "index.pug")
   const iframe = path.join(__dirname, "iframe.pug")
 
+  const cachebust = Date.now().toString(32)
+
   comments = comments
     .filter((item) => item.kind !== "module")
     .map((item) => ({
@@ -89,7 +91,10 @@ module.exports = function (comments, config) {
       examples.forEach((el, i) => {
         const body = new Function("shown", "return " + el.description)(shown)
         el.path = `examples/${i + 1}/index.html`
-        el.contents = Buffer.from(pug.renderFile(iframe, { body }), "utf8")
+        el.contents = Buffer.from(
+          pug.renderFile(iframe, { body, cachebust }),
+          "utf8"
+        )
         el.result = body
       })
 
@@ -111,6 +116,7 @@ module.exports = function (comments, config) {
                   contents: Buffer.from(
                     pug.renderFile(template, {
                       docs: comments,
+                      cachebust,
                       links,
                       config,
                       format,
