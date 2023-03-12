@@ -18,7 +18,7 @@ header h1 {
 }
 
 header h1 code {
-  color: white;
+  color: #fff;
 }
 
 header a {
@@ -43,6 +43,7 @@ header h1::before {
   top: 0;
   z-index: 1;
   height: 4em;
+  background: #fff;
 }
 
 #toc::before {
@@ -60,10 +61,10 @@ header h1::before {
   pointer-events: none;
   background: linear-gradient(
     to right,
-    white,
+    #fff,
     #fff0 1rem,
     #fff0 calc(100% - 1rem),
-    white
+    #fff
   );
 }
 
