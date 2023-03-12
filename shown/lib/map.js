@@ -15,7 +15,7 @@ import utils from "./utils.js"
  * used for all items in the data.
  *
  * For example, both of these declarations will return `"black"` for the first
- * item in the data and `"white"` for the second option.
+ * item in the data and `"white"` for the second item.
  *
  * ```javascript
  * {
@@ -25,58 +25,60 @@ import utils from "./utils.js"
  * ```
  *
  * @typedef {Object} MapOptions
- * @property {Function|Array|Number} [value]
+ * @property {Function|number[]|number} [value]
  * Parse the raw value from the supplied data. This function is useful if your
  * data structure wraps each value in an object.
  * The default function returns the value unchanged.
- * @property {Function|Array|Number} [x]
+ * @property {Function|number[]|number} [x]
  * Parse the x-axis value from the data. This function is useful if your
  * data structure wraps each value in an object.
- * The default function returns the index of the item, scaled between the `min`
- * and `max` value on the x-axis.
+ * The default function returns the _index_ of the item.
  * **Line and Scatter Chart only**
- * @property {Function|Array|Number} [y]
+ * @property {Function|number[]|number} [y]
  * Parse the y-axis value from the data. This function is useful if your
  * data structure wraps each value in an object.
- * The default function returns the value of the item.
+ * The default function returns the _value_ of the item.
  * **Line and Scatter Chart only**
- * @property {Function|Array|Number} [r]
+ * @property {Function|number[]|number} [r]
  * Parse the radial size from the data. This function is useful if you want to
  * visualise another dimension in the data. If the radius is not greater
  * than zero, the item isn't be rendered.
  * The default function returns a radial size of 1.
  * **Scatter Chart only**
- * @property {Function|Array|String} [label]
+ * @property {Function|string[]|string} [label]
  * Convert the data into a formatted string.
  * The default function returns the value fixed to the same number of decimals
  * as the most precise value in the dataset. Return `false` to prevent this
  * label from being rendered.
- * @property {Function|Array|String} [tally]
+ * @property {Function|string[]|string} [tally]
  * Add an additional label summing the total values into a formatted string.
  * If true, the default function returns the value fixed to the same number of
  * decimals as the most precise value in the dataset. Return `false` to prevent
  * the tally from being rendered. When only a single series is present, the bar
  * chart defaults to using a tally rather than a label.
  * **Bar Chart only**
- * @property {Function|Array|String} [color]
+ * @property {Function|string[]|string} [color]
  * Select a color for the supplied data.
  * The default function returns evenly distributed colors from the default
  * palette. Return an array of two colors to change the color of the label.
- * @property {Function|Array|String} [shape]
+ * @property {Function|string[]|string} [shape]
  * Select a shape for the supplied data.
- * Supported shapes include `circle | square | triangle`.
- * @property {Function|Array|String} [curve]
+ * Supported shapes include `circle | square | triangle | diamond | cross`.
+ * @property {Function|string[]|string} [curve]
  * Select a curve for the current line. Lines can include multiple curve types.
  * Supported curves include `linear | stepX | stepY | stepXMid | stepYMid |
  * monotone | bump`.
- * @property {Function|Array|Number} [width]
+ * @property {Function|number[]|number} [width]
  * Change the size of the object. Return values should fall between 0 and 1.
- * @property {Function|Array|String} [key]
+ * @property {Function|string[]|string} [key]
  * Select the legend key for the supplied data. A legend is only rendered when
  * there is more than one unique key.
- * @property {Function|Array|String} [series]
+ * @property {Function|string[]|string} [series]
  * Select the series key for the supplied data.
- * **Bar Chart only**
+ * @property {Function|Object[]|Object} [attrs]
+ * Set attributes on the DOM element that corresponds to a data point. This
+ * function is useful if you want to override or add arbitrary attributes on the
+ * chart.
  */
 
 const defaults = {
@@ -97,6 +99,16 @@ const recur = (map, data, depth, indices = []) => {
   }
 }
 
+/**
+ * @private
+ * @param {MapOptions} options
+ * @param {any[]} data
+ * @param {Object} [overrides]
+ * @param {number} [overrides.minValue]
+ * @param {boolean} [overrides.sum]
+ * @param {number} [overrides.maxDepth]
+ * @returns {Function} converter
+ */
 const Map = function (
   options,
   data = [],

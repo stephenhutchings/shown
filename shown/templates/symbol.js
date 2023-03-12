@@ -30,6 +30,15 @@ const symbol = (type) => {
     })
   }
 
+  if (type === "cross") {
+    symbol = $.path({
+      "d": "M-60,0H60M0,-60V60",
+      "fill": "none",
+      "stroke": "currentColor",
+      "stroke-width": 2,
+    })
+  }
+
   return $.symbol({
     class: "symbol",
     id: `symbol-${type}`,

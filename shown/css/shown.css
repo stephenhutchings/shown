@@ -116,6 +116,15 @@
   margin-right: 0.5em;
 }
 
+.shown .legend-marker line {
+  stroke: currentColor;
+  fill: none;
+}
+
 .shown .symbol {
   font-size: 10px;
+}
+
+.shown .symbol * {
+  vector-effect: non-scaling-stroke;
 }

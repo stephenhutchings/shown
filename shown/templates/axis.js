@@ -2,7 +2,11 @@ import $ from "../lib/dom/index.js"
 import utils from "../lib/utils.js"
 
 // The number of ticks to use, in preferential order.
-const TICKCOUNT_ORDER = [5, 4, 6, 7, 8, 9, 3, 10, 11, 12, 13]
+const TICKCOUNT_ORDER = [5, 6, 7, 8, 4, 9, 3, 10, 11, 12, 13]
+const MAX_PRECISION = 7
+
+// Primes under 10 are used to calculate divisions
+const LOW_PRIMES = [7, 5, 3, 2]
 
 /**
  * Calculate the transformed position after including the offset
@@ -27,11 +31,11 @@ const pad = (t, inset = 0) => inset + (1 - inset * 2) * t
  * this axis. The default value is a derived number between 2 and 13 that best
  * splits the difference between `min` and `max`.
  * @property {function|array} [label] - A function to map an axis
- * value to a label. The function is passed the current value and index as
+ * value to a label. The function is passed the current value, index and axis as
  * arguments. When supplying an array, the item at the corresponding index will
  * be selected
  * @property {function|array} [line] - A function to toggle an axis
- * line. The function is passed the current value and index as
+ * line. The function is passed the current value, index and axis as
  * arguments. When supplying an array, the item at the corresponding index will
  * be selected
  * @property {number} [inset=0] - The amount to inset the first and last tick
@@ -42,6 +46,59 @@ const pad = (t, inset = 0) => inset + (1 - inset * 2) * t
  */
 
 /**
+ * Calculate the scale to use when calculating bounds or ticks.
+ * @private
+ * @param {number} min
+ * @param {number} max
+ * @returns {number} scale
+ */
+const getScale = (min, max) => {
+  let m = Math.max(utils.magnitude(min), utils.magnitude(max))
+
+  // The magnitude should be no greater than the difference
+  m = Math.min(m, utils.magnitude(max - min))
+
+  // Deal with integers from here
+  let scale = Math.pow(10, m)
+
+  // If both values are integers and min is positive,
+  // all ticks should only occur at integer positions
+  if (
+    Number.isInteger(max) &&
+    Number.isInteger(min) &&
+    min > 0 &&
+    scale === 1
+  ) {
+    return 1
+  }
+
+  min /= scale
+  max /= scale
+
+  let d = max - min
+
+  // Increase the scale when the difference is too small
+  // For example, min=0 and max=1 should have more than 2 ticks
+  if (d < 2) {
+    d *= 10
+    scale /= 10
+  } else if (d <= 3) {
+    d *= 5
+    scale /= 5
+  }
+
+  // Reduce by primes that neatly fit to help ensure tick counts
+  // in preferential order are not chosen when others fit better
+  LOW_PRIMES.forEach((p) => {
+    if (min > 0 || max < 0 ? d % p === 0 : min % p === 0 && max % p === 0) {
+      scale /= p
+    }
+  })
+
+  return scale
+}
+
+/**
  * Calculate the min and max bounds to contain the values. The precision
  * of the values is used to calculate appropriate containing bounds.
  * @private
@@ -49,41 +106,42 @@ const pad = (t, inset = 0) => inset + (1 - inset * 2) * t
  * @returns {number[]} bounds
  */
 const getBounds = (values) => {
-  let _min = utils.toPrecision(Math.min(...values), 9)
-  let _max = utils.toPrecision(Math.max(...values), 9)
+  if (values.length === 0) return [0, 1]
 
-  if (_min === _max) _min = 0
+  let min = utils.toPrecision(Math.min(...values), MAX_PRECISION)
+  let max = utils.toPrecision(Math.max(...values), MAX_PRECISION)
 
-  let p = Math.max(
-    Math.floor(Math.log10(Math.abs(_min))),
-    Math.floor(Math.log10(Math.abs(_max)))
-  )
+  if (min === max) {
+    // All values are zero
+    if (max === 0) return [0, 1]
 
-  if (_max !== _min && _min !== 0) {
-    p = Math.min(p, Math.floor(Math.log10(Math.abs(_max - _min))))
+    // The bounds should be between zero and max
+    if (min < 0) max = 0
+    else min = 0
   }
 
-  const f = Math.pow(10, p)
+  const f = getScale(min, max)
 
-  let min = utils.toPrecision(_min, -p)
-  let max = utils.toPrecision(_max, -p)
+  min = Math.floor(min / f)
+  max = Math.ceil(max / f)
 
-  if (max < _max) max += Math.ceil((_max - max) / f) * f
-  if (min > _min) min -= Math.ceil((min - _min) / f) * f
-
-  const d = utils.toPrecision((max - min) / f, 7)
+  const d = max - min
 
   // The distance should be divisible by a low prime number
-  // to produce a sensible number of ticks
-  if (d > 1 && d % 2 > 0 && d % 3 > 0 && d % 5 > 0 && d % 7 > 0) {
-    if (Math.abs(_max % f) > Math.abs(_min % f)) {
-      max += Math.abs(max % f)
+  // to produce a sensible number of ticks. If it isn't, adding
+  // one will ensure it is divisible by two.
+  if (d % 2 > 0 && !LOW_PRIMES.some((p) => d % p === 0)) {
+    if (Math.abs(max) % 2 === 1) {
+      max += 1
     } else {
-      min -= Math.abs(min % f)
+      min -= 1
     }
   }
 
-  return [utils.toPrecision(min), utils.toPrecision(max)]
+  return [
+    utils.toPrecision(min * f, MAX_PRECISION),
+    utils.toPrecision(max * f, MAX_PRECISION),
+  ]
 }
 
 /**
@@ -93,24 +151,39 @@ const getBounds = (values) => {
  * @private
  * @param {number} min
  * @param {number} max
- * @returns {number} ticks
+ * @returns {number} count
  */
 const getTicks = (min, max) => {
-  const d = max - min
-  const l = max.toString().length
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return 0
+  if (min === max) return 0
 
-  const p = Math.max(
-    Math.floor(Math.log10(Math.abs(min))),
-    Math.floor(Math.log10(Math.abs(max)))
-  )
+  const f = getScale(min, max)
+
+  min = utils.toPrecision(min / f, MAX_PRECISION)
+  max = utils.toPrecision(max / f, MAX_PRECISION)
+
+  let d = max - min
+
+  if (min >= 0 || max <= 0) {
+    LOW_PRIMES.forEach((p) => {
+      if (d > Math.max(10, 10 * f) && d % p === 0) {
+        d /= p
+      }
+    })
+  }
+
+  const maxDecimals = utils.decimalPlaces(utils.toPrecision(d, MAX_PRECISION))
 
   return (
-    TICKCOUNT_ORDER.find(
-      (n) =>
-        utils.toPrecision(max % (d / (n - 1)), p) === 0 &&
-        utils.toPrecision(min % (d / (n - 1)), p) === 0 &&
-        l >= utils.toPrecision(d / (n - 1), 7).toString().length
-    ) || 2
+    TICKCOUNT_ORDER.find((n) => {
+      const mod = utils.toPrecision(d / (n - 1), MAX_PRECISION)
+      const dec = utils.toPrecision(mod, MAX_PRECISION)
+
+      return (
+        utils.decimalPlaces(dec) <= maxDecimals &&
+        (min > 0 || max < 0 || (min % mod === 0 && max % mod === 0))
+      )
+    }) || 2
   )
 }
 
@@ -130,10 +203,18 @@ export const setup = (axis = {}, data, guessBounds = true) => {
 
   if (data) {
     if (guessBounds) {
-      ;[_min, _max] = getBounds([min, max, ...data].filter(Number.isFinite))
+      const values = [min, max, ...data].filter(Number.isFinite)
+
+      // Unless every number is an integer, assume zero should
+      // appear on either end of the scale
+      if (values.some((n) => !Number.isInteger(n))) {
+        values.push(0)
+      }
+
+      ;[_min, _max] = getBounds(values)
     } else {
-      _min = Math.min(...data)
-      _max = Math.max(...data)
+      _min = Math.min(...data.filter(Number.isFinite))
+      _max = Math.max(...data.filter(Number.isFinite))
     }
   } else {
     _min = 0
@@ -154,7 +235,15 @@ export const setup = (axis = {}, data, guessBounds = true) => {
     const val = label
     label = () => val
   } else if (showLabel && !label) {
-    label = (v, i) => (ticks < 8 || i % 2 === 0) && utils.toPrecision(v, 7)
+    // Labels will only show if their length is the same or shorter
+    // than the min and max label lengths. If there are many ticks,
+    // only every second tick will be labeled.
+    const length = Math.max(Math.abs(max), Math.abs(min)).toString().length
+
+    label = (v, i) =>
+      (ticks < 8 || i % 2 === 0) &&
+      Math.abs(v).toString().length <= length &&
+      utils.toPrecision(v, MAX_PRECISION)
   }
 
   // If the label is an array, wrap in a function
@@ -165,39 +254,17 @@ export const setup = (axis = {}, data, guessBounds = true) => {
     const val = line
     line = () => val
   } else if (!line) {
-    line = (v, i) => true
+    line = () => true
   }
 
   let grid = Array.from({ length: ticks }, (n, i) => i / (ticks - 1))
 
-  // If we cross zero, ensure zero is on the axis
-  if (min < 0 && max > 0 && !axis.ticks) {
-    const d = max - min
-    const z = -min / d
-
-    if (!grid.includes(z)) {
-      const limit = Math.min(-min, max)
-      const count = getTicks(-limit, limit)
-      const base = z > 0.5 ? -1 + 2 * z : 0
-
-      grid = Array.from({ length: count }, (n, i) => {
-        const t = i / (count - 1)
-        return base + ((t * limit) / d) * 2
-      })
-
-      while (utils.toPrecision(1 - grid[grid.length - 1], 7) >= grid[1]) {
-        grid.push(grid[grid.length - 1] + grid[1])
-      }
-
-      ticks = grid.length
-      spine = spine ?? true
-    }
-  }
-
   // If the axis displays groups, the inset shifts inwards
   if (axis.group) inset = (0.5 + inset) / ticks
 
-  const scale = (v) => pad((v - min) / (max - min), inset)
+  if (max === min) inset = 0.5
+
+  const scale = (v) => (max === min ? 0.5 : pad((v - min) / (max - min), inset))
 
   if (label) {
     width = Math.max(
@@ -239,16 +306,19 @@ export default (type, axis) => {
   if (axis.hasSeries && type === "x") txtProps.dy = "3em"
 
   const children = axis.grid.map((t, i) => {
-    const v = utils.toPrecision(axis.min + (axis.max - axis.min) * t, 7)
+    const v = utils.toPrecision(
+      axis.min + (axis.max - axis.min) * t,
+      MAX_PRECISION
+    )
     const lines = []
 
     if (axis.label) {
-      const label = axis.label(v, i)
+      const label = axis.label(v, i, axis)
       if (label || label === 0)
         lines.push($.text({ class: "axis-label", ...txtProps })(label))
     }
 
-    if (axis.line(v, i)) {
+    if (axis.line(v, i, axis)) {
       if (axis.group) {
         if (axis.ticks !== 1) {
           const altOffset = (0.5 - axis.inset) / (axis.ticks - 1)
@@ -304,7 +374,7 @@ export default (type, axis) => {
     const spineProps = { class: "axis-spine", ...lineProps }
 
     // Add an initial line if the first line is inset
-    if (!axis.line(axis.min, 0) || pad(axis.grid[0], axis.inset) > 0) {
+    if (!axis.line(axis.min, 0, axis) || pad(axis.grid[0], axis.inset) > 0) {
       if (type === "x") {
         children.unshift($.line(spineProps))
       } else {
@@ -314,7 +384,7 @@ export default (type, axis) => {
 
     // Add a final line if the last line is inset
     if (
-      !axis.line(axis.max, axis.ticks - 1) ||
+      !axis.line(axis.max, axis.ticks - 1, axis) ||
       pad(axis.grid[axis.grid.length - 1], axis.inset) < 1
     ) {
       if (type === "x") {

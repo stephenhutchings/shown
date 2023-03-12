@@ -10,9 +10,35 @@ import wrap from "./wrap.js"
 const SVGLINE_VIEWPORT_W = 100
 const SVGLINE_VIEWPORT_H = SVGLINE_VIEWPORT_W
 
-// A line may include points with multiple curve types. This function
-// groups the points by curve type, renders these groups using their
-// respective curve functions, and joins them together into a path.
+/**
+ * @private
+ * @typedef {string[]} Color
+ */
+
+/**
+ * @private
+ * @typedef {Object} Point
+ * @property {number} x
+ * @property {number} y
+ * @property {number} value
+ * @property {boolean} tally
+ * @property {string} curve
+ * @property {string} shape
+ * @property {string} key
+ * @property {Color} color
+ * @property {string} label
+ */
+
+/**
+ * A line may include points with multiple curve types. This function
+ * groups the points by curve type, renders these groups using their
+ * respective curve functions, and joins them together into a path.
+ * @private
+ * @param {number[]} points
+ * @param {function(Point, number): boolean} toPoint
+ * @param {boolean} skip
+ * @returns {number} ticks
+ */
 const linePath = (points, toPoint, skip) =>
   points
     .reduce((m, d, i) => {
@@ -38,17 +64,21 @@ const linePath = (points, toPoint, skip) =>
     .map((l) => {
       let args = []
 
+      // Some curve types allow other parameters to be passed to the curve
+      // function. For example, setting the tension on "monotone" or "bump".
       if (Array.isArray(l.curve)) {
         ;[l.curve, ...args] = l.curve
       }
+
       return curve[l.curve](l.points, ...args)
     })
     .join("")
 
 /**
  * Generate a line chart.
+ * @alias module:shown.line
  * @param {Object} options - Data and display options for the chart.
- * @param {number[]|Array[]} options.data - The data for this chart. Data can
+ * @param {any[]} options.data - The data for this chart. Data can
  * be passed either as a flat array for a single line, or nested arrays
  * for multiple lines.
  * @param {string} [options.title] - The title for this chart, set to the
@@ -96,9 +126,9 @@ const linePath = (points, toPoint, skip) =>
  * shown.line({
  *   title: "Multiple lines, curves and shapes",
  *   data: [
- *      [52.86, 10.65, 14.54, 10.09, 41.86],
+ *      [52.86, 20.65, 14.54, 10.09, 41.86],
  *      [21.97, 31.71, 56.94, 17.85, 23.53],
- *      [ 6.73, 20.84, 37.62, 45.79, 53.32],
+ *      [ 6.73, 10.84, 37.62, 45.79, 53.32],
  *      [38.44, 50.79, 22.31, 31.82,  7.64],
  *   ],
  *   map: {
@@ -187,6 +217,7 @@ export default ({
         $.svg({
           "class": ["series", "series-" + j],
           "text-anchor": "middle",
+          "color": data[0]?.color[0],
         })(
           data.map((d) => {
             return (
@@ -197,10 +228,11 @@ export default ({
                 x: utils.percent(axes.x.scale(d.x)),
                 y: utils.percent(1 - axes.y.scale(d.y)),
                 href: `#symbol-${d.shape}`,
-                fill: d.color[0],
                 width: "1em",
                 height: "1em",
                 class: "symbol",
+                color: data[0].color[0] !== d.color[0] && d.color[0],
+                attrs: d.attrs,
               })
             )
           })
@@ -240,7 +272,7 @@ export default ({
           symbols,
         ])
       ),
-      legendTemplate(data, true),
+      legendTemplate({ data, line: true }),
     ])
   )
 }

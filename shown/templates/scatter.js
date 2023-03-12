@@ -8,8 +8,9 @@ import wrap from "./wrap.js"
 
 /**
  * Generate a scatter chart.
+ * @alias module:shown.scatter
  * @param {Object} options - Data and display options for the chart.
- * @param {Array[]} options.data - The data for this chart. Data can
+ * @param {any[]} options.data - The data for this chart. Data can
  * be passed either as an array of `[x, y]` points, or nested arrays
  * for multiple series.
  * @param {string} [options.title] - The title for this chart, set to the
@@ -41,14 +42,19 @@ import wrap from "./wrap.js"
  *   data: [
  *     {x: 11, y: 14}, {x: 32, y: 23}, {x: 25, y: 34}, {x: 45, y: 43},
  *     {x: 31, y: 24}, {x: 31, y: 28}, {x: 29, y: 19}, {x: 40, y: 33},
- *     {x: 21, y: 34}, {x: 21, y: 38}, {x: 39, y: 29}, {x: 30, y: 33}
+ *     {x: 21, y: 34}, {x: 21, y: 38}, {x: 39, y: 29}, {x: 30, y: 33},
+ *     {x: 25, y: 25, special: true}
  *   ],
  *   map: {
  *     x: (d) => d.x,
  *     y: (d) => d.y,
+ *     shape: d => d.special ? "cross" : "circle",
+ *     attrs: (d) => d.special && {
+ *       style: { color: "#fe772b" }
+ *     }
  *   },
- *   xAxis: { min: 0, line: (v) => v === 0 || v === 50 },
- *   yAxis: { min: 0, line: (v) => v === 0 || v === 50 },
+ *   xAxis: { min: 0, line: (v, i, axis) => v === axis.min || v === axis.max },
+ *   yAxis: { min: 0, line: (v, i, axis) => v === axis.min || v === axis.max },
  * })
  *
  */
@@ -86,6 +92,7 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
       $.svg({
         "class": ["series", "series-" + j],
         "text-anchor": "middle",
+        "color": data[0]?.color[0],
       })(
         data.map(
           (d) =>
@@ -95,10 +102,11 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
               x: utils.percent(axes.x.scale(d.x)),
               y: utils.percent(1 - axes.y.scale(d.y)),
               href: `#symbol-${d.shape}`,
-              fill: d.color[0],
               width: `${d.r}em`,
               height: `${d.r}em`,
               class: "symbol",
+              color: data[0].color[0] !== d.color[0] && d.color[0],
+              attrs: d.attrs,
             })
         )
       )
@@ -136,7 +144,7 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
           symbols,
         ])
       ),
-      legendTemplate(data),
+      legendTemplate({ data }),
     ])
   )
 }

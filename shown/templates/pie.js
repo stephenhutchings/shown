@@ -37,6 +37,7 @@ const getBounds = (t0, t1) => {
 
 /**
  * Generate a pie chart.
+ * @alias module:shown.pie
  * @param {Object} options - Data and display options for the chart.
  * @param {number[]} options.data - The data for this chart. Values can sum to
  * any number, and percentages will be calculated as needed.
@@ -47,11 +48,11 @@ const getBounds = (t0, t1) => {
  * @param {boolean} [options.sorted] - Whether to sort the values.
  * @param {MapOptions} [options.map]
  * Controls for transforming data. See {@link MapOptions} for more details.
- * @returns {string} Rendered chart
  * @param {number} [options.startAngle] - The initial rotation of the chart.
  * Angle values should fall between zero and one.
  * @param {number} [options.endAngle] - The final rotation of the chart.
  * Angle values should fall between zero and one.
+ * @returns {string} Rendered chart
  *
  * @example
  * shown.pie({ data: [60, 30, 10] });
@@ -74,7 +75,11 @@ const getBounds = (t0, t1) => {
  *   data: [60, 30, 10],
  *   startAngle: -0.33,
  *   endAngle: 0.33,
- *   map: { width: 0.4, key: ["Item 1", "Item 2", "Item 3"] }
+ *   map: {
+ *     width: 0.4,
+ *     key: ["Item 1", "Item 2", "Item 3"],
+ *     attrs: (d) => ({ "data-value": d })
+ *   }
  * });
  */
 export default ({
@@ -123,6 +128,7 @@ export default ({
     return $.g({
       "class": `segment segment-${i}`,
       "aria-label": `${d.label} (${utils.percent(t)})`,
+      "attrs": d.attrs,
     })([
       $.svg({
         viewBox: "0 0 100 100",
@@ -149,8 +155,6 @@ export default ({
         })(d.label),
     ])
   })
-
-  const legend = legendTemplate(data)
 
   return wrap(
     $.div({
@@ -180,7 +184,7 @@ export default ({
           })(segments),
         ])
       ),
-      legend,
+      legendTemplate({ data }),
     ])
   )
 }
