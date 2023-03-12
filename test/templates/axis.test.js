@@ -198,5 +198,11 @@ describe("setup", () => {
     testBounds(0, null, false, NaN, undefined)
     testBounds()
     testBounds(1, 1, 1)
+
+    expect(setup({}, [1], false)).toEqual(
+      expect.objectContaining({
+        grid: [0.5],
+      })
+    )
   })
 })
