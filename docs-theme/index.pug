@@ -18,9 +18,11 @@ html
     if config["project-description"]
       meta(name="description" content=config["project-description"])
     
-    link(rel="stylesheet" href="assets/css/bass.css")
-    link(rel="stylesheet" href="assets/css/style.css")
-    link(rel="stylesheet" href="assets/css/code.css")
+    - const timestamp = Date.now().toString(32)
+
+    link(rel="stylesheet" href=`assets/css/bass.css?${timestamp}`)
+    link(rel="stylesheet" href=`assets/css/style.css?${timestamp}`)
+    link(rel="stylesheet" href=`assets/css/code.css?${timestamp}`)
     
     link(rel="icon" href="assets/favicon.png")
   
