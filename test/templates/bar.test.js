@@ -6,9 +6,13 @@ describe("bar", () => {
   })
 
   test("renders basic chart", () => {
-    expect(bar({ data: [1, 2, 3] })).toEqual(
-      expect.stringContaining('<div class="shown"><div class="chart chart-bar')
+    expect(bar({ data: [1, 2, 3] })).toMatch(
+      '<div class="shown"><div class="chart chart-bar'
     )
+  })
+
+  test("renders a single datum", () => {
+    expect(bar({ data: [1] })).not.toMatch('width="0"')
   })
 
   test("renders custom keys", () => {
@@ -21,6 +25,6 @@ describe("bar", () => {
           color: ["red", "blue"],
         },
       })
-    ).toEqual(expect.stringContaining("custom"))
+    ).toMatch("custom")
   })
 })
