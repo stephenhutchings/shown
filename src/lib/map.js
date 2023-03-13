@@ -50,7 +50,7 @@ import utils from "./utils.js"
  * The default function returns the value fixed to the same number of decimals
  * as the most precise value in the dataset. Return `false` to prevent this
  * label from being rendered.
- * @property {Function|string[]|string} [tally]
+ * @property {Function|string[]|string|true} [tally]
  * Add an additional label summing the total values into a formatted string.
  * If true, the default function returns the value fixed to the same number of
  * decimals as the most precise value in the dataset. Return `false` to prevent
