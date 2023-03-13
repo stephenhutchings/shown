@@ -22,6 +22,7 @@
     "build:docs": "documentation build ./src/index.js -f html -g -o docs -t ./docs-theme/index.cjs",
     "build:types": "jsdoc -p -t node_modules/tsd-jsdoc/dist -r ./src -d types",
     "prepublishOnly": "run-s build:**",
+    "preinstall": "run-s build:lib",
     "release": "standard-version"
   },
   "repository": {
