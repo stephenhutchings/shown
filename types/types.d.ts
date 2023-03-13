@@ -355,7 +355,7 @@ declare type MapOptions = {
     y?: ((...params: any[]) => any) | number[] | number;
     r?: ((...params: any[]) => any) | number[] | number;
     label?: ((...params: any[]) => any) | string[] | string;
-    tally?: ((...params: any[]) => any) | string[] | string;
+    tally?: ((...params: any[]) => any) | string[] | string | true;
     color?: ((...params: any[]) => any) | string[] | string;
     shape?: ((...params: any[]) => any) | string[] | string;
     curve?: ((...params: any[]) => any) | string[] | string;
@@ -405,15 +405,16 @@ declare type AxisOptions = {
  * Charts render a {@link #legend|Legend} when needed, passing their internally
  * mapped data. When supplying data for a standalone legend, each item should
  * define these properties.
- * @property shape - Select a shape for the legend item. Supported
- * shapes include `circle | square | triangle | diamond | cross`.
- * @property key - Select the legend key for this item. A legend is only rendered when there is more than one unique key.
+ * @property key - Select the legend key for this item. A legend is
+ * only rendered when there is more than one unique key.
  * @property color - Select a color for this item. When an
  * array is passed, the first item in the array is used.
+ * @property [shape] - Select a shape for the legend item. Supported
+ * shapes include `circle | square | triangle | diamond | cross`.
  */
 declare type LegendItem = {
-    shape: string;
     key: string;
     color: string | string[];
+    shape?: string;
 };
 
