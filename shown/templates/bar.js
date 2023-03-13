@@ -168,8 +168,10 @@ export default ({
   const bars = $.svg({ class: "values" })(
     data.map((series, k) =>
       $.svg({
-        x: utils.percent(axes.x.scale(k - 0.5)),
-        width: utils.percent(axes.x.scale(1) - axes.x.scale(0)),
+        x: data.length > 1 && utils.percent(axes.x.scale(k - 0.5)),
+        width: utils.percent(
+          data.length > 1 ? axes.x.scale(1) - axes.x.scale(0) : 1
+        ),
         class: ["group", "group-" + k],
       })(
         series.map((stack, j) => {

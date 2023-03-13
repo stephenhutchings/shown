@@ -120,9 +120,10 @@ export default ({
  * mapped data. When supplying data for a standalone legend, each item should
  * define these properties.
  * @typedef {Object} LegendItem
- * @property {string} shape - Select a shape for the legend item. Supported
- * shapes include `circle | square | triangle | diamond | cross`.
- * @property {string} key - Select the legend key for this item. A legend is only rendered when there is more than one unique key.
+ * @property {string} key - Select the legend key for this item. A legend is
+ * only rendered when there is more than one unique key.
  * @property {string|string[]} color - Select a color for this item. When an
  * array is passed, the first item in the array is used.
+ * @property {string} [shape] - Select a shape for the legend item. Supported
+ * shapes include `circle | square | triangle | diamond | cross`.
  */
