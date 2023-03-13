@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.3](https://github.com/stephenhutchings/shown/compare/v1.0.2...v1.0.3) (2023-03-13)
+
+
+### Bug Fixes
+
+* Re-add preinstall to create CommonJS entry ([b780c75](https://github.com/stephenhutchings/shown/commit/b780c75b82cc1541b71749855b269b2888b0fa8d))
+* Single bar chart item renders with no width ([2e1be82](https://github.com/stephenhutchings/shown/commit/2e1be821441e6b207d84aeab2cae18b435854540))
+
 ### [1.0.2](https://github.com/stephenhutchings/shown/compare/v1.0.1...v1.0.2) (2023-03-13)
 
 
