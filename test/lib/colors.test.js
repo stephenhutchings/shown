@@ -1,4 +1,4 @@
-import { get, wrap } from "../../src/lib/colors.js"
+import { get, wrap } from "../../src/lib/color.js"
 
 describe("colors", () => {
   test("is a function", () => {
