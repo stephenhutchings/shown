@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.4](https://github.com/stephenhutchings/shown/compare/v1.0.3...v1.0.4) (2023-03-14)
+
+
+### Bug Fixes
+
+* Publish includes compiled library ([fd2d9d8](https://github.com/stephenhutchings/shown/commit/fd2d9d892461d9c779c0f6e7c7068298e2f8bb6a))
+* Use data to determine series length ([1e989e9](https://github.com/stephenhutchings/shown/commit/1e989e9e38770d1a4e6278667bfbe992730d5759))
+
 ### [1.0.3](https://github.com/stephenhutchings/shown/compare/v1.0.2...v1.0.3) (2023-03-13)
 
 
