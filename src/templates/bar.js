@@ -1,5 +1,5 @@
 import $ from "../lib/dom/index.js"
-import { get as getColor } from "../lib/colors.js"
+import { get as getColor } from "../lib/color.js"
 import utils from "../lib/utils.js"
 import Map from "../lib/map.js"
 import legendTemplate from "./legend.js"

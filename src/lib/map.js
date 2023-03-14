@@ -1,4 +1,4 @@
-import { get as getColor, wrap } from "./colors.js"
+import { get as getColor, wrap as wrapColor } from "./color.js"
 import utils from "./utils.js"
 
 /**
@@ -138,7 +138,7 @@ const Map = function (
   // and foreground color. This wrapper ensures an array is always returned by
   // the color function.
   const base = map.color || ((v, i) => getColor(i / (data.length - 1)))
-  map.color = wrap(base)
+  map.color = wrapColor(base)
 
   // By default, a label will only show when it exceeds the minimum value
   // specified by a chart. It uses the largest number of decimal places found
