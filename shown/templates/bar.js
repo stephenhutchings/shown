@@ -1,5 +1,5 @@
 import $ from "../lib/dom/index.js"
-import { get as getColor } from "../lib/colors.js"
+import { get as getColor } from "../lib/color.js"
 import utils from "../lib/utils.js"
 import Map from "../lib/map.js"
 import legendTemplate from "./legend.js"
@@ -104,7 +104,7 @@ export default ({
 }) => {
   data = data.map((v) => (Array.isArray(v) ? v : [v]))
 
-  if (!Array.isArray(data[0][0])) {
+  if (data.length && !Array.isArray(data[0][0])) {
     data = stack ? data.map((d) => [d]) : data.map((d) => d.map((d) => [d]))
   } else {
     stack = true
@@ -146,7 +146,10 @@ export default ({
 
   xAxis = {
     ticks: data.length,
-    hasSeries: map.series,
+    hasSeries: data
+      .flat(2)
+      .map((d) => d.series)
+      .some((f) => f),
     group: true,
     line: maxSeries > 1,
     ...xAxis,
@@ -241,7 +244,7 @@ export default ({
         "chart-bar",
         axes.x.label && "has-xaxis xaxis-w" + axes.x.width,
         axes.y.label && "has-yaxis yaxis-w" + axes.y.width,
-        map.series && "has-series",
+        axes.x.hasSeries && "has-series",
       ],
     })([
       $.div({

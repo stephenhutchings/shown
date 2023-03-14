@@ -9,3 +9,4 @@ export { default as legend } from "./templates/legend.js"
 // Import these options to include their type definitions
 export * as map from "./lib/map.js"
 export * as axis from "./templates/axis.js"
+export * as color from "./lib/color.js"
