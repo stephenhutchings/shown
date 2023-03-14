@@ -42,7 +42,7 @@ const DEFAULT_COLORS = [
  * @private
  * @typedef {string} BackgroundColor
  * @typedef {string|false} TextColor
- * @typedef {[BackgroundColor,TextColor]} ColorPair
+ * @typedef {string[]} ColorPair
  */
 
 /**
