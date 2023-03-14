@@ -76,10 +76,6 @@ header h1::before {
   width: fit-content;
 }
 
-#toc li + li {
-  margin-inline-start: 1rem;
-}
-
 .documentation {
   font-family: system-ui, Helvetica, sans-serif;
   color: #1c2335;
