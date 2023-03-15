@@ -43,7 +43,16 @@ const symbol = (type) => {
     class: "symbol",
     id: `symbol-${type}`,
     viewBox: "0 0 100 100",
-  })(symbol)
+  })([
+    $.rect({
+      class: "touch",
+      x: -150,
+      y: -150,
+      width: 300,
+      height: 300,
+    }),
+    symbol,
+  ])
 }
 
 export default (data) => {

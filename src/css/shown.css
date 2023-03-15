@@ -3,6 +3,10 @@
   overflow: visible;
 }
 
+.shown defs {
+  display: none;
+}
+
 .shown svg,
 .shown text {
   fill: currentColor;
@@ -128,6 +132,11 @@
 
 .shown .symbol {
   font-size: 10px;
+}
+
+.shown .symbol .touch {
+  fill: transparent !important;
+  stroke: none !important;
 }
 
 .shown .symbol * {
