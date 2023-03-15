@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.5](https://github.com/stephenhutchings/shown/compare/v1.0.4...v1.0.5) (2023-03-15)
+
+
+### Features
+
+* Add transparent touch area around symbols ([0a49a8b](https://github.com/stephenhutchings/shown/commit/0a49a8b0691ecfe59ecc2b7f05b14dfbfefbd1f7))
+
 ### [1.0.4](https://github.com/stephenhutchings/shown/compare/v1.0.3...v1.0.4) (2023-03-14)
 
 
