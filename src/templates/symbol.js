@@ -40,7 +40,7 @@ const symbol = (type) => {
   }
 
   return $.symbol({
-    class: "symbol",
+    class: "symbol shown",
     id: `symbol-${type}`,
     viewBox: "0 0 100 100",
   })([

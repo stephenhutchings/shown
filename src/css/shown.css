@@ -1,5 +1,6 @@
 .shown svg,
-.shown .symbol {
+.shown .symbol,
+.shown.symbol {
   overflow: visible;
 }
 
@@ -134,7 +135,7 @@
   font-size: 10px;
 }
 
-.shown .symbol .touch {
+.shown .touch {
   fill: transparent !important;
   stroke: none !important;
 }
