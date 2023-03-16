@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.6](https://github.com/stephenhutchings/shown/compare/v1.0.5...v1.0.6) (2023-03-16)
+
+
+### Features
+
+* Add new symbol type "asterisk" ([fa4bf4d](https://github.com/stephenhutchings/shown/commit/fa4bf4de90e95cd71d377bcd20c55a60246077e8))
+
+
+### Bug Fixes
+
+* [#3](https://github.com/stephenhutchings/shown/issues/3) Convert hit area to circle ([5f50e0c](https://github.com/stephenhutchings/shown/commit/5f50e0c45e3fa0f37bbd7bf5a25af248b4c6e8c1))
+* Firefox requires class to apply scoping to shadow root ([2cf5e92](https://github.com/stephenhutchings/shown/commit/2cf5e9265f8361bdee1b97d75fc2702dfa1407e8))
+
 ### [1.0.5](https://github.com/stephenhutchings/shown/compare/v1.0.4...v1.0.5) (2023-03-15)
 
 
