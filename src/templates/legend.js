@@ -125,5 +125,5 @@ export default ({
  * @property {string|string[]} color - Select a color for this item. When an
  * array is passed, the first item in the array is used.
  * @property {string} [shape] - Select a shape for the legend item. Supported
- * shapes include `circle | square | triangle | diamond | cross`.
+ * shapes include `circle | square | triangle | diamond | cross | asterisk`.
  */

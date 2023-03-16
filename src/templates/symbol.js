@@ -33,6 +33,17 @@ const symbol = (type) => {
     })
   }
 
+  if (type === "asterisk") {
+    symbol = [
+      $.circle({
+        r: 6,
+      })(),
+      $.path({
+        d: "M-6,0H6M0,-6V6M-4-4L4,4M-4,4L4,-4",
+      })(),
+    ].join("")
+  }
+
   // Increase the hit area of the marker by including a transparent
   // circle that extends beyond the bounds of the marker.
   // This may be useful, for example, to activate a tooltip on hover.

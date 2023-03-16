@@ -63,7 +63,7 @@ import utils from "./utils.js"
  * palette. Return an array of two colors to change the color of the label.
  * @property {Function|string[]|string} [shape]
  * Select a shape for the supplied data.
- * Supported shapes include `circle | square | triangle | diamond | cross`.
+ * Supported shapes include `circle | square | triangle | diamond | cross | asterisk`.
  * @property {Function|string[]|string} [curve]
  * Select a curve for the current line. Lines can include multiple curve types.
  * Supported curves include `linear | stepX | stepY | stepXMid | stepYMid |

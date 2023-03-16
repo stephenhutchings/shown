@@ -144,8 +144,14 @@
   vector-effect: non-scaling-stroke;
 }
 
+.shown#symbol-asterisk,
 .shown#symbol-cross {
   fill: none;
   stroke: currentColor;
   stroke-width: 2;
+}
+
+.shown#symbol-asterisk circle {
+  fill: white;
+  stroke: none;
 }

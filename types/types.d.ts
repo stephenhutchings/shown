@@ -337,7 +337,7 @@ declare module "shown" {
  * The default function returns evenly distributed colors from the default
  * palette. Return an array of two colors to change the color of the label.
  * @property [shape] - Select a shape for the supplied data.
- * Supported shapes include `circle | square | triangle | diamond | cross`.
+ * Supported shapes include `circle | square | triangle | diamond | cross | asterisk`.
  * @property [curve] - Select a curve for the current line. Lines can include multiple curve types.
  * Supported curves include `linear | stepX | stepY | stepXMid | stepYMid |
  * monotone | bump`.
@@ -410,7 +410,7 @@ declare type AxisOptions = {
  * @property color - Select a color for this item. When an
  * array is passed, the first item in the array is used.
  * @property [shape] - Select a shape for the legend item. Supported
- * shapes include `circle | square | triangle | diamond | cross`.
+ * shapes include `circle | square | triangle | diamond | cross | asterisk`.
  */
 declare type LegendItem = {
     key: string;
