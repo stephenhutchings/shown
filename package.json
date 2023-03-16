@@ -64,6 +64,7 @@
     "tsd-jsdoc": "^2.5.0"
   },
   "files": [
+    "types/types.d.ts",
     "src/**/*.js",
     "src/**/*.css"
   ],
