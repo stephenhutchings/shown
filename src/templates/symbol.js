@@ -5,37 +5,31 @@ const symbol = (type) => {
 
   if (type === "circle") {
     symbol = $.circle({
-      r: 45,
+      r: 4.5,
     })
   }
 
   if (type === "square") {
-    symbol = $.rect({
-      x: -40,
-      y: -40,
-      width: 80,
-      height: 80,
+    symbol = $.path({
+      d: "M-4-4h8v8h-8Z",
     })
   }
 
   if (type === "triangle") {
-    symbol = $.polygon({
-      points: [0, -50, 50, 40, -50, 40].join(),
+    symbol = $.path({
+      d: "M0-5L5,4H-5Z",
     })
   }
 
   if (type === "diamond") {
-    symbol = $.polygon({
-      points: [0, -50, 50, 0, 0, 50, -50, 0].join(),
+    symbol = $.path({
+      d: "M0-5L5,0L0,5L-5,0Z",
     })
   }
 
   if (type === "cross") {
     symbol = $.path({
-      "d": "M-60,0H60M0,-60V60",
-      "fill": "none",
-      "stroke": "currentColor",
-      "stroke-width": 2,
+      d: "M-6,0H6M0,-6V6",
     })
   }
 
@@ -44,13 +38,13 @@ const symbol = (type) => {
   // This may be useful, for example, to activate a tooltip on hover.
   const hitArea = $.circle({
     class: "touch",
-    r: 150,
+    r: 15,
   })
 
   return $.symbol({
     class: "symbol shown",
     id: `symbol-${type}`,
-    viewBox: "0 0 100 100",
+    viewBox: "0 0 10 10",
   })([hitArea, symbol])
 }
 
