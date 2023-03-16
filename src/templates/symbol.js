@@ -39,20 +39,19 @@ const symbol = (type) => {
     })
   }
 
+  // Increase the hit area of the marker by including a transparent
+  // circle that extends beyond the bounds of the marker.
+  // This may be useful, for example, to activate a tooltip on hover.
+  const hitArea = $.circle({
+    class: "touch",
+    r: 150,
+  })
+
   return $.symbol({
     class: "symbol shown",
     id: `symbol-${type}`,
     viewBox: "0 0 100 100",
-  })([
-    $.rect({
-      class: "touch",
-      x: -150,
-      y: -150,
-      width: 300,
-      height: 300,
-    }),
-    symbol,
-  ])
+  })([hitArea, symbol])
 }
 
 export default (data) => {
