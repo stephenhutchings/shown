@@ -14,6 +14,11 @@ describe("bar", () => {
     )
   })
 
+  test("handles the stack option correctly", () => {
+    expect(bar({ data: [simple, simple], stack: false })).toMatch("series-1")
+    expect(bar({ data: [simple, simple], stack: true })).not.toMatch("series-1")
+  })
+
   test("renders a single datum", () => {
     expect(bar({ data: simple.slice(0, 1) })).not.toMatch('width="0"')
   })

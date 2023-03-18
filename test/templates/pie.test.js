@@ -1,5 +1,7 @@
 import pie from "../../src/templates/pie.js"
 
+const data = [1, 2, 3]
+
 describe("pie", () => {
   test("is a function", () => {
     expect(typeof pie).toBe("function")
@@ -10,12 +12,24 @@ describe("pie", () => {
   })
 
   test("renders with arguments", () => {
-    expect(pie({ data: [1] })).toEqual(expect.stringContaining(`chart-pie`))
-    expect(pie({ data: [1], startAngle: -0.3, endAngle: 0.9 })).toEqual(
-      expect.stringContaining(`chart-pie`)
+    expect(pie({ data })).toMatch(`chart-pie`)
+  })
+
+  test("renders correct angles", () => {
+    expect(pie({ data, startAngle: -0.3 })).toMatch(
+      `stroke-dashoffset="86.39%"`
     )
-    expect(
-      pie({ data: [1], title: "A", description: "B", sorted: false })
-    ).toEqual(expect.stringContaining(`chart-pie`))
+  })
+
+  test("includes a11y elements", () => {
+    expect(pie({ data, title: "A" })).toMatch(`<title>A`)
+    expect(pie({ data, description: "A" })).toMatch(`<desc>A`)
+  })
+
+  test("handles the sort argument", () => {
+    // The smallest segment shouldn't be the last one
+    expect(pie({ data, sorted: false })).toMatch(
+      `1</text></g><g class=\"segment`
+    )
   })
 })
