@@ -116,35 +116,18 @@ const Map = function (
 ) {
   const map = Object.assign({}, defaults, options)
 
-  // Maps may use a shorthand syntax by providing an array rather than a
-  // function. In this case, the function is wrapped to ensure the map has
-  // a consistent shape. Any other value that is not a function is also
-  // wrapped in the same way, and simply returns the value.
-  Object.entries(map).forEach(([k, v]) => {
-    if (Array.isArray(v)) {
-      map[k] = (d, i) => v[i]
-    } else if (typeof v !== "function") {
-      map[k] = () => v
-    }
-  })
-
   const values = data.map((v) => (Array.isArray(v) ? v : [v]).map(map.value))
   const places = Math.min(
     Math.max(...values.flat().map(utils.decimalPlaces)),
     2
   )
 
-  // A color function can return a background color, or an array of background
-  // and foreground color. This wrapper ensures an array is always returned by
-  // the color function.
-  const base = map.color || ((v, i) => getColor(i / (data.length - 1)))
-  map.color = wrapColor(base)
 
   // By default, a label will only show when it exceeds the minimum value
   // specified by a chart. It uses the largest number of decimal places found
   // across all values in the provided data.
-  if (!map.label) {
-    const max = Math.max(...(sum ? values.map(utils.sum) : values.flat()))
+  if (map.label === undefined || map.label === true) {
+    const max = Math.max(...values)
 
     map.label = (v) =>
       (v = map.value(v)) &&
@@ -161,10 +144,28 @@ const Map = function (
 
   // By default, a tally is formatted using the largest number of decimal
   // places found across all values in the provided data.
-  if (map.tally() === true) {
+  if (map.tally === true) {
     map.tally = (v) =>
       (v = map.value(v)) && Number.isFinite(v) && v.toFixed(places)
   }
+
+  // Maps may use a shorthand syntax by providing an array rather than a
+  // function. In this case, the function is wrapped to ensure the map has
+  // a consistent shape. Any other value that is not a function is also
+  // wrapped in the same way, and simply returns the value.
+  Object.entries(map).forEach(([k, v]) => {
+    if (Array.isArray(v)) {
+      map[k] = (d, i) => v[i]
+    } else if (typeof v !== "function") {
+      map[k] = () => v
+    }
+  })
+
+  // A color function can return a background color, or an array of background
+  // and foreground colors. This wrapper ensures an array is always returned by
+  // the color function.
+  const base = map.color || ((v, i) => getColor(i / (data.length - 1)))
+  map.color = wrapColor(base)
 
   // The return function contains references to each mapping function in cases
   // where the defaults need to be accessed at other times
