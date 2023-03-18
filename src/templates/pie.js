@@ -107,13 +107,12 @@ export default ({
 
   const bounds = getBounds(startAngle, endAngle)
 
-  const values = data.map((d) => d.value)
-  const total = utils.sum(values)
+  const total = utils.sum(data)
   const scale = endAngle - startAngle
 
   const segments = data.map((d, i) => {
     const t = (d.value / total) * scale
-    const o = startAngle + (utils.sum(values.slice(0, i)) / total) * scale
+    const o = startAngle + (utils.sum(data.slice(0, i)) / total) * scale
 
     const radius = (1 - d.width / 2) / 2
     const dashoffset = arc(-o, radius)
