@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.7](https://github.com/stephenhutchings/shown/compare/v1.0.6...v1.0.7) (2023-03-18)
+
+
+### Features
+
+* Returning true for label uses default method ([081fd6a](https://github.com/stephenhutchings/shown/commit/081fd6ae189886022f10ab4890186eb1a6cd9907))
+
+
+### Bug Fixes
+
+* Mapped bar methods receive incorrect indices ([8c30fb2](https://github.com/stephenhutchings/shown/commit/8c30fb2a5430c30901169cc8e86cddef4c7a7684))
+* Publish types to NPM ([716a413](https://github.com/stephenhutchings/shown/commit/716a41337e98bc4915acc59b8356279896135741))
+
 ### [1.0.6](https://github.com/stephenhutchings/shown/compare/v1.0.5...v1.0.6) (2023-03-16)
 
 
