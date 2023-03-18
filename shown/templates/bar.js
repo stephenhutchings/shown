@@ -60,9 +60,9 @@ import wrap from "./wrap.js"
  *      [34.44, 14.79, 30.64, 18.31, 1.82],
  *   ],
  *   map: {
- *     width: (v, i) => v === 30.64 ? 0.8 : 0.6,
- *     label: (v, i) => v === 30.64 ? v.toFixed(1) : false,
- *     key: (v, i) => ["A", "B", "C", "D", "E"][i],
+ *     width: (v) => v === 30.64 ? 0.8 : 0.6,
+ *     label: (v) => v === 30.64 ? v.toFixed(1) : false,
+ *     key: ["A", "B", "C", "D", "E"],
  *   },
  *   stack: true,
  *   xAxis: { label: ["I", "II", "III"] }
@@ -85,8 +85,9 @@ import wrap from "./wrap.js"
  *   map: {
  *     key: ["In", "Out"],
  *     series: ["A", "B", "C"],
- *     tally: Math.round,
- *     label: Math.round,
+ *     value: Math.round,
+ *     tally: true,
+ *     label: true,
  *     attrs: (d) => ({ "data-value": d })
  *   },
  *   xAxis: { label: ["I", "II"] }
@@ -102,8 +103,10 @@ export default ({
   xAxis,
   yAxis,
 }) => {
+  // If the data is only one-level deep, it needs an initial wrapper
   data = data.map((v) => (Array.isArray(v) ? v : [v]))
 
+  // If the data is only two-levels deep, wrap based on the `stack` option
   if (data.length && !Array.isArray(data[0][0])) {
     data = stack ? data.map((d) => [d]) : data.map((d) => d.map((d) => [d]))
   } else {
@@ -122,27 +125,43 @@ export default ({
     }
   }
 
-  if (map && map.series && Array.isArray(map.key)) {
+  // Being triple-nested, bar charts need help to make an intuitive choice about
+  // which index to use when picking an item from an array.
+  if (Array.isArray(map?.key)) {
     const arr = map.key
-    map.key = (v, i, j) => arr[j]
+    map.key = (v, k, j, i) => arr[maxStack > 1 ? i : j]
+  }
+
+  if (Array.isArray(map?.series)) {
+    const arr = map.series
+    map.series = (v, k, j) => arr[j]
+  }
+
+  if (Array.isArray(map?.color)) {
+    const arr = map.color
+    map.color = (v, k, j, i) => arr[maxStack > 1 ? i : j]
   }
 
   map = new Map(
     {
-      color: (v, i, j) =>
-        getColor(maxStack === 1 ? i / (maxSeries - 1) : j / (maxStack - 1)),
+      // Other charts use the shallow index, but bar charts select a color
+      // from the deepest index, or second deepest if unstacked.
+      color: (v, k, j, i) => {
+        return getColor(
+          maxStack === 1 ? j / (maxSeries - 1) : i / (maxStack - 1)
+        )
+      },
       width: 0.6,
       ...map,
     },
-    data.flat(),
-    { sum: stack, minValue: 0.05 }
+    stack ? data.flat().map((d) => utils.sum(d)) : data.flat(2),
+    { minValue: 0.05 }
   )
 
-  data = data.map(map)
+  data = map(data)
 
   const maxWidth = Math.max(...data.flat(2).map((d) => d.width))
-
-  const values = data.flat().map(utils.sum)
+  const values = data.flat().map((d) => utils.sum(d))
 
   xAxis = {
     ticks: data.length,

@@ -165,8 +165,8 @@ export default ({
       y: (d) => d,
       ...map,
     },
-    data,
-    { minValue: -Infinity }
+    data.flat(),
+    { minValue: -Infinity, colors: data.length }
   )
 
   data = map(data)
