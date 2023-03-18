@@ -31,9 +31,9 @@ declare module "shown" {
      *      [34.44, 14.79, 30.64, 18.31, 1.82],
      *   ],
      *   map: {
-     *     width: (v, i) => v === 30.64 ? 0.8 : 0.6,
-     *     label: (v, i) => v === 30.64 ? v.toFixed(1) : false,
-     *     key: (v, i) => ["A", "B", "C", "D", "E"][i],
+     *     width: (v) => v === 30.64 ? 0.8 : 0.6,
+     *     label: (v) => v === 30.64 ? v.toFixed(1) : false,
+     *     key: ["A", "B", "C", "D", "E"],
      *   },
      *   stack: true,
      *   xAxis: { label: ["I", "II", "III"] }
@@ -55,8 +55,9 @@ declare module "shown" {
      *   map: {
      *     key: ["In", "Out"],
      *     series: ["A", "B", "C"],
-     *     tally: Math.round,
-     *     label: Math.round,
+     *     value: Math.round,
+     *     tally: true,
+     *     label: true,
      *     attrs: (d) => ({ "data-value": d })
      *   },
      *   xAxis: { label: ["I", "II"] }
@@ -292,6 +293,7 @@ declare module "shown" {
  *
  * Each option can be declared as a function. The function is passed the
  * original datum and indices that correspond to how deeply the datum is nested.
+ * For example, bar chart data may be nested up to three levels
  *
  * However, it's often useful to use a shorthand syntax instead. If the
  * property is an array, the array item at the index corresponding to the

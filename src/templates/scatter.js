@@ -70,8 +70,8 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
       r: 1,
       ...map,
     },
-    data,
-    { minValue: -Infinity, maxDepth: 2 }
+    data.flat(),
+    { minValue: -Infinity, maxDepth: 2, colors: data.length }
   )
 
   data = map(data)
