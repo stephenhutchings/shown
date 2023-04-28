@@ -19,19 +19,19 @@ describe("curve", () => {
   })
 
   test("renders stepX curve", () => {
-    expect(curve.stepX(points)).toBe("M0 0h1v0h1v3h0v-1")
+    expect(curve.stepX(points)).toBe("M0 0h1h1v3v-1")
   })
 
   test("renders stepY curve", () => {
-    expect(curve.stepY(points)).toBe("M0 0v0h1v3h1v-1h0")
+    expect(curve.stepY(points)).toBe("M0 0h1v3h1v-1")
   })
 
   test("renders stepMidX curve", () => {
-    expect(curve.stepMidX(points)).toBe("M0 0h0.5v0h0.5h0.5v3h0.5h0v-1h0")
+    expect(curve.stepMidX(points)).toBe("M0 0h0.5h0.5h0.5v3h0.5v-1")
   })
 
   test("renders stepMidY curve", () => {
-    expect(curve.stepMidY(points)).toBe("M0 0v0h1v0v1.5h1v1.5v-0.5h0v-0.5")
+    expect(curve.stepMidY(points)).toBe("M0 0h1v1.5h1v1.5v-0.5v-0.5")
   })
 
   test("renders monotone curve", () => {
