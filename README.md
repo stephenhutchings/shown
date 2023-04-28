@@ -39,5 +39,5 @@ resizes.
 [licence img]: https://img.shields.io/github/license/stephenhutchings/shown.svg?color=1c2335
 [licence url]: https://github.com/stephenhutchings/shown/blob/master/LICENSE.md
 [test badge]: https://github.com/stephenhutchings/shown/workflows/Test/badge.svg?branch=master
-[coverage img]: https://github.com/stephenhutchings/shown/blob/master/coverage.svg
+[coverage img]: https://stephenhutchings.github.io/shown/coverage.svg
 [documentation]: https://stephenhutchings.github.io/shown/
