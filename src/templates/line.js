@@ -238,11 +238,18 @@ export default ({
   }
 
   if (area) {
+    const longest = data.find((line) => line.length === maxLength)
+
     // For lines with fewer points, continue along the baseline
-    data.forEach((line, i) => {
+    data.forEach((line) => {
       const curve = line.slice(-1)[0]?.curve
+
       while (line.length < maxLength) {
-        line.push({ x: map.x({}, i, line.length), y: 0, ignore: true, curve })
+        line.push({
+          x: longest[line.length]?.x,
+          y: 0,
+          curve,
+        })
       }
     })
 

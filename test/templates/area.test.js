@@ -19,7 +19,7 @@ describe("area", () => {
 
   test("handles discontinuities", () => {
     const data = [
-      [1, 2, null, NaN, 3, false, 0],
+      [1, 2, null, NaN, 3, false],
       [1, 2, null, NaN, 3, false, 0],
     ]
 
