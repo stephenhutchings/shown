@@ -78,7 +78,7 @@ export default ({
 } = {}) => {
   if (!data) return
 
-  includeDefs ??= includeWrap
+  includeDefs = includeDefs ?? includeWrap
 
   const keys = Object.values(
     data.flat().reduce((m, d) => {
