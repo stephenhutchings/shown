@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/stephenhutchings/shown/compare/v1.0.7...v1.1.0) (2023-04-28)
+
+
+### Features
+
+* Add area chart ([23b6439](https://github.com/stephenhutchings/shown/commit/23b64394a604a09a783832fc1377e683c977358d))
+* Move utils to modules for better minification ([43e846a](https://github.com/stephenhutchings/shown/commit/43e846a110bb8592b73b3eb7faefb9a185d1a5df))
+* Pixel-perfect axis lines ([3524764](https://github.com/stephenhutchings/shown/commit/35247646f76a0b2672ac1f5a472bb6a4abb7f8b4))
+* Skip unneeded intermediate step path commands ([a95c472](https://github.com/stephenhutchings/shown/commit/a95c4720361b3e167832e4dd035849310eb8d715))
+
 ### [1.0.7](https://github.com/stephenhutchings/shown/compare/v1.0.6...v1.0.7) (2023-03-18)
 
 
