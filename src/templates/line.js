@@ -1,5 +1,8 @@
 import $ from "../lib/dom/index.js"
 import percent from "../lib/utils/percent.js"
+import sum from "../lib/utils/sum.js"
+import interpolate from "../lib/utils/interpolate.js"
+import { isFinite } from "../lib/utils/math.js"
 import curve from "../lib/curve.js"
 import Map from "../lib/map.js"
 import legendTemplate from "./legend.js"
@@ -221,8 +224,8 @@ export default ({
         })(
           data.map((d) => {
             return (
-              Number.isFinite(d.x) &&
-              Number.isFinite(d.y) &&
+              isFinite(d.x) &&
+              isFinite(d.y) &&
               d.shape &&
               $.use({
                 x: percent(axes.x.scale(d.x)),

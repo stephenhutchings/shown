@@ -1,3 +1,5 @@
+import { floor } from "./utils/math.js"
+
 // prettier-ignore
 const DEFAULT_COLORS = [
   "#0036b0", "#0236b1", "#0536b1", "#0737b2", "#0a37b2", "#0c37b3", "#0f37b3",
@@ -54,7 +56,7 @@ const DEFAULT_COLORS = [
 export const get = (t) => {
   if (!(t >= 0 && t <= 1)) t = 0
 
-  const c = Math.floor(t * (DEFAULT_COLORS.length - 1))
+  const c = floor(t * (DEFAULT_COLORS.length - 1))
 
   return t < 0.6 ? [DEFAULT_COLORS[c], "#fff"] : DEFAULT_COLORS[c]
 }

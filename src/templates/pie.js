@@ -5,8 +5,7 @@ import toPrecision from "../lib/utils/to-precision.js"
 import Map from "../lib/map.js"
 import wrap from "./wrap.js"
 import legendTemplate from "./legend.js"
-
-const tau = Math.PI * 2
+import { min, max, tau, cos, sin } from "../lib/utils/math.js"
 
 const arc = (t, r) => percent((t % 1) * tau * r)
 
@@ -26,13 +25,13 @@ const getBounds = (t0, t1) => {
   if (t0 < 0.25 && t1 > 0.25) ts.push(0.25)
   if (t0 < 0.5 && t1 > 0.5) ts.push(0.5)
 
-  const xs = ts.map((t) => toPrecision(Math.cos(t * tau) / 2))
-  const ys = ts.map((t) => toPrecision(Math.sin(t * tau) / 2))
+  const xs = ts.map((t) => toPrecision(cos(t * tau) / 2))
+  const ys = ts.map((t) => toPrecision(sin(t * tau) / 2))
 
-  const maxX = Math.max(...xs)
-  const minX = Math.min(...xs)
-  const maxY = Math.max(...ys)
-  const minY = Math.min(...ys)
+  const maxX = max(...xs)
+  const minX = min(...xs)
+  const maxY = max(...ys)
+  const minY = min(...ys)
 
   return { x: minX, y: minY, w: maxX - minX, h: maxY - minY }
 }
@@ -123,8 +122,8 @@ export default ({
     const theta = tau * (o + t / 2)
     const shift = d.width === 1 && t < 0.25 ? 1.2 : 1
 
-    const x = Math.cos(theta) * shift * radius
-    const y = Math.sin(theta) * shift * radius
+    const x = cos(theta) * shift * radius
+    const y = sin(theta) * shift * radius
 
     return $.g({
       "class": `segment segment-${i}`,

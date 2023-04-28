@@ -2,10 +2,11 @@ import monotone from "./curve/monotone.js"
 import bump from "./curve/bump.js"
 import linear from "./curve/linear.js"
 import { stepX, stepY, stepMidX, stepMidY } from "./curve/step.js"
+import { isFinite } from "./utils/math.js"
 
 const FIXED = 2
 
-const filter = (p) => Number.isFinite(p[0]) && Number.isFinite(p[1])
+const filter = (p) => isFinite(p[0]) && isFinite(p[1])
 
 const wrap =
   (fn) =>
@@ -13,8 +14,8 @@ const wrap =
     fn(p.filter(filter), ...args)
       .map(
         (v, i, a) =>
-          (Number.isFinite(v) && Number.isFinite(a[i - 1]) ? " " : "") +
-          (Number.isFinite(v) ? +v.toFixed(FIXED) : v)
+          (isFinite(v) && isFinite(a[i - 1]) ? " " : "") +
+          (isFinite(v) ? +v.toFixed(FIXED) : v)
       )
       .join("")
 

@@ -5,6 +5,7 @@ import percent from "../lib/utils/percent.js"
 import Map from "../lib/map.js"
 import legendTemplate from "./legend.js"
 import { default as axisTemplate, setup as setupAxis } from "./axis.js"
+import { max } from "../lib/utils/math.js"
 import wrap from "./wrap.js"
 
 /**
@@ -114,8 +115,8 @@ export default ({
     stack = true
   }
 
-  const maxStack = Math.max(...data.flat(1).map((d) => d.length))
-  const maxSeries = Math.max(...data.map((d) => d.length))
+  const maxStack = max(...data.flat(1).map((d) => d.length))
+  const maxSeries = max(...data.map((d) => d.length))
 
   // For unstacked charts, tally results rather than label.
   if (maxStack === 1 && (!map || !map.label)) {
@@ -161,7 +162,7 @@ export default ({
 
   data = map(data)
 
-  const maxWidth = Math.max(...data.flat(2).map((d) => d.width))
+  const maxWidth = max(...data.flat(2).map((d) => d.width))
   const values = data.flat().map((d) => sum(d))
 
   xAxis = {

@@ -4,8 +4,18 @@ import decimalPlaces from "../lib/utils/decimal-places.js"
 import magnitude from "../lib/utils/magnitude.js"
 import percent from "../lib/utils/percent.js"
 import toPrecision from "../lib/utils/to-precision.js"
+import {
+  isFinite,
+  isInteger,
+  floor,
+  ceil,
+  abs,
+  min,
+  max,
+  pow,
+} from "../lib/utils/math.js"
 
-// The number of ticks to use, in preferential order.
+// The number of ticks to use, in preferential order
 const TICKCOUNT_ORDER = [5, 6, 7, 8, 4, 9, 3, 10, 11, 12, 13]
 const MAX_PRECISION = 7
 
@@ -52,34 +62,29 @@ const pad = (t, inset = 0) => inset + (1 - inset * 2) * t
 /**
  * Calculate the scale to use when calculating bounds or ticks.
  * @private
- * @param {number} min
- * @param {number} max
+ * @param {number} vmin
+ * @param {number} vmax
  * @returns {number} scale
  */
-const getScale = (min, max) => {
-  let m = Math.max(magnitude(min), magnitude(max))
+const getScale = (vmin, vmax) => {
+  let m = max(magnitude(vmin), magnitude(vmax))
 
   // The magnitude should be no greater than the difference
-  m = Math.min(m, magnitude(max - min))
+  m = min(m, magnitude(vmax - vmin))
 
   // Deal with integers from here
-  let scale = Math.pow(10, m)
+  let scale = pow(10, m)
 
   // If both values are integers and min is positive,
   // all ticks should only occur at integer positions
-  if (
-    Number.isInteger(max) &&
-    Number.isInteger(min) &&
-    min > 0 &&
-    scale === 1
-  ) {
+  if (isInteger(vmax) && isInteger(vmin) && vmin > 0 && scale === 1) {
     return 1
   }
 
-  min /= scale
-  max /= scale
+  vmin /= scale
+  vmax /= scale
 
-  let d = max - min
+  let d = vmax - vmin
 
   // Increase the scale when the difference is too small
   // For example, min=0 and max=1 should have more than 2 ticks
@@ -94,7 +99,7 @@ const getScale = (min, max) => {
   // Reduce by primes that neatly fit to help ensure tick counts
   // in preferential order are not chosen when others fit better
   LOW_PRIMES.forEach((p) => {
-    if (min > 0 || max < 0 ? d % p === 0 : min % p === 0 && max % p === 0) {
+    if (vmin > 0 || vmax < 0 ? d % p === 0 : vmin % p === 0 && vmax % p === 0) {
       scale /= p
     }
   })
@@ -112,39 +117,39 @@ const getScale = (min, max) => {
 const getBounds = (values) => {
   if (values.length === 0) return [0, 1]
 
-  let min = toPrecision(Math.min(...values), MAX_PRECISION)
-  let max = toPrecision(Math.max(...values), MAX_PRECISION)
+  let vmin = toPrecision(min(...values), MAX_PRECISION)
+  let vmax = toPrecision(max(...values), MAX_PRECISION)
 
-  if (min === max) {
+  if (vmin === vmax) {
     // All values are zero
-    if (max === 0) return [0, 1]
+    if (vmax === 0) return [0, 1]
 
     // The bounds should be between zero and max
-    if (min < 0) max = 0
-    else min = 0
+    if (vmin < 0) vmax = 0
+    else vmin = 0
   }
 
-  const f = getScale(min, max)
+  const f = getScale(vmin, vmax)
 
-  min = Math.floor(min / f)
-  max = Math.ceil(max / f)
+  vmin = floor(vmin / f)
+  vmax = ceil(vmax / f)
 
-  const d = max - min
+  const d = vmax - vmin
 
   // The distance should be divisible by a low prime number
   // to produce a sensible number of ticks. If it isn't, adding
   // one will ensure it is divisible by two.
   if (d % 2 > 0 && !LOW_PRIMES.some((p) => d % p === 0)) {
-    if (Math.abs(max) % 2 === 1) {
-      max += 1
+    if (abs(vmax) % 2 === 1) {
+      vmax += 1
     } else {
-      min -= 1
+      vmin -= 1
     }
   }
 
   return [
-    toPrecision(min * f, MAX_PRECISION),
-    toPrecision(max * f, MAX_PRECISION),
+    toPrecision(vmin * f, MAX_PRECISION),
+    toPrecision(vmax * f, MAX_PRECISION),
   ]
 }
 
@@ -153,24 +158,24 @@ const getBounds = (values) => {
  * divide the difference between min and max without requiring more
  * precision when cast as a string.
  * @private
- * @param {number} min
- * @param {number} max
+ * @param {number} vmin
+ * @param {number} vmax
  * @returns {number} count
  */
-const getTicks = (min, max) => {
-  if (!Number.isFinite(min) || !Number.isFinite(max)) return 0
-  if (min === max) return 0
+const getTicks = (vmin, vmax) => {
+  if (!isFinite(vmin) || !isFinite(vmax)) return 0
+  if (vmin === vmax) return 0
 
-  const f = getScale(min, max)
+  const f = getScale(vmin, vmax)
 
-  min = toPrecision(min / f, MAX_PRECISION)
-  max = toPrecision(max / f, MAX_PRECISION)
+  vmin = toPrecision(vmin / f, MAX_PRECISION)
+  vmax = toPrecision(vmax / f, MAX_PRECISION)
 
-  let d = max - min
+  let d = vmax - vmin
 
-  if (min >= 0 || max <= 0) {
+  if (vmin >= 0 || vmax <= 0) {
     LOW_PRIMES.forEach((p) => {
-      if (d > Math.max(10, 10 * f) && d % p === 0) {
+      if (d > max(10, 10 * f) && d % p === 0) {
         d /= p
       }
     })
@@ -185,7 +190,7 @@ const getTicks = (min, max) => {
 
       return (
         decimalPlaces(dec) <= maxDecimals &&
-        (min > 0 || max < 0 || (min % mod === 0 && max % mod === 0))
+        (vmin > 0 || vmax < 0 || (vmin % mod === 0 && vmax % mod === 0))
       )
     }) || 2
   )
@@ -199,36 +204,35 @@ const getTicks = (min, max) => {
  * @returns {AxisOptions}
  */
 export const setup = (axis = {}, data, guessBounds = true) => {
-  let { min, max, ticks, label, line, spine, inset } = axis
-  let _min, _max, hasOverflow, width
+  let { min: vmin, max: vmax, ticks, label, line, spine, inset } = axis
+  let bmin, bmax, hasOverflow, width
 
-  const showLabel =
-    !!data || Number.isFinite(axis.min) || Number.isFinite(axis.max)
+  const showLabel = !!data || isFinite(axis.min) || isFinite(axis.max)
 
   if (data) {
     if (guessBounds) {
-      const values = [min, max, ...data].filter(Number.isFinite)
+      const values = [vmin, vmax, ...data].filter(isFinite)
 
       // Unless every number is an integer, assume zero should
       // appear on either end of the scale
-      if (values.some((n) => !Number.isInteger(n))) {
+      if (values.some((n) => !isInteger(n))) {
         values.push(0)
       }
 
-      ;[_min, _max] = getBounds(values)
+      ;[bmin, bmax] = getBounds(values)
     } else {
-      _min = Math.min(...data.filter(Number.isFinite))
-      _max = Math.max(...data.filter(Number.isFinite))
+      bmin = min(...data.filter(isFinite))
+      bmax = max(...data.filter(isFinite))
     }
   } else {
-    _min = 0
-    _max = ticks - 1
+    bmin = 0
+    bmax = ticks - 1
   }
 
-  hasOverflow = _min < min || _max > max
-  min = min ?? _min
-  max = max ?? _max
-  ticks = ticks ?? getTicks(min, max)
+  hasOverflow = bmin < vmin || bmax > vmax
+  vmin = vmin ?? bmin
+  vmax = vmax ?? bmax
+  ticks = ticks ?? getTicks(vmin, vmax)
   inset = inset ?? 0
 
   // If the label is an array, wrap in a function
@@ -242,11 +246,11 @@ export const setup = (axis = {}, data, guessBounds = true) => {
     // Labels will only show if their length is the same or shorter
     // than the min and max label lengths. If there are many ticks,
     // only every second tick will be labeled.
-    const length = Math.max(Math.abs(max), Math.abs(min)).toString().length
+    const length = max(abs(vmax), abs(vmin)).toString().length
 
     label = (v, i) =>
       (ticks < 8 || i % 2 === 0) &&
-      Math.abs(v).toString().length <= length &&
+      abs(v).toString().length <= length &&
       toPrecision(v, MAX_PRECISION)
   }
 
@@ -266,29 +270,30 @@ export const setup = (axis = {}, data, guessBounds = true) => {
   // If the axis displays groups, the inset shifts inwards
   if (axis.group) inset = (0.5 + inset) / ticks
 
-  if (max === min) {
+  if (vmax === vmin) {
     grid = [0.5]
     inset = 0.5
   }
 
-  const scale = (v) => (max === min ? 0.5 : pad((v - min) / (max - min), inset))
+  const scale = (v) =>
+    vmax === vmin ? 0.5 : pad((v - vmin) / (vmax - vmin), inset)
 
   if (label) {
-    width = Math.max(
+    width = max(
       ...grid
-        .map((t) => min + t * (max - min))
+        .map((t) => vmin + t * (vmax - vmin))
         .map(label)
-        .filter((t) => t.length || Number.isFinite(t))
+        .filter((t) => t.length || isFinite(t))
         .map((t) => t.toString().length)
     )
   }
 
   return {
     ...axis,
+    min: vmin,
+    max: vmax,
     grid,
     ticks,
-    min,
-    max,
     label,
     line,
     inset,
