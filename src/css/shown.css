@@ -17,6 +17,7 @@
   fill-opacity: 0.9;
   user-select: none;
 }
+
 .shown .axis,
 .shown .series-label {
   font-size: 85%;
@@ -59,6 +60,14 @@
 
 .shown .chart-bar > div {
   padding-bottom: 0.5em;
+}
+
+.shown .chart-line .series {
+  stroke-linecap: round;
+}
+
+.shown .lines {
+  overflow: hidden;
 }
 
 .shown .has-xaxis > div,

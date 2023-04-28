@@ -304,7 +304,27 @@ export default (type, axis) => {
   const txtProps =
     type === "x" ? { y: "100%", dy: "1.5em" } : { x: "-0.5em", dy: "0.33em" }
 
-  const lineProps = type === "x" ? { y2: "100%" } : { x2: "100%" }
+  const line = (t, className, d) => {
+    const props = { class: className }
+    const v = t !== 0 && utils.percent(t)
+
+    if (type === "x") {
+      props.x1 = v
+      props.x2 = v
+      props.y2 = utils.percent(1)
+    } else {
+      props.y1 = v
+      props.y2 = v
+      props.x2 = utils.percent(1)
+    }
+
+    if (d) {
+      const offset = (type === "x" ? [d, 0] : [0, -d]).join(" ")
+      props.transform = `translate(${offset})`
+    }
+
+    return $.line(props)
+  }
 
   if (axis.hasSeries && type === "x") txtProps.dy = "3em"
 
@@ -326,42 +346,19 @@ export default (type, axis) => {
         if (axis.ticks !== 1) {
           const altOffset = (0.5 - axis.inset) / (axis.ticks - 1)
 
-          const altLProps =
-            type === "x"
-              ? {
-                  x1: utils.percent(-altOffset),
-                  x2: utils.percent(-altOffset),
-                }
-              : {
-                  y1: utils.percent(-altOffset),
-                  y2: utils.percent(-altOffset),
-                }
-          const altRProps =
-            type === "x"
-              ? { x1: utils.percent(altOffset), x2: utils.percent(altOffset) }
-              : { y1: utils.percent(altOffset), y2: utils.percent(altOffset) }
-
           lines.push(
-            (axis.inset || i > 0) &&
-              $.line({
-                class: "axis-line",
-                ...lineProps,
-                ...altLProps,
-              }),
-            i === axis.grid.length - 1 &&
-              $.line({
-                class: "axis-line",
-                ...lineProps,
-                ...altRProps,
-              })
+            (axis.inset || t > 0) &&
+              line(-altOffset, "axis-line", t === 0 && 0.5),
+            t === 1 && line(altOffset, "axis-line", -0.5)
           )
         }
       } else {
         lines.push(
-          $.line({
-            class: v == 0 ? "axis-base" : "axis-line",
-            ...lineProps,
-          })
+          line(
+            0,
+            v == 0 ? "axis-base" : "axis-line",
+            t === 0 ? 0.5 : t === 1 ? -0.5 : 0
+          )
         )
       }
     }
@@ -374,15 +371,9 @@ export default (type, axis) => {
   })
 
   if (axis.spine) {
-    const spineProps = { class: "axis-spine", ...lineProps }
-
     // Add an initial line if the first line is inset
     if (!axis.line(axis.min, 0, axis) || pad(axis.grid[0], axis.inset) > 0) {
-      if (type === "x") {
-        children.unshift($.line(spineProps))
-      } else {
-        children.push($.line({ y1: "100%", y2: "100%", ...spineProps }))
-      }
+      children.unshift(line(0, "axis-spine", 0.5))
     }
 
     // Add a final line if the last line is inset
@@ -390,11 +381,7 @@ export default (type, axis) => {
       !axis.line(axis.max, axis.ticks - 1, axis) ||
       pad(axis.grid[axis.grid.length - 1], axis.inset) < 1
     ) {
-      if (type === "x") {
-        children.push($.line({ x1: "100%", x2: "100%", ...spineProps }))
-      } else {
-        children.unshift($.line(spineProps))
-      }
+      children.push(line(1, "axis-spine", -0.5))
     }
   }
 
