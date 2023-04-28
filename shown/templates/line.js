@@ -1,5 +1,8 @@
 import $ from "../lib/dom/index.js"
-import utils from "../lib/utils.js"
+import percent from "../lib/utils/percent.js"
+import sum from "../lib/utils/sum.js"
+import interpolate from "../lib/utils/interpolate.js"
+import { isFinite } from "../lib/utils/math.js"
 import curve from "../lib/curve.js"
 import Map from "../lib/map.js"
 import legendTemplate from "./legend.js"
@@ -35,23 +38,28 @@ const SVGLINE_VIEWPORT_H = SVGLINE_VIEWPORT_W
  * respective curve functions, and joins them together into a path.
  * @private
  * @param {number[]} points
- * @param {function(Point, number): boolean} toPoint
- * @param {boolean} skip
- * @returns {number} ticks
+ * @param {Axis} xAxis
+ * @param {Axis} yAxis
+ * @param {boolean} showGaps
+ * @returns {string} path
  */
-const linePath = (points, toPoint, skip) =>
-  points
-    .reduce((m, d, i) => {
+const linePath = (points, xAxis, yAxis, showGaps) => {
+  let path = points
+    .reduce((m, d) => {
       const l = m[m.length - 1]
-      const p = toPoint(d, i)
 
-      if (!p) {
-        if (skip) {
+      if (!(isFinite(d.x) && isFinite(d.y))) {
+        if (showGaps) {
           return [...m, { curve: d.curve, points: [] }]
         } else {
           return m
         }
       }
+
+      const p = [
+        SVGLINE_VIEWPORT_W * xAxis.scale(d.x),
+        SVGLINE_VIEWPORT_H * (1 - yAxis.scale(d.y)),
+      ]
 
       if (l) l.points.push(p)
 
@@ -63,16 +71,62 @@ const linePath = (points, toPoint, skip) =>
     }, [])
     .map((l) => {
       let args = []
+      let path
+      let type = l.curve
 
       // Some curve types allow other parameters to be passed to the curve
       // function. For example, setting the tension on "monotone" or "bump".
-      if (Array.isArray(l.curve)) {
-        ;[l.curve, ...args] = l.curve
+      if (Array.isArray(type)) {
+        ;[type, ...args] = type
       }
 
-      return curve[l.curve](l.points, ...args)
+      path = curve[type](l.points, ...args)
+
+      return path
     })
     .join("")
+
+  return path
+}
+
+/**
+ * An area path is constructed using the linePath of the current and next line,
+ * or the baseline when it is the final line.
+ * @private
+ * @param {number[]} line1
+ * @param {number[]} line2
+ * @param {Axis} xAxis
+ * @param {Axis} yAxis
+ * @returns {string} path
+ */
+const areaPath = (line1, line2, xAxis, yAxis) => {
+  const path1 = linePath(line1, xAxis, yAxis, false)
+
+  // The first path reverses along the baseline
+  if (!line2) {
+    return (
+      path1 +
+      `L${SVGLINE_VIEWPORT_W},${SVGLINE_VIEWPORT_H}L0,${SVGLINE_VIEWPORT_H}Z`
+    )
+  }
+
+  // Some curves are asymmetric and need to be mirrored
+  const mirror = {
+    stepX: "stepY",
+    stepY: "stepX",
+  }
+
+  line2 = line2
+    .map((d) => ({
+      ...d,
+      curve: mirror[d.curve] || d.curve,
+    }))
+    .reverse()
+
+  const path2 = linePath(line2, xAxis, yAxis, false)
+
+  return path1 + "L" + path2.slice(1) + "Z"
+}
 
 /**
  * Generate a line chart.
@@ -93,7 +147,9 @@ const linePath = (points, toPoint, skip) =>
  * Overrides for the y-axis. See {@link AxisOptions} for more details.
  * @param {Boolean} [options.showGaps]
  * Points in the line with non-finite values are rendered as broken lines
- * where data is unavailable. Set to `false` to ignore missing values instead.
+ * where data is unavailable. Set to `false` to skip missing values instead.
+ * @param {Boolean} [options.area] Render the line chart as an area chart.
+ * @param {boolean} [options.sorted] - Whether to sort the values.
  * @returns {string} Rendered chart
  *
  * @example
@@ -139,7 +195,6 @@ const linePath = (points, toPoint, skip) =>
  *   xAxis: { label: ["A", "B", "C", "D", "E"], inset: 0.1 },
  * })
  */
-
 export default ({
   data,
   title,
@@ -148,6 +203,8 @@ export default ({
   showGaps = true,
   xAxis,
   yAxis,
+  area = false,
+  sorted = false,
 }) => {
   data = Array.isArray(data[0]) ? data : [data]
 
@@ -171,6 +228,44 @@ export default ({
 
   data = map(data)
 
+  if (sorted) {
+    data.sort((al, bl) => {
+      const a = sum(al)
+      const b = sum(bl)
+
+      return a === b ? 0 : a > b ? 1 : -1
+    })
+  }
+
+  if (area) {
+    // For lines with fewer points, continue along the baseline
+    data.forEach((line, i) => {
+      const curve = line.at(-1)?.curve
+      while (line.length < maxLength) {
+        line.push({ x: map.x({}, i, line.length), y: 0, ignore: true, curve })
+      }
+    })
+
+    // If a line is discontinuous at a point where the previous is not,
+    // interpolate an average value for that point
+    data.slice(1).forEach((next, j) => {
+      const prev = data[j]
+
+      const prevBase = interpolate(prev.map((d) => d.y))
+      const nextBase = interpolate(next.map((d) => d.y))
+
+      next.forEach((item, i) => {
+        if (isFinite(prev[i]?.y) && !isFinite(item.y)) {
+          item.y = nextBase[i]
+        }
+
+        if (isFinite(item.y)) {
+          item.y += prevBase[i]
+        }
+      })
+    })
+  }
+
   // prettier-ignore
   const axes = {
     x: setupAxis( xAxis, data.flat().map((d) => d.x), false ),
@@ -179,10 +274,32 @@ export default ({
 
   const axisX = axisTemplate("x", axes.x)
   const axisY = axisTemplate("y", axes.y)
+  const viewBox = `0 0 ${SVGLINE_VIEWPORT_W} ${SVGLINE_VIEWPORT_H}`
+
+  const areas =
+    area &&
+    $.svg({
+      class: "areas",
+      viewBox,
+      preserveAspectRatio: "none",
+      style: (axes.x.hasOverflow || axes.y.hasOverflow) && "overflow: hidden;",
+    })(
+      data
+        .filter((line) => line.length > 0)
+        .reverse()
+        .map((line, i, arr) =>
+          $.path({
+            "class": ["series", "series-" + i],
+            "vector-effect": "non-scaling-stroke",
+            "fill": line[0].color[0],
+            "d": areaPath(line, arr[i + 1], axes.x, axes.y),
+          })
+        )
+    )
 
   const lines = $.svg({
     class: "lines",
-    viewBox: `0 0 ${SVGLINE_VIEWPORT_W} ${SVGLINE_VIEWPORT_H}`,
+    viewBox,
     preserveAspectRatio: "none",
     style: (axes.x.hasOverflow || axes.y.hasOverflow) && "overflow: hidden;",
   })(
@@ -194,16 +311,7 @@ export default ({
           "vector-effect": "non-scaling-stroke",
           "stroke": line[0].color[0],
           "fill": "none",
-          "d": linePath(
-            line,
-            (d) =>
-              Number.isFinite(d.x) &&
-              Number.isFinite(d.y) && [
-                SVGLINE_VIEWPORT_W * axes.x.scale(d.x),
-                SVGLINE_VIEWPORT_H * (1 - axes.y.scale(d.y)),
-              ],
-            showGaps
-          ),
+          "d": linePath(line, axes.x, axes.y, showGaps),
         })
       )
   )
@@ -215,18 +323,17 @@ export default ({
       (data, j) =>
         data.find((d) => d.shape) &&
         $.svg({
-          "class": ["series", "series-" + j],
-          "text-anchor": "middle",
-          "color": data[0]?.color[0],
+          class: ["series", "series-" + j],
+          color: data[0]?.color[0],
         })(
           data.map((d) => {
             return (
-              Number.isFinite(d.x) &&
-              Number.isFinite(d.y) &&
+              isFinite(d.x) &&
+              isFinite(d.y) &&
               d.shape &&
               $.use({
-                x: utils.percent(axes.x.scale(d.x)),
-                y: utils.percent(1 - axes.y.scale(d.y)),
+                x: percent(axes.x.scale(d.x)),
+                y: percent(1 - axes.y.scale(d.y)),
                 href: `#symbol-${d.shape}`,
                 width: "1em",
                 height: "1em",
@@ -246,7 +353,7 @@ export default ({
     $.div({
       class: [
         "chart",
-        "chart-line",
+        area ? "chart-area" : "chart-line",
         axes.x.label && "has-xaxis xaxis-w" + axes.x.width,
         axes.y.label && "has-yaxis yaxis-w" + axes.y.width,
       ],
@@ -268,6 +375,7 @@ export default ({
           description && $.desc()(description),
           axisY,
           axisX,
+          areas,
           lines,
           symbols,
         ])

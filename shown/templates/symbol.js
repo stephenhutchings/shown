@@ -23,7 +23,7 @@ const symbol = (type) => {
 
   if (type === "diamond") {
     symbol = $.path({
-      d: "M0-5L5,0L0,5L-5,0Z",
+      d: "M0-5.5L5.5,0L0,5.5L-5.5,0Z",
     })
   }
 

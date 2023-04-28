@@ -1,5 +1,6 @@
 import { get as getColor, wrap as wrapColor } from "./color.js"
-import utils from "./utils.js"
+import decimalPlaces from "./utils/decimal-places.js"
+import { min, max, isFinite } from "./utils/math.js"
 
 /**
  * To render a chart, the data you supply is mapped to various
@@ -34,12 +35,12 @@ import utils from "./utils.js"
  * Parse the x-axis value from the data. This function is useful if your
  * data structure wraps each value in an object.
  * The default function returns the _index_ of the item.
- * **Line and Scatter Chart only**
+ * **Line, Area and Scatter Chart only**
  * @property {Function|number[]|number} [y]
  * Parse the y-axis value from the data. This function is useful if your
  * data structure wraps each value in an object.
  * The default function returns the _value_ of the item.
- * **Line and Scatter Chart only**
+ * **Line, Area and Scatter Chart only**
  * @property {Function|number[]|number} [r]
  * Parse the radial size from the data. This function is useful if you want to
  * visualise another dimension in the data. If the radius is not greater
@@ -79,7 +80,8 @@ import utils from "./utils.js"
  * @property {Function|Object[]|Object} [attrs]
  * Set attributes on the DOM element that corresponds to a data point. This
  * function is useful if you want to override or add arbitrary attributes on the
- * chart.
+ * chart. For example, you could add a `data-tooltip` attribute to trigger
+ * tooltips using a JavaScript library.
  */
 
 const defaults = {
@@ -127,18 +129,18 @@ const Map = function (
   }
 
   const values = data.map(map.y || map.value)
-  const places = Math.min(Math.max(...values.map(utils.decimalPlaces)), 2)
+  const places = min(max(...values.map(decimalPlaces)), 2)
 
   // By default, a label will only show when it exceeds the minimum value
   // specified by a chart. It uses the largest number of decimal places found
   // across all values in the provided data.
   if (map.label === undefined || map.label === true) {
-    const max = Math.max(...values)
+    const maxValue = max(...values)
 
     map.label = (v) =>
       (v = map.value(v)) &&
-      Number.isFinite(v) &&
-      v / max >= minValue &&
+      isFinite(v) &&
+      v / maxValue >= minValue &&
       v.toFixed(places)
   }
 
@@ -151,8 +153,7 @@ const Map = function (
   // By default, a tally is formatted using the largest number of decimal
   // places found across all values in the provided data.
   if (map.tally === true) {
-    map.tally = (v) =>
-      (v = map.value(v)) && Number.isFinite(v) && v.toFixed(places)
+    map.tally = (v) => (v = map.value(v)) && isFinite(v) && v.toFixed(places)
   }
 
   // Maps may use a shorthand syntax by providing an array rather than a

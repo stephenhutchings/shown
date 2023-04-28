@@ -2,21 +2,23 @@ import monotone from "./curve/monotone.js"
 import bump from "./curve/bump.js"
 import linear from "./curve/linear.js"
 import { stepX, stepY, stepMidX, stepMidY } from "./curve/step.js"
+import { isFinite } from "./utils/math.js"
 
 const FIXED = 2
 
-const filter = (p) => Number.isFinite(p[0]) && Number.isFinite(p[1])
+const finite = (line) => line.filter(([x, y]) => isFinite(x) && isFinite(y))
+
+const toPath = (path, d) =>
+  path +
+  // Add spaces between consecutive numbers (unless negative)
+  (d >= 0 && isFinite(+path.slice(-1)[0]) ? " " : "") +
+  // Limit decimals in the path string
+  (isFinite(d) ? +d.toFixed(FIXED) : d)
 
 const wrap =
-  (fn) =>
-  (p, ...args) =>
-    fn(p.filter(filter), ...args)
-      .map(
-        (v, i, a) =>
-          (Number.isFinite(v) && Number.isFinite(a[i - 1]) ? " " : "") +
-          (Number.isFinite(v) ? +v.toFixed(FIXED) : v)
-      )
-      .join("")
+  (curve) =>
+  (line, ...args) =>
+    curve(finite(line), ...args).reduce(toPath, "")
 
 export default {
   linear: wrap(linear),
