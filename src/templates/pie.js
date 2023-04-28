@@ -1,12 +1,14 @@
 import $ from "../lib/dom/index.js"
-import utils from "../lib/utils.js"
+import percent from "../lib/utils/percent.js"
+import sum from "../lib/utils/sum.js"
+import toPrecision from "../lib/utils/to-precision.js"
 import Map from "../lib/map.js"
 import wrap from "./wrap.js"
 import legendTemplate from "./legend.js"
 
 const tau = Math.PI * 2
 
-const arc = (t, r) => utils.percent((t % 1) * tau * r)
+const arc = (t, r) => percent((t % 1) * tau * r)
 
 /**
  * Calculate the bounds based on the portion of the circle
@@ -24,8 +26,8 @@ const getBounds = (t0, t1) => {
   if (t0 < 0.25 && t1 > 0.25) ts.push(0.25)
   if (t0 < 0.5 && t1 > 0.5) ts.push(0.5)
 
-  const xs = ts.map((t) => utils.toPrecision(Math.cos(t * tau) / 2))
-  const ys = ts.map((t) => utils.toPrecision(Math.sin(t * tau) / 2))
+  const xs = ts.map((t) => toPrecision(Math.cos(t * tau) / 2))
+  const ys = ts.map((t) => toPrecision(Math.sin(t * tau) / 2))
 
   const maxX = Math.max(...xs)
   const minX = Math.min(...xs)
@@ -107,12 +109,12 @@ export default ({
 
   const bounds = getBounds(startAngle, endAngle)
 
-  const total = utils.sum(data)
+  const total = sum(data)
   const scale = endAngle - startAngle
 
   const segments = data.map((d, i) => {
     const t = (d.value / total) * scale
-    const o = startAngle + (utils.sum(data.slice(0, i)) / total) * scale
+    const o = startAngle + (sum(data.slice(0, i)) / total) * scale
 
     const radius = (1 - d.width / 2) / 2
     const dashoffset = arc(-o, radius)
@@ -126,7 +128,7 @@ export default ({
 
     return $.g({
       "class": `segment segment-${i}`,
-      "aria-label": `${d.label} (${utils.percent(t)})`,
+      "aria-label": `${d.label} (${percent(t)})`,
       "attrs": d.attrs,
     })([
       $.svg({
@@ -135,19 +137,19 @@ export default ({
         $.circle({
           "class": "segment-arc",
           "role": "presentation",
-          "r": utils.percent(radius),
+          "r": percent(radius),
           "stroke": d.color[0],
           "stroke-dasharray": dasharray,
           "stroke-dashoffset": dashoffset,
-          "stroke-width": utils.percent(d.width / 2),
+          "stroke-width": percent(d.width / 2),
           "fill": "none",
         })
       ),
       d.label &&
         $.text({
           class: "segment-label",
-          x: utils.percent(x),
-          y: utils.percent(y),
+          x: percent(x),
+          y: percent(y),
           dy: "0.33em",
           role: "presentation",
           color: d.color[1],
@@ -174,10 +176,10 @@ export default ({
           title && $.title()(title),
           description && $.desc()(description),
           $.svg({
-            "x": utils.percent(0.5 - (bounds.x + bounds.w / 2) / bounds.w),
-            "y": utils.percent(0.5 - (bounds.y + bounds.h / 2) / bounds.h),
-            "width": utils.percent(1 / bounds.w),
-            "height": utils.percent(1 / bounds.h),
+            "x": percent(0.5 - (bounds.x + bounds.w / 2) / bounds.w),
+            "y": percent(0.5 - (bounds.y + bounds.h / 2) / bounds.h),
+            "width": percent(1 / bounds.w),
+            "height": percent(1 / bounds.h),
             "role": "presentation",
             "text-anchor": "middle",
           })(segments),

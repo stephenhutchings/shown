@@ -1,5 +1,5 @@
 import { get as getColor, wrap as wrapColor } from "./color.js"
-import utils from "./utils.js"
+import decimalPlaces from "./utils/decimal-places.js"
 
 /**
  * To render a chart, the data you supply is mapped to various
@@ -127,7 +127,7 @@ const Map = function (
   }
 
   const values = data.map(map.y || map.value)
-  const places = Math.min(Math.max(...values.map(utils.decimalPlaces)), 2)
+  const places = Math.min(Math.max(...values.map(decimalPlaces)), 2)
 
   // By default, a label will only show when it exceeds the minimum value
   // specified by a chart. It uses the largest number of decimal places found

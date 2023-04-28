@@ -1,5 +1,9 @@
 import $ from "../lib/dom/index.js"
-import utils from "../lib/utils.js"
+
+import decimalPlaces from "../lib/utils/decimal-places.js"
+import magnitude from "../lib/utils/magnitude.js"
+import percent from "../lib/utils/percent.js"
+import toPrecision from "../lib/utils/to-precision.js"
 
 // The number of ticks to use, in preferential order.
 const TICKCOUNT_ORDER = [5, 6, 7, 8, 4, 9, 3, 10, 11, 12, 13]
@@ -53,10 +57,10 @@ const pad = (t, inset = 0) => inset + (1 - inset * 2) * t
  * @returns {number} scale
  */
 const getScale = (min, max) => {
-  let m = Math.max(utils.magnitude(min), utils.magnitude(max))
+  let m = Math.max(magnitude(min), magnitude(max))
 
   // The magnitude should be no greater than the difference
-  m = Math.min(m, utils.magnitude(max - min))
+  m = Math.min(m, magnitude(max - min))
 
   // Deal with integers from here
   let scale = Math.pow(10, m)
@@ -108,8 +112,8 @@ const getScale = (min, max) => {
 const getBounds = (values) => {
   if (values.length === 0) return [0, 1]
 
-  let min = utils.toPrecision(Math.min(...values), MAX_PRECISION)
-  let max = utils.toPrecision(Math.max(...values), MAX_PRECISION)
+  let min = toPrecision(Math.min(...values), MAX_PRECISION)
+  let max = toPrecision(Math.max(...values), MAX_PRECISION)
 
   if (min === max) {
     // All values are zero
@@ -139,8 +143,8 @@ const getBounds = (values) => {
   }
 
   return [
-    utils.toPrecision(min * f, MAX_PRECISION),
-    utils.toPrecision(max * f, MAX_PRECISION),
+    toPrecision(min * f, MAX_PRECISION),
+    toPrecision(max * f, MAX_PRECISION),
   ]
 }
 
@@ -159,8 +163,8 @@ const getTicks = (min, max) => {
 
   const f = getScale(min, max)
 
-  min = utils.toPrecision(min / f, MAX_PRECISION)
-  max = utils.toPrecision(max / f, MAX_PRECISION)
+  min = toPrecision(min / f, MAX_PRECISION)
+  max = toPrecision(max / f, MAX_PRECISION)
 
   let d = max - min
 
@@ -172,15 +176,15 @@ const getTicks = (min, max) => {
     })
   }
 
-  const maxDecimals = utils.decimalPlaces(utils.toPrecision(d, MAX_PRECISION))
+  const maxDecimals = decimalPlaces(toPrecision(d, MAX_PRECISION))
 
   return (
     TICKCOUNT_ORDER.find((n) => {
-      const mod = utils.toPrecision(d / (n - 1), MAX_PRECISION)
-      const dec = utils.toPrecision(mod, MAX_PRECISION)
+      const mod = toPrecision(d / (n - 1), MAX_PRECISION)
+      const dec = toPrecision(mod, MAX_PRECISION)
 
       return (
-        utils.decimalPlaces(dec) <= maxDecimals &&
+        decimalPlaces(dec) <= maxDecimals &&
         (min > 0 || max < 0 || (min % mod === 0 && max % mod === 0))
       )
     }) || 2
@@ -243,7 +247,7 @@ export const setup = (axis = {}, data, guessBounds = true) => {
     label = (v, i) =>
       (ticks < 8 || i % 2 === 0) &&
       Math.abs(v).toString().length <= length &&
-      utils.toPrecision(v, MAX_PRECISION)
+      toPrecision(v, MAX_PRECISION)
   }
 
   // If the label is an array, wrap in a function
@@ -306,16 +310,16 @@ export default (type, axis) => {
 
   const line = (t, className, d) => {
     const props = { class: className }
-    const v = t !== 0 && utils.percent(t)
+    const v = t !== 0 && percent(t)
 
     if (type === "x") {
       props.x1 = v
       props.x2 = v
-      props.y2 = utils.percent(1)
+      props.y2 = percent(1)
     } else {
       props.y1 = v
       props.y2 = v
-      props.x2 = utils.percent(1)
+      props.x2 = percent(1)
     }
 
     if (d) {
@@ -329,10 +333,7 @@ export default (type, axis) => {
   if (axis.hasSeries && type === "x") txtProps.dy = "3em"
 
   const children = axis.grid.map((t, i) => {
-    const v = utils.toPrecision(
-      axis.min + (axis.max - axis.min) * t,
-      MAX_PRECISION
-    )
+    const v = toPrecision(axis.min + (axis.max - axis.min) * t, MAX_PRECISION)
     const lines = []
 
     if (axis.label) {
@@ -365,8 +366,8 @@ export default (type, axis) => {
 
     return $.svg(
       type === "x"
-        ? { x: utils.percent(pad(t, axis.inset)) }
-        : { y: utils.percent(pad(1 - t, axis.inset)) }
+        ? { x: percent(pad(t, axis.inset)) }
+        : { y: percent(pad(1 - t, axis.inset)) }
     )(lines)
   })
 

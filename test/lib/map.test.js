@@ -1,7 +1,7 @@
 import { jest } from "@jest/globals"
 
 import map from "../../src/lib/map.js"
-import utils from "../../src/lib/utils.js"
+import sum from "../../src/lib/utils/sum.js"
 
 describe("map", () => {
   test("to return a converter function", () => {
@@ -41,7 +41,7 @@ describe("map", () => {
     expect(
       map(
         {},
-        d.map((d) => utils.sum(d)),
+        d.map((d) => sum(d)),
         o
       )(d)
     ).toStrictEqual([

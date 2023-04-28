@@ -1,5 +1,5 @@
 import $ from "../lib/dom/index.js"
-import utils from "../lib/utils.js"
+import percent from "../lib/utils/percent.js"
 import Map from "../lib/map.js"
 import legendTemplate from "./legend.js"
 import symbolTemplate from "./symbol.js"
@@ -99,8 +99,8 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
             d.r > 0 &&
             d.shape &&
             $.use({
-              x: utils.percent(axes.x.scale(d.x)),
-              y: utils.percent(1 - axes.y.scale(d.y)),
+              x: percent(axes.x.scale(d.x)),
+              y: percent(1 - axes.y.scale(d.y)),
               href: `#symbol-${d.shape}`,
               width: `${d.r}em`,
               height: `${d.r}em`,

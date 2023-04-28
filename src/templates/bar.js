@@ -1,6 +1,7 @@
 import $ from "../lib/dom/index.js"
 import { get as getColor } from "../lib/color.js"
-import utils from "../lib/utils.js"
+import sum from "../lib/utils/sum.js"
+import percent from "../lib/utils/percent.js"
 import Map from "../lib/map.js"
 import legendTemplate from "./legend.js"
 import { default as axisTemplate, setup as setupAxis } from "./axis.js"
@@ -154,14 +155,14 @@ export default ({
       width: 0.6,
       ...map,
     },
-    stack ? data.flat().map((d) => utils.sum(d)) : data.flat(2),
+    stack ? data.flat().map((d) => sum(d)) : data.flat(2),
     { minValue: 0.05 }
   )
 
   data = map(data)
 
   const maxWidth = Math.max(...data.flat(2).map((d) => d.width))
-  const values = data.flat().map((d) => utils.sum(d))
+  const values = data.flat().map((d) => sum(d))
 
   xAxis = {
     ticks: data.length,
@@ -190,10 +191,8 @@ export default ({
   const bars = $.svg({ class: "values" })(
     data.map((series, k) =>
       $.svg({
-        x: data.length > 1 && utils.percent(axes.x.scale(k - 0.5)),
-        width: utils.percent(
-          data.length > 1 ? axes.x.scale(1) - axes.x.scale(0) : 1
-        ),
+        x: data.length > 1 && percent(axes.x.scale(k - 0.5)),
+        width: percent(data.length > 1 ? axes.x.scale(1) - axes.x.scale(0) : 1),
         class: ["group", "group-" + k],
       })(
         series.map((stack, j) => {
@@ -201,34 +200,32 @@ export default ({
           const w = maxWidth / maxSeries
           const x = g * (j + 1.5) + w * (j + 0.5)
 
-          const tally = map.tally(utils.sum(stack))
+          const tally = map.tally(sum(stack))
 
           return $.svg({
             class: ["series", "series-" + j],
-            x: utils.percent(x),
-            width: utils.percent(w),
+            x: percent(x),
+            width: percent(w),
           })([
             ...stack.map((d, i) => {
               if (!d.value) return
 
               const w = d.width / maxWidth
               const h = axes.y.scale(d.value)
-              const y = axes.y.scale(
-                axes.y.max - utils.sum(stack.slice(0, i + 1))
-              )
+              const y = axes.y.scale(axes.y.max - sum(stack.slice(0, i + 1)))
 
               const rect = $.rect({
-                x: utils.percent(-w / 2),
-                y: utils.percent(y),
-                height: utils.percent(h),
-                width: utils.percent(w),
+                x: percent(-w / 2),
+                y: percent(y),
+                height: percent(h),
+                width: percent(w),
                 fill: d.color[0],
               })
 
               const text =
                 d.label &&
                 $.text({
-                  y: utils.percent(y + h / 2),
+                  y: percent(y + h / 2),
                   dy: "0.33em",
                   color: d.color[1],
                 })(d.label)
@@ -240,7 +237,7 @@ export default ({
             }),
             tally &&
               $.text({
-                y: utils.percent(axes.y.scale(axes.y.max - utils.sum(stack))),
+                y: percent(axes.y.scale(axes.y.max - sum(stack))),
                 dy: "-0.5em",
               })(tally),
             stack[0] &&
