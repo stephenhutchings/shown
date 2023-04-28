@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/stephenhutchings/shown/compare/v1.1.0...v1.1.1) (2023-04-28)
+
+
+### Bug Fixes
+
+* Avoid nullish coalescing for Node 14 ([0df8fbd](https://github.com/stephenhutchings/shown/commit/0df8fbd7ef9a40077c729123f131cdc0e0b89581))
+* Handle empty mapped x values ([8920ed0](https://github.com/stephenhutchings/shown/commit/8920ed0feb92841e3e5b32d5f41e27bb76940853))
+* Node 14 does not support Array.prototype.at ([2ed13ce](https://github.com/stephenhutchings/shown/commit/2ed13ce29da5f9074f988e08a1e2b7cbe317d497))
+
 ## [1.1.0](https://github.com/stephenhutchings/shown/compare/v1.0.7...v1.1.0) (2023-04-28)
 
 
