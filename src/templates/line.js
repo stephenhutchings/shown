@@ -240,7 +240,7 @@ export default ({
   if (area) {
     // For lines with fewer points, continue along the baseline
     data.forEach((line, i) => {
-      const curve = line.at(-1)?.curve
+      const curve = line.slice(-1)[0]?.curve
       while (line.length < maxLength) {
         line.push({ x: map.x({}, i, line.length), y: 0, ignore: true, curve })
       }

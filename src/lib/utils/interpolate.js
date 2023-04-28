@@ -11,10 +11,10 @@ export default (values) => {
 
   return values.reduce((stack, next, i) => {
     if (isFinite(next) || i === values.length - 1) {
-      next = next ?? stack.at(-1)
+      next = next ?? stack.slice(-1)[0]
 
       if (count > 0) {
-        const prev = stack.at(-1) ?? next
+        const prev = stack.slice(-1)[0] ?? next
         const delta = 1 / (count + 1)
         const index = stack.length
 
