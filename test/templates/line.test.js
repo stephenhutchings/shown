@@ -50,7 +50,7 @@ describe("line", () => {
         data,
         map: { curve: () => ["bump", 1 / 2] },
       })
-    ).toMatch('d="M0 100c25 0 25 -100 50 -100M50 0c25 0 25 50 50 50M100 50"')
+    ).toMatch('d="M0 100c25 0 25-100 50-100M50 0c25 0 25 50 50 50M100 50"')
   })
 
   test("handles shapes", () => {

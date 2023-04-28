@@ -1,5 +1,60 @@
 declare module "shown" {
     /**
+     * Generate an area chart.
+     * @example
+     * shown.area({
+     *   title: "Stacked area chart",
+     *   data: [
+     *      [52.86, 20.65, 14.54, 10.09,  8.41],
+     *      [21.97, 31.71,  6.31, 17.85, 23.53],
+     *      [ 6.73, 10.84, 37.62, 45.79, 53.32],
+     *      [38.44, 50.79, 22.31, 31.82,  7.64],
+     *   ],
+     *   map: {
+     *     curve: "monotone",
+     *     key: ["α", "β", "γ", "δ"],
+     *   },
+     *   sorted: true,
+     * })
+     * @example
+     * shown.area({
+     *   title: "Discontinuous data is interpolated",
+     *   data: [
+     *     [ 12.2, 19.2, 35.9, 88.1, 12.8, 48.2,      ],
+     *     [ 25.7, 10.1, 48.5, 84.4, 39.6,            ],
+     *     [ 11.0, 43.5, 68.4, 79.6, null, null, 35.4 ],
+     *     [ 20.3, null, 17.5, 71.6, 67.1, 64.1, 25.4 ],
+     *   ],
+     *   map: {
+     *     key: ["A", "B", "C", "D"],
+     *   },
+     * })
+     * @param options - Data and display options for the chart. Area charts
+     * are a wrapper for line charts, with the default options for `sorted` and
+     * `area` set to true.
+     * @param options.data - The data for this chart. Data can
+     * be passed either as a flat array for a single line, or nested arrays
+     * for multiple lines.
+     * @param [options.title] - The title for this chart, set to the
+     * `<title>` element for better accessibility.
+     * @param [options.description] - The description for this chart, set
+     * to the `<desc>` element for better accessibility.
+     * @param [options.map] - Controls for transforming data. See {@link MapOptions} for more details.
+     * @param [options.xAxis] - Overrides for the x-axis. See {@link AxisOptions} for more details.
+     * @param [options.yAxis] - Overrides for the y-axis. See {@link AxisOptions} for more details.
+     * @param [options.sorted] - Whether to sort the values.
+     * @returns Rendered chart
+     */
+    function area(options: {
+        data: any[];
+        title?: string;
+        description?: string;
+        map?: MapOptions;
+        xAxis?: AxisOptions;
+        yAxis?: AxisOptions;
+        sorted?: boolean;
+    }): string;
+    /**
      * Generate a bar chart.
      * @example
      * shown.bar({
@@ -168,7 +223,9 @@ declare module "shown" {
      * @param [options.xAxis] - Overrides for the x-axis. See {@link AxisOptions} for more details.
      * @param [options.yAxis] - Overrides for the y-axis. See {@link AxisOptions} for more details.
      * @param [options.showGaps] - Points in the line with non-finite values are rendered as broken lines
-     * where data is unavailable. Set to `false` to ignore missing values instead.
+     * where data is unavailable. Set to `false` to skip missing values instead.
+     * @param [options.area] - Render the line chart as an area chart.
+     * @param [options.sorted] - Whether to sort the values.
      * @returns Rendered chart
      */
     function line(options: {
@@ -179,6 +236,8 @@ declare module "shown" {
         xAxis?: AxisOptions;
         yAxis?: AxisOptions;
         showGaps?: boolean;
+        area?: boolean;
+        sorted?: boolean;
     }): string;
     /**
      * Generate a pie chart.
@@ -315,11 +374,11 @@ declare module "shown" {
  * @property [x] - Parse the x-axis value from the data. This function is useful if your
  * data structure wraps each value in an object.
  * The default function returns the _index_ of the item.
- * **Line and Scatter Chart only**
+ * **Line, Area and Scatter Chart only**
  * @property [y] - Parse the y-axis value from the data. This function is useful if your
  * data structure wraps each value in an object.
  * The default function returns the _value_ of the item.
- * **Line and Scatter Chart only**
+ * **Line, Area and Scatter Chart only**
  * @property [r] - Parse the radial size from the data. This function is useful if you want to
  * visualise another dimension in the data. If the radius is not greater
  * than zero, the item isn't be rendered.
@@ -349,7 +408,8 @@ declare module "shown" {
  * @property [series] - Select the series key for the supplied data.
  * @property [attrs] - Set attributes on the DOM element that corresponds to a data point. This
  * function is useful if you want to override or add arbitrary attributes on the
- * chart.
+ * chart. For example, you could add a `data-tooltip` attribute to trigger
+ * tooltips using a JavaScript library.
  */
 declare type MapOptions = {
     value?: ((...params: any[]) => any) | number[] | number;

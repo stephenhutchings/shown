@@ -1,6 +1,8 @@
-import { sign, min, abs, clamp } from "../utils/math.js"
+import { min, abs, clamp } from "../utils/math.js"
 
 const TENSION = 1 / 3
+
+const sign = (v) => (v < 0 ? -1 : 1)
 
 const slope = (x0, y0, x1, y1, x2, y2) => {
   const h0 = x1 - x0
@@ -13,7 +15,9 @@ const slope = (x0, y0, x1, y1, x2, y2) => {
 }
 
 const curve = (x0, y0, x1, y1, s0, s1, alpha) => {
-  const delta = (x1 - x0) * alpha
+  const ratio = abs((y1 - y0) / (x1 - x0))
+  const scale = clamp(ratio, 1, 1.5)
+  const delta = (x1 - x0) * alpha * scale
 
   return ["C", x0 + delta, y0 + delta * s0, x1 - delta, y1 - delta * s1, x1, y1]
 }

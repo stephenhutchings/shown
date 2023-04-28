@@ -35,12 +35,12 @@ import { min, max, isFinite } from "./utils/math.js"
  * Parse the x-axis value from the data. This function is useful if your
  * data structure wraps each value in an object.
  * The default function returns the _index_ of the item.
- * **Line and Scatter Chart only**
+ * **Line, Area and Scatter Chart only**
  * @property {Function|number[]|number} [y]
  * Parse the y-axis value from the data. This function is useful if your
  * data structure wraps each value in an object.
  * The default function returns the _value_ of the item.
- * **Line and Scatter Chart only**
+ * **Line, Area and Scatter Chart only**
  * @property {Function|number[]|number} [r]
  * Parse the radial size from the data. This function is useful if you want to
  * visualise another dimension in the data. If the radius is not greater
@@ -80,7 +80,8 @@ import { min, max, isFinite } from "./utils/math.js"
  * @property {Function|Object[]|Object} [attrs]
  * Set attributes on the DOM element that corresponds to a data point. This
  * function is useful if you want to override or add arbitrary attributes on the
- * chart.
+ * chart. For example, you could add a `data-tooltip` attribute to trigger
+ * tooltips using a JavaScript library.
  */
 
 const defaults = {

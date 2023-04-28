@@ -62,12 +62,18 @@
   padding-bottom: 0.5em;
 }
 
+.shown .chart-area .series,
 .shown .chart-line .series {
   stroke-linecap: round;
 }
 
+.shown .areas,
 .shown .lines {
   overflow: hidden;
+}
+
+.shown .areas {
+  opacity: 0.9;
 }
 
 .shown .has-xaxis > div,

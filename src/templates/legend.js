@@ -13,7 +13,7 @@ import symbolTemplate from "./symbol.js"
 const shape = (type, color, includeLine) => {
   let symbol = ""
 
-  if (type) {
+  if (type && type !== "none") {
     symbol = [
       includeLine &&
         $.line({

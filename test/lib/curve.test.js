@@ -42,7 +42,7 @@ describe("curve", () => {
 
   test("renders bump curve", () => {
     expect(curve.bump(points)).toBe(
-      "M0 0c0.4 0 0.6 0 1 0c0.4 0 0.6 3 1 3c0 0 0 -1 0 -1"
+      "M0 0c0.4 0 0.6 0 1 0c0.4 0 0.6 3 1 3c0 0 0-1 0-1"
     )
   })
 })
