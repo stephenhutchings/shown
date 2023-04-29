@@ -9,7 +9,9 @@ import { min, max, isFinite } from "./utils/math.js"
  *
  * Each option can be declared as a function. The function is passed the
  * original datum and indices that correspond to how deeply the datum is nested.
- * For example, bar chart data may be nested up to three levels
+ * For example, bar chart data may be nested up to three levels, while a pie
+ * chart's data is always a flat array. Indices start from the top-level array
+ * and continue downwards.
  *
  * However, it's often useful to use a shorthand syntax instead. If the
  * property is an array, the array item at the index corresponding to the
