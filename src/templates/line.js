@@ -354,8 +354,6 @@ export default ({
     )
   )
 
-  console.log(data)
-
   const labels = $.svg({
     class: "labels",
   })(
