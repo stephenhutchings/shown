@@ -136,7 +136,7 @@ const Map = function (
   // By default, a label will only show when it exceeds the minimum value
   // specified by a chart. It uses the largest number of decimal places found
   // across all values in the provided data.
-  if (map.label === undefined || map.label === true) {
+  if ((map.label === undefined && !map.curve) || map.label === true) {
     const maxValue = max(...values)
 
     map.label = (v) =>

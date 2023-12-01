@@ -275,8 +275,8 @@ export default ({
 
   // prettier-ignore
   const axes = {
-    x: setupAxis( xAxis, data.flat().map((d) => d.x), false ),
-    y: setupAxis( yAxis, data.flat().map((d) => d.y) )
+    x: setupAxis(xAxis, data.flat().map((d) => d.x), false),
+    y: setupAxis(yAxis, data.flat().map((d) => d.y))
   }
 
   const axisX = axisTemplate("x", axes.x)
@@ -354,6 +354,35 @@ export default ({
     )
   )
 
+  console.log(data)
+
+  const labels = $.svg({
+    class: "labels",
+  })(
+    data.map(
+      (data, j) =>
+        data.find((d) => d.label) &&
+        $.svg({
+          class: ["label", "label-" + j],
+          color: data[0]?.color[0],
+        })(
+          data.map((d) => {
+            return (
+              isFinite(d.x) &&
+              isFinite(d.y) &&
+              d.label &&
+              $.text({
+                x: percent(axes.x.scale(d.x)),
+                y: percent(1 - axes.y.scale(d.y)),
+                dy: "-1em",
+                attrs: { "text-anchor": "middle", "alignment-baseline": "middle" },
+              })(d.label)
+            )
+          })
+        )
+    )
+  )
+
   const defs = symbolTemplate(data)
 
   return wrap(
@@ -385,6 +414,7 @@ export default ({
           areas,
           lines,
           symbols,
+          labels,
         ])
       ),
       legendTemplate({ data, line: true }),
