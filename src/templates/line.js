@@ -2,7 +2,7 @@ import $ from "../lib/dom/index.js"
 import percent from "../lib/utils/percent.js"
 import sum from "../lib/utils/sum.js"
 import interpolate from "../lib/utils/interpolate.js"
-import { isFinite } from "../lib/utils/math.js"
+import { atan2, isFinite } from "../lib/utils/math.js"
 import curve from "../lib/curve.js"
 import Map from "../lib/map.js"
 import legendTemplate from "./legend.js"
@@ -149,7 +149,9 @@ const areaPath = (line1, line2, xAxis, yAxis) => {
  * Points in the line with non-finite values are rendered as broken lines
  * where data is unavailable. Set to `false` to skip missing values instead.
  * @param {Boolean} [options.area] Render the line chart as an area chart.
- * @param {boolean} [options.sorted] - Whether to sort the values.
+ * @param {Boolean} [options.sorted] - Whether to sort the values.
+ * @param {Boolean} [options.smartLabels] - Labels are shifted to minimise
+ * overlapping the line.
  * @returns {string} Rendered chart
  *
  * @example
@@ -205,6 +207,7 @@ export default ({
   yAxis,
   area = false,
   sorted = false,
+  smartLabels = true,
 }) => {
   data = Array.isArray(data[0]) ? data : [data]
 
@@ -357,6 +360,33 @@ export default ({
 
             let dx = 0
             let dy = -1
+
+            if (smartLabels && i > 0 && i < data.length - 1) {
+              const prev = data[i - 1]
+              const next = data[i + 1]
+
+              if (
+                isFinite(next.x) &&
+                isFinite(prev.x) &&
+                isFinite(next.y) &&
+                isFinite(prev.y)
+              ) {
+                const nx = axes.x.scale(next.x)
+                const px = axes.x.scale(prev.x)
+                const ny = 1 - axes.y.scale(next.y)
+                const py = 1 - axes.y.scale(prev.y)
+                const pdx = x - px
+                const pdy = y - py
+                const ndx = nx - x
+                const ndy = ny - y
+                const nt = atan2(ndy, ndx)
+                const pt = atan2(pdy, pdx)
+                const theta = (nt + pt) / 2 - Math.PI / 2
+
+                dx = Math.cos(theta)
+                dy = Math.sin(theta) * 0.67 - 0.33
+              }
+            }
 
             label = $.text({
               class: "label",
