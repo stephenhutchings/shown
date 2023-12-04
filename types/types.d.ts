@@ -192,7 +192,9 @@ declare module "shown" {
      *   map: {
      *     x: (d) => d.x,
      *     y: (d) => d.y,
-     *     curve: "bump"
+     *     curve: "bump",
+     *     label: (d, i, j) => "p" + j,
+     *     style: { "font-style": "italic" },
      *   }
      * })
      * @example
@@ -211,6 +213,26 @@ declare module "shown" {
      *   },
      *   xAxis: { label: ["A", "B", "C", "D", "E"], inset: 0.1 },
      * })
+     * @example
+     * shown.line({
+     *   title: "Multiple lines, curves and shapes",
+     *   data: [
+     *      [52.86, 20.65, 14.54, 10.09, 41.86],
+     *      [21.97, 31.71, 56.94, 17.85, 23.53],
+     *   ],
+     *   map: {
+     *     curve: "monotone",
+     *     shape: "circle",
+     *     key: ["Type I", "Type II"],
+     *     label: (v, i) => Math.round(v),
+     *     attrs: {
+     *        "stroke": "#fff",
+     *        "stroke-width": 3,
+     *        "paint-order": "stroke fill",
+     *      }
+     *   },
+     *   xAxis: { inset: 0.1 },
+     * })
      * @param options - Data and display options for the chart.
      * @param options.data - The data for this chart. Data can
      * be passed either as a flat array for a single line, or nested arrays
@@ -226,6 +248,8 @@ declare module "shown" {
      * where data is unavailable. Set to `false` to skip missing values instead.
      * @param [options.area] - Render the line chart as an area chart.
      * @param [options.sorted] - Whether to sort the values.
+     * @param [options.smartLabels] - Labels are shifted to minimise
+     * overlapping the line.
      * @returns Rendered chart
      */
     function line(options: {
@@ -238,6 +262,7 @@ declare module "shown" {
         showGaps?: boolean;
         area?: boolean;
         sorted?: boolean;
+        smartLabels?: boolean;
     }): string;
     /**
      * Generate a pie chart.
