@@ -324,61 +324,58 @@ export default ({
       )
   )
 
-  const symbols = $.svg({
-    class: "symbols",
+  const points = $.svg({
+    class: "points",
   })(
-    data.map(
-      (data, j) =>
-        data.find((d) => d.shape) &&
-        $.svg({
-          class: ["series", "series-" + j],
-          color: data[0]?.color[0],
-        })(
-          data.map((d) => {
-            return (
-              isFinite(d.x) &&
-              isFinite(d.y) &&
-              d.shape &&
-              $.use({
-                x: percent(axes.x.scale(d.x)),
-                y: percent(1 - axes.y.scale(d.y)),
-                href: `#symbol-${d.shape}`,
-                width: "1em",
-                height: "1em",
-                class: "symbol",
-                color: data[0].color[0] !== d.color[0] && d.color[0],
-                attrs: d.attrs,
-              })
-            )
-          })
-        )
-    )
-  )
+    data.map((data, j) =>
+      $.svg({
+        "class": ["series", "series-" + j],
+        "color": data[0]?.color[0],
+        "text-anchor": "middle",
+        "alignment-baseline": "central",
+      })(
+        data.map((d, i) => {
+          if (!isFinite(d.x) || !isFinite(d.y)) return
 
-  const labels = $.svg({
-    class: "labels",
-  })(
-    data.map(
-      (data, j) =>
-        data.find((d) => d.label) &&
-        $.svg({
-          class: ["label", "label-" + j],
-          color: data[0]?.color[0],
-        })(
-          data.map((d) => {
-            return (
-              isFinite(d.x) &&
-              isFinite(d.y) &&
-              d.label &&
-              $.text({
-                x: percent(axes.x.scale(d.x)),
-                y: percent(1 - axes.y.scale(d.y)),
-                dy: "-1em",
-                attrs: { "text-anchor": "middle", "alignment-baseline": "middle" },
-              })(d.label)
-            )
-          })
-        )
+          let shape
+          let label
+
+          if (d.shape) {
+            shape = $.use({
+              href: `#symbol-${d.shape}`,
+              width: "1em",
+              height: "1em",
+              class: "symbol",
+              color: data[0].color[0] !== d.color[0] && d.color[0],
+              attrs: d.attrs,
+            })
+          }
+
+          if (d.label || d.label === 0) {
+            let x = axes.x.scale(d.x)
+            let y = 1 - axes.y.scale(d.y)
+
+            let dx = 0
+            let dy = -1
+
+            label = $.text({
+              class: "label",
+              dx: +dx.toFixed(2) + "em",
+              dy: +dy.toFixed(2) + "em",
+
+              attrs: d.attrs,
+            })(d.label)
+          }
+
+          if (shape || label) {
+            return $.svg({
+              class: "point",
+              x: percent(axes.x.scale(d.x)),
+              y: percent(1 - axes.y.scale(d.y)),
+            })([shape, label])
+          }
+        })
+      )
     )
   )
 
@@ -412,8 +409,7 @@ export default ({
           axisX,
           areas,
           lines,
-          symbols,
-          labels,
+          points,
         ])
       ),
       legendTemplate({ data, line: true }),
