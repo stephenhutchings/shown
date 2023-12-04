@@ -15,17 +15,21 @@ const mapSpecial = ([key, val]) => {
       .join(";")
   }
 
-  // The "attrs" object allows users to set their own attributes
-  if (key === "attrs" && typeof val === "object") {
-    return [join(val), true]
-  }
-
   return [key, val]
+}
+
+// The "attrs" object allows user-set attributes, which overwrite defaults
+const flattenAttrs = (attrs) => {
+  const result = { ...attrs, ...attrs.attrs }
+
+  delete result.attrs
+
+  return result
 }
 
 const join = (attrs = false) =>
   attrs
-    ? Object.entries(attrs)
+    ? Object.entries(flattenAttrs(attrs))
         .filter(([key, val]) => val || val === 0)
         .map(mapSpecial)
         .map(([key, val]) => (val === true ? key : `${key}="${val}"`))
