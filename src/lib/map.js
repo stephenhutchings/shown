@@ -130,7 +130,8 @@ const Map = function (
     console.warn("Data should be flattened when constructing a Map")
   }
 
-  const values = data.map(map.y || map.value).filter(isFinite)
+  const toValue = map.y || map.value
+  const values = data.map(toValue).filter(isFinite)
   const places = min(max(...values.map(decimalPlaces)), 2)
 
   // By default, a label will only show when it exceeds the minimum value
@@ -140,7 +141,7 @@ const Map = function (
     const maxValue = max(...values)
 
     map.label = (v) =>
-      (v = map.value(v)) &&
+      (v = toValue(v)) &&
       isFinite(v) &&
       v / maxValue >= minValue &&
       v.toFixed(places)
@@ -155,7 +156,7 @@ const Map = function (
   // By default, a tally is formatted using the largest number of decimal
   // places found across all values in the provided data.
   if (map.tally === true) {
-    map.tally = (v) => (v = map.value(v)) && isFinite(v) && v.toFixed(places)
+    map.tally = (v) => (v = toValue(v)) && isFinite(v) && v.toFixed(places)
   }
 
   // Maps may use a shorthand syntax by providing an array rather than a
