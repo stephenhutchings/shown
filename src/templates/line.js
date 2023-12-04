@@ -176,7 +176,9 @@ const areaPath = (line1, line2, xAxis, yAxis) => {
  *   map: {
  *     x: (d) => d.x,
  *     y: (d) => d.y,
- *     curve: "bump"
+ *     curve: "bump",
+ *     label: (d, i, j) => "p" + j,
+ *     style: { "font-style": "italic" },
  *   }
  * })
  *
@@ -195,6 +197,27 @@ const areaPath = (line1, line2, xAxis, yAxis) => {
  *     key: ["α", "β", "γ", "δ"],
  *   },
  *   xAxis: { label: ["A", "B", "C", "D", "E"], inset: 0.1 },
+ * })
+ *
+ * @example
+ * shown.line({
+ *   title: "Multiple lines, curves and shapes",
+ *   data: [
+ *      [52.86, 20.65, 14.54, 10.09, 41.86],
+ *      [21.97, 31.71, 56.94, 17.85, 23.53],
+ *   ],
+ *   map: {
+ *     curve: "monotone",
+ *     shape: "circle",
+ *     key: ["Type I", "Type II"],
+ *     label: (v, i) => Math.round(v),
+ *     attrs: {
+ *        "stroke": "#fff",
+ *        "stroke-width": 3,
+ *        "paint-order": "stroke fill",
+ *      }
+ *   },
+ *   xAxis: { inset: 0.1 },
  * })
  */
 export default ({
