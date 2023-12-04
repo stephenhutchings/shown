@@ -212,8 +212,9 @@ export default ({
 
   map = new Map(
     {
-      curve: () => "linear",
-      shape: () => false,
+      curve: "linear",
+      shape: false,
+      label: false,
       x: (d, i, j) => {
         const min = (xAxis || {}).min ?? 0
         const max = (xAxis || {}).max ?? min + (maxLength - 1)
