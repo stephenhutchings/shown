@@ -129,6 +129,7 @@ export default ({
       "class": `segment segment-${i}`,
       "aria-label": `${d.label} (${percent(t)})`,
       "attrs": d.attrs,
+      "alignment-baseline": "central",
     })([
       $.svg({
         viewBox: "0 0 100 100",
@@ -149,7 +150,6 @@ export default ({
           class: "segment-label",
           x: percent(x),
           y: percent(y),
-          dy: "0.33em",
           role: "presentation",
           color: d.color[1],
         })(d.label),

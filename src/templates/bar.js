@@ -227,14 +227,14 @@ export default ({
                 d.label &&
                 $.text({
                   y: percent(y + h / 2),
-                  dy: "0.33em",
                   color: d.color[1],
                 })(d.label)
 
-              return $.svg({ class: ["value", "value-" + i], attrs: d.attrs })([
-                rect,
-                text,
-              ])
+              return $.svg({
+                "class": ["value", "value-" + i],
+                "attrs": d.attrs,
+                "alignment-baseline": "central",
+              })([rect, text])
             }),
             tally &&
               $.text({
