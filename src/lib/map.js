@@ -130,7 +130,7 @@ const Map = function (
     console.warn("Data should be flattened when constructing a Map")
   }
 
-  const values = data.map(map.y || map.value)
+  const values = data.map(map.y || map.value).filter(isFinite)
   const places = min(max(...values.map(decimalPlaces)), 2)
 
   // By default, a label will only show when it exceeds the minimum value
