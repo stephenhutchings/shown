@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.1](https://github.com/stephenhutchings/shown/compare/v1.2.0...v1.2.1) (2023-12-07)
+
+
+### Bug Fixes
+
+* Inconsistent tag ([9a12401](https://github.com/stephenhutchings/shown/commit/9a12401e909b80aea8e010b29db263ead1c40816))
+
 ### [1.1.2](https://github.com/stephenhutchings/shown/compare/v1.1.1...v1.1.2) (2023-12-07)
 
 
