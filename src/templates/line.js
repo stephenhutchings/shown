@@ -306,7 +306,7 @@ export default ({
 
   // prettier-ignore
   const axes = {
-    x: setupAxis(xAxis, data.flat().map((d) => d.x), !scatter),
+    x: setupAxis(xAxis, data.flat().map((d) => d.x), scatter),
     y: setupAxis(yAxis, data.flat().map((d) => d.y))
   }
 
