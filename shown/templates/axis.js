@@ -308,10 +308,13 @@ export default (type, axis) => {
   const svgProps =
     type === "x"
       ? { "width": "100%", "text-anchor": "middle" }
-      : { "height": "100%", "text-anchor": "end" }
+      : {
+          "height": "100%",
+          "text-anchor": "end",
+          "alignment-baseline": "central",
+        }
 
-  const txtProps =
-    type === "x" ? { y: "100%", dy: "1.5em" } : { x: "-0.5em", dy: "0.33em" }
+  const txtProps = type === "x" ? { y: "100%", dy: "1.5em" } : { x: "-0.5em" }
 
   const line = (t, className, d) => {
     const props = { class: className }

@@ -2,7 +2,7 @@ import $ from "../lib/dom/index.js"
 import percent from "../lib/utils/percent.js"
 import sum from "../lib/utils/sum.js"
 import interpolate from "../lib/utils/interpolate.js"
-import { isFinite } from "../lib/utils/math.js"
+import { atan2, isFinite } from "../lib/utils/math.js"
 import curve from "../lib/curve.js"
 import Map from "../lib/map.js"
 import legendTemplate from "./legend.js"
@@ -12,6 +12,11 @@ import wrap from "./wrap.js"
 
 const SVGLINE_VIEWPORT_W = 100
 const SVGLINE_VIEWPORT_H = SVGLINE_VIEWPORT_W
+
+// If label points are shifted horizontally above the threshold,
+// text-anchor is used and the horizontal offset is fixed so that
+// the closest glyph is centered above the point.
+const labelAnchorThreshold = 0.3
 
 /**
  * @private
@@ -149,7 +154,10 @@ const areaPath = (line1, line2, xAxis, yAxis) => {
  * Points in the line with non-finite values are rendered as broken lines
  * where data is unavailable. Set to `false` to skip missing values instead.
  * @param {Boolean} [options.area] Render the line chart as an area chart.
- * @param {boolean} [options.sorted] - Whether to sort the values.
+ * @param {Boolean} [options.scatter] Render the line chart as a scatter plot.
+ * @param {Boolean} [options.sorted] - Whether to sort the values.
+ * @param {Boolean} [options.smartLabels] - Labels are shifted to minimise
+ * overlapping the line.
  * @returns {string} Rendered chart
  *
  * @example
@@ -174,7 +182,7 @@ const areaPath = (line1, line2, xAxis, yAxis) => {
  *   map: {
  *     x: (d) => d.x,
  *     y: (d) => d.y,
- *     curve: "bump"
+ *     curve: "bump",
  *   }
  * })
  *
@@ -194,6 +202,24 @@ const areaPath = (line1, line2, xAxis, yAxis) => {
  *   },
  *   xAxis: { label: ["A", "B", "C", "D", "E"], inset: 0.1 },
  * })
+ *
+ * @example
+ * shown.line({
+ *   title: "Point labels",
+ *   data: [
+ *      [3127, 2106, 1849, null, 4397, 3347],
+ *      [3952, 4222, 4640, 2579, 1521, 1342],
+ *   ],
+ *   map: {
+ *     curve: "monotone",
+ *     shape: "circle",
+ *     color: ["#d4a", "#f84"],
+ *     key: ["Type I", "Type II"],
+ *     label: true,
+ *   },
+ *   xAxis: { inset: 0.1 },
+ *   yAxis: { min: 0, label: (v) => Math.round(v / 1000) + "k" },
+ * })
  */
 export default ({
   data,
@@ -204,7 +230,9 @@ export default ({
   xAxis,
   yAxis,
   area = false,
+  scatter = false,
   sorted = false,
+  smartLabels = true,
 }) => {
   data = Array.isArray(data[0]) ? data : [data]
 
@@ -212,8 +240,9 @@ export default ({
 
   map = new Map(
     {
-      curve: () => "linear",
-      shape: () => false,
+      curve: "linear",
+      shape: false,
+      label: false,
       x: (d, i, j) => {
         const min = (xAxis || {}).min ?? 0
         const max = (xAxis || {}).max ?? min + (maxLength - 1)
@@ -223,10 +252,12 @@ export default ({
       ...map,
     },
     data.flat(),
-    { minValue: -Infinity, colors: data.length }
+    { minValue: -Infinity, colors: data.length, maxDepth: 2 }
   )
 
   data = map(data)
+
+  const hasLines = !scatter && !!data.find((line) => line.find((d) => d.curve))
 
   if (sorted) {
     data.sort((al, bl) => {
@@ -275,8 +306,8 @@ export default ({
 
   // prettier-ignore
   const axes = {
-    x: setupAxis( xAxis, data.flat().map((d) => d.x), false ),
-    y: setupAxis( yAxis, data.flat().map((d) => d.y) )
+    x: setupAxis(xAxis, data.flat().map((d) => d.x), scatter),
+    y: setupAxis(yAxis, data.flat().map((d) => d.y))
   }
 
   const axisX = axisTemplate("x", axes.x)
@@ -304,53 +335,118 @@ export default ({
         )
     )
 
-  const lines = $.svg({
-    class: "lines",
-    viewBox,
-    preserveAspectRatio: "none",
-    style: (axes.x.hasOverflow || axes.y.hasOverflow) && "overflow: hidden;",
-  })(
-    data
-      .filter((line) => line.length > 0)
-      .map((line, i) =>
-        $.path({
-          "class": ["series", "series-" + i],
-          "vector-effect": "non-scaling-stroke",
-          "stroke": line[0].color[0],
-          "fill": "none",
-          "d": linePath(line, axes.x, axes.y, showGaps),
-        })
-      )
-  )
-
-  const symbols = $.svg({
-    class: "symbols",
-  })(
-    data.map(
-      (data, j) =>
-        data.find((d) => d.shape) &&
-        $.svg({
-          class: ["series", "series-" + j],
-          color: data[0]?.color[0],
-        })(
-          data.map((d) => {
-            return (
-              isFinite(d.x) &&
-              isFinite(d.y) &&
-              d.shape &&
-              $.use({
-                x: percent(axes.x.scale(d.x)),
-                y: percent(1 - axes.y.scale(d.y)),
-                href: `#symbol-${d.shape}`,
-                width: "1em",
-                height: "1em",
-                class: "symbol",
-                color: data[0].color[0] !== d.color[0] && d.color[0],
-                attrs: d.attrs,
-              })
-            )
+  const lines =
+    hasLines &&
+    $.svg({
+      class: "lines",
+      viewBox,
+      preserveAspectRatio: "none",
+      style: (axes.x.hasOverflow || axes.y.hasOverflow) && "overflow: hidden;",
+    })(
+      data
+        .filter((line) => line.length > 0 && !!line.find((d) => d.curve))
+        .map((line, i) =>
+          $.path({
+            "class": ["series", "series-" + i],
+            "vector-effect": "non-scaling-stroke",
+            "stroke": line[0].color[0],
+            "fill": "none",
+            "d": linePath(line, axes.x, axes.y, showGaps),
           })
         )
+    )
+
+  const points = $.svg({
+    class: "points",
+  })(
+    data.map((data, j) =>
+      $.svg({
+        "class": ["series", "series-" + j],
+        "color": data[0]?.color[0],
+        "text-anchor": "middle",
+        "alignment-baseline": "central",
+      })(
+        data.map((d, i) => {
+          if (!isFinite(d.x) || !isFinite(d.y)) return
+
+          let shape
+          let label
+
+          if (d.shape) {
+            shape = $.use({
+              href: `#symbol-${d.shape}`,
+              width: "1em",
+              height: "1em",
+              class: "symbol",
+              color: data[0].color[0] !== d.color[0] && d.color[0],
+            })
+          }
+
+          if (d.label || d.label === 0) {
+            let x = axes.x.scale(d.x)
+            let y = 1 - axes.y.scale(d.y)
+
+            let dx = 0
+            let dy = -1
+            let textAnchor
+
+            const prev = data[i - 1]
+            const next = data[i + 1]
+
+            if (smartLabels && (prev || next)) {
+              let nx = !!next && isFinite(next.x) && axes.x.scale(next.x)
+              let px = !!prev && isFinite(prev.x) && axes.x.scale(prev.x)
+              let ny = !!next && isFinite(next.y) && 1 - axes.y.scale(next.y)
+              let py = !!prev && isFinite(prev.y) && 1 - axes.y.scale(prev.y)
+
+              if (nx === false || ny === false) {
+                nx = x + (x - px)
+                ny = y + (y - py)
+              }
+
+              if (px === false || py === false) {
+                px = x - (nx - x)
+                py = y - (ny - y)
+              }
+
+              const pdx = x - px
+              const pdy = y - py
+              const ndx = nx - x
+              const ndy = ny - y
+              const nt = atan2(ndy, ndx)
+              const pt = atan2(pdy, pdx)
+              const theta = (nt + pt) / 2 - Math.PI / 2
+
+              dx = Math.cos(theta)
+              dy = -0.75
+
+              if (Math.abs(dx) > labelAnchorThreshold) {
+                textAnchor = dx > 0 ? "start" : "end"
+                dx = labelAnchorThreshold * (dx > 0 ? -1 : 1)
+              }
+            }
+
+            if (d.r > 1) dy = dy * d.r
+            if (d.shape) dy -= 0.25
+
+            label = $.text({
+              "class": "label",
+              "dx": +dx.toFixed(2) + "em",
+              "dy": +dy.toFixed(2) + "em",
+              "text-anchor": textAnchor,
+            })(d.label)
+          }
+
+          if (shape || label) {
+            return $.svg({
+              class: "point",
+              x: percent(axes.x.scale(d.x)),
+              y: percent(1 - axes.y.scale(d.y)),
+              attrs: d.attrs,
+            })([shape, label])
+          }
+        })
+      )
     )
   )
 
@@ -360,7 +456,7 @@ export default ({
     $.div({
       class: [
         "chart",
-        area ? "chart-area" : "chart-line",
+        area ? "chart-area" : scatter ? "chart-scatter" : "chart-line",
         axes.x.label && "has-xaxis xaxis-w" + axes.x.width,
         axes.y.label && "has-yaxis yaxis-w" + axes.y.width,
       ],
@@ -384,7 +480,7 @@ export default ({
           axisX,
           areas,
           lines,
-          symbols,
+          points,
         ])
       ),
       legendTemplate({ data, line: true }),

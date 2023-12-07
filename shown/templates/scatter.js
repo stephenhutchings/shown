@@ -1,10 +1,4 @@
-import $ from "../lib/dom/index.js"
-import percent from "../lib/utils/percent.js"
-import Map from "../lib/map.js"
-import legendTemplate from "./legend.js"
-import symbolTemplate from "./symbol.js"
-import { default as axisTemplate, setup as setupAxis } from "./axis.js"
-import wrap from "./wrap.js"
+import line from "./line.js"
 
 /**
  * Generate a scatter chart.
@@ -49,6 +43,7 @@ import wrap from "./wrap.js"
  *     x: (d) => d.x,
  *     y: (d) => d.y,
  *     shape: d => d.special ? "cross" : "circle",
+ *     label: d => d.special && "Special",
  *     attrs: (d) => d.special && {
  *       style: { color: "#fe772b" }
  *     }
@@ -62,89 +57,23 @@ import wrap from "./wrap.js"
 export default ({ data, title, description, map, xAxis, yAxis }) => {
   data = Array.isArray(data[0][0]) ? data : [data]
 
-  map = new Map(
-    {
-      shape: () => "circle",
-      x: (d) => d[0],
-      y: (d) => d[1],
-      r: 1,
-      ...map,
-    },
-    data.flat(),
-    { minValue: -Infinity, maxDepth: 2, colors: data.length }
-  )
-
-  data = map(data)
-
-  // prettier-ignore
-  const axes = {
-    x: setupAxis( xAxis, data.flat().map((d) => d.x) ),
-    y: setupAxis( yAxis, data.flat().map((d) => d.y) )
+  map = {
+    shape: "circle",
+    curve: false,
+    x: (d) => d[0],
+    y: (d) => d[1],
+    r: 1,
+    ...map,
   }
 
-  const axisX = axisTemplate("x", axes.x)
-  const axisY = axisTemplate("y", axes.y)
-
-  const symbols = $.svg({
-    class: "symbols",
-  })(
-    data.map((data, j) =>
-      $.svg({
-        "class": ["series", "series-" + j],
-        "text-anchor": "middle",
-        "color": data[0]?.color[0],
-      })(
-        data.map(
-          (d) =>
-            d.r > 0 &&
-            d.shape &&
-            $.use({
-              x: percent(axes.x.scale(d.x)),
-              y: percent(1 - axes.y.scale(d.y)),
-              href: `#symbol-${d.shape}`,
-              width: `${d.r}em`,
-              height: `${d.r}em`,
-              class: "symbol",
-              color: data[0].color[0] !== d.color[0] && d.color[0],
-              attrs: d.attrs,
-            })
-        )
-      )
-    )
-  )
-
-  const defs = symbolTemplate(data)
-
-  return wrap(
-    $.div({
-      class: [
-        "chart",
-        "chart-scatter",
-        axes.x.label && "has-xaxis xaxis-w" + axes.x.width,
-        axes.y.label && "has-yaxis yaxis-w" + axes.y.width,
-      ],
-    })([
-      $.div({
-        style: {
-          "flex-grow": 1,
-          "height": 0,
-          "box-sizing": "border-box",
-        },
-      })(
-        $.svg({
-          xmlns: "http://www.w3.org/2000/svg",
-          width: "100%",
-          height: "100%",
-        })([
-          defs && $.defs()(defs),
-          title && $.title()(title),
-          description && $.desc()(description),
-          axisY,
-          axisX,
-          symbols,
-        ])
-      ),
-      legendTemplate({ data }),
-    ])
-  )
+  return line({
+    data,
+    title,
+    description,
+    map,
+    xAxis,
+    yAxis,
+    smartLabels: false,
+    scatter: true,
+  })
 }

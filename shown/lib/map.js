@@ -53,7 +53,8 @@ import { min, max, isFinite } from "./utils/math.js"
  * Convert the data into a formatted string.
  * The default function returns the value fixed to the same number of decimals
  * as the most precise value in the dataset. Return `false` to prevent this
- * label from being rendered.
+ * label from being rendered. Labels are hidden on line and scatter charts by
+ * default.
  * @property {Function|string[]|string|true} [tally]
  * Add an additional label summing the total values into a formatted string.
  * If true, the default function returns the value fixed to the same number of
@@ -130,7 +131,8 @@ const Map = function (
     console.warn("Data should be flattened when constructing a Map")
   }
 
-  const values = data.map(map.y || map.value)
+  const toValue = map.y || map.value
+  const values = data.map(toValue).filter(isFinite)
   const places = min(max(...values.map(decimalPlaces)), 2)
 
   // By default, a label will only show when it exceeds the minimum value
@@ -140,7 +142,7 @@ const Map = function (
     const maxValue = max(...values)
 
     map.label = (v) =>
-      (v = map.value(v)) &&
+      (v = toValue(v)) &&
       isFinite(v) &&
       v / maxValue >= minValue &&
       v.toFixed(places)
@@ -155,7 +157,7 @@ const Map = function (
   // By default, a tally is formatted using the largest number of decimal
   // places found across all values in the provided data.
   if (map.tally === true) {
-    map.tally = (v) => (v = map.value(v)) && isFinite(v) && v.toFixed(places)
+    map.tally = (v) => (v = toValue(v)) && isFinite(v) && v.toFixed(places)
   }
 
   // Maps may use a shorthand syntax by providing an array rather than a
