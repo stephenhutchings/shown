@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.3](https://github.com/stephenhutchings/shown/compare/v1.2.2...v1.2.3) (2023-12-07)
+
+
+### Bug Fixes
+
+* Serve is not a hard dependency ([c22d6ff](https://github.com/stephenhutchings/shown/commit/c22d6fff4c87801ce16f9afb4ebfac08d75f656b))
+
 ### [1.2.2](https://github.com/stephenhutchings/shown/compare/v1.2.1...v1.2.2) (2023-12-07)
 
 
