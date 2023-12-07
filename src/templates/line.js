@@ -182,8 +182,6 @@ const areaPath = (line1, line2, xAxis, yAxis) => {
  *     x: (d) => d.x,
  *     y: (d) => d.y,
  *     curve: "bump",
- *     label: (d, i, j) => "p" + j,
- *     style: { "font-style": "italic" },
  *   }
  * })
  *
@@ -206,23 +204,20 @@ const areaPath = (line1, line2, xAxis, yAxis) => {
  *
  * @example
  * shown.line({
- *   title: "Multiple lines, curves and shapes",
+ *   title: "Point labels",
  *   data: [
- *      [52.86, 20.65, 14.54, 10.09, 41.86],
- *      [21.97, 31.71, 56.94, 17.85, 23.53],
+ *      [3127, 2106, 1849, null, 4397, 3347],
+ *      [3952, 4222, 4640, 2579, 1521, 1342],
  *   ],
  *   map: {
  *     curve: "monotone",
  *     shape: "circle",
+ *     color: ["#d4a", "#f84"],
  *     key: ["Type I", "Type II"],
- *     label: (v, i) => Math.round(v),
- *     attrs: {
- *        "stroke": "#fff",
- *        "stroke-width": 3,
- *        "paint-order": "stroke fill",
- *      }
+ *     label: true,
  *   },
  *   xAxis: { inset: 0.1 },
+ *   yAxis: { min: 0, label: (v) => Math.round(v / 1000) + "k" },
  * })
  */
 export default ({
