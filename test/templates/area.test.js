@@ -20,11 +20,12 @@ describe("area", () => {
   test("handles discontinuities", () => {
     const data = [
       [1, 2, null, NaN, 3, false],
-      [1, 2, null, NaN, 3, false, 0],
+      [1, null, 2, NaN, 3, false, 0],
+      [1, 2, undefined, 3, 3, 1, 0],
     ]
 
     expect(area({ data, map: { curve: "monotone" } })).toMatch(
-      'd="M0 83.33C5.56 77.78 11.11 72.22 16.67 66.67"'
+      'd="M0 88.89C5.56 85.19 11.11 81.48 16.67 77.78"'
     )
   })
 

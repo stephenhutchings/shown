@@ -53,6 +53,17 @@ describe("line", () => {
     ).toMatch('d="M0 100c25 0 25-100 50-100M50 0c25 0 25 50 50 50M100 50"')
   })
 
+  test("handles labels", () => {
+    const data = [1, 2, -3, -2, 3, false, 4]
+    const make = line({
+      data,
+      smartLabels: true,
+      map: { label: true },
+    })
+
+    expect(make).toMatch('<text class="label"')
+  })
+
   test("handles shapes", () => {
     const data = [1, 2, 3, 4]
     const make = line({
@@ -63,5 +74,20 @@ describe("line", () => {
     expect(make).toMatch("symbol-circle")
     expect(make).toMatch("symbol-diamond")
     expect(make).toMatch("symbol-triangle")
+  })
+
+  test("sorts lines", () => {
+    const data = [
+      [3, 4],
+      [1, 2],
+    ]
+    const make = line({
+      data,
+      sorted: true,
+    })
+
+    expect(make).toMatch(
+      '<path class="series series-0" vector-effect="non-scaling-stroke" stroke="#ffca01" fill="none" d="M0 100L100 66.67"></path>'
+    )
   })
 })
