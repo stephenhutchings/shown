@@ -15,6 +15,7 @@ declare module "shown" {
      *     key: ["α", "β", "γ", "δ"],
      *   },
      *   sorted: true,
+     *   smartLabels: false,
      * })
      * @example
      * shown.area({
@@ -43,6 +44,8 @@ declare module "shown" {
      * @param [options.xAxis] - Overrides for the x-axis. See {@link AxisOptions} for more details.
      * @param [options.yAxis] - Overrides for the y-axis. See {@link AxisOptions} for more details.
      * @param [options.sorted] - Whether to sort the values.
+     * @param [options.smartLabels] - Labels are shifted to minimise
+     * overlapping the line.
      * @returns Rendered chart
      */
     function area(options: {
@@ -53,6 +56,7 @@ declare module "shown" {
         xAxis?: AxisOptions;
         yAxis?: AxisOptions;
         sorted?: boolean;
+        smartLabels?: boolean;
     }): string;
     /**
      * Generate a bar chart.
@@ -356,6 +360,9 @@ declare module "shown" {
      * @param [options.map] - Controls for transforming data. See {@link MapOptions} for more details.
      * @param [options.xAxis] - Overrides for the x-axis. See {@link AxisOptions} for more details.
      * @param [options.yAxis] - Overrides for the y-axis. See {@link AxisOptions} for more details.
+     * @param [options.sorted] - Whether to sort the values.
+     * @param [options.smartLabels] - Labels are shifted to minimise
+     * overlapping the line.
      * @returns Rendered chart
      */
     function scatter(options: {
@@ -365,6 +372,8 @@ declare module "shown" {
         map?: MapOptions;
         xAxis?: AxisOptions;
         yAxis?: AxisOptions;
+        sorted?: boolean;
+        smartLabels?: boolean;
     }): string;
 }
 

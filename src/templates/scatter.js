@@ -17,6 +17,9 @@ import line from "./line.js"
  * Overrides for the x-axis. See {@link AxisOptions} for more details.
  * @param {AxisOptions} [options.yAxis]
  * Overrides for the y-axis. See {@link AxisOptions} for more details.
+ * @param {Boolean} [options.sorted] - Whether to sort the values.
+ * @param {Boolean} [options.smartLabels] - Labels are shifted to minimise
+ * overlapping the line.
  * @returns {string} Rendered chart
  *
  * @example
@@ -54,7 +57,16 @@ import line from "./line.js"
  *
  */
 
-export default ({ data, title, description, map, xAxis, yAxis }) => {
+export default ({
+  data,
+  title,
+  description,
+  map,
+  xAxis,
+  yAxis,
+  sorted,
+  smartLabels = false,
+}) => {
   data = Array.isArray(data[0][0]) ? data : [data]
 
   map = {
@@ -73,7 +85,8 @@ export default ({ data, title, description, map, xAxis, yAxis }) => {
     map,
     xAxis,
     yAxis,
-    smartLabels: false,
+    sorted,
+    smartLabels,
     scatter: true,
   })
 }
