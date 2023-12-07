@@ -13,6 +13,11 @@ import wrap from "./wrap.js"
 const SVGLINE_VIEWPORT_W = 100
 const SVGLINE_VIEWPORT_H = SVGLINE_VIEWPORT_W
 
+// If label points are shifted horizontally above the threshold,
+// text-anchor is used and the horizontal offset is fixed so that
+// the closest glyph is centered above the point.
+const labelAnchorThreshold = 0.3
+
 /**
  * @private
  * @typedef {string[]} Color
@@ -408,6 +413,9 @@ export default ({
 
                 dx = Math.cos(theta)
                 dy = Math.sin(theta) * 0.67 - 0.33
+              if (Math.abs(dx) > labelAnchorThreshold) {
+                textAnchor = dx > 0 ? "start" : "end"
+                dx = labelAnchorThreshold * (dx > 0 ? -1 : 1)
               }
             }
 
