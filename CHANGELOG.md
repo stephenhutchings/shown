@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.2](https://github.com/stephenhutchings/shown/compare/v1.2.1...v1.2.2) (2023-12-07)
+
+
+### Bug Fixes
+
+* Ensure `smartLabels`, `sorted` values are inherited ([9975427](https://github.com/stephenhutchings/shown/commit/9975427663712138e5d0eecbb68b4852617cf429))
+
 ### [1.2.1](https://github.com/stephenhutchings/shown/compare/v1.2.0...v1.2.1) (2023-12-07)
 
 

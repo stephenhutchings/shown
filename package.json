@@ -1,6 +1,6 @@
 {
   "name": "shown",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Statically-generated, responsive charts, without the need for client-side Javascript.",
   "type": "module",
   "main": "dist/index.cjs",
@@ -18,7 +18,9 @@
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "badge": "make-coverage-badge --output-path=docs/coverage.svg",
+    "dev": "run-p watch serve",
     "watch": "nodemon --exec 'npm run build'",
+    "serve": "serve docs",
     "build": "run-s build:**",
     "build:lib": "esbuild src/index.js src/css/shown.css --bundle --platform=node --target=node10.4 --outdir=dist --out-extension:.js=.cjs",
     "build:docs": "documentation build ./src/index.js -f html -g -o docs -t ./docs-theme/index.cjs",
@@ -97,5 +99,8 @@
       "**/*.ts"
     ],
     "delay": 2500
+  },
+  "dependencies": {
+    "serve": "^14.2.1"
   }
 }
