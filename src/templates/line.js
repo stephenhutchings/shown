@@ -154,6 +154,7 @@ const areaPath = (line1, line2, xAxis, yAxis) => {
  * Points in the line with non-finite values are rendered as broken lines
  * where data is unavailable. Set to `false` to skip missing values instead.
  * @param {Boolean} [options.area] Render the line chart as an area chart.
+ * @param {Boolean} [options.scatter] Render the line chart as a scatter plot.
  * @param {Boolean} [options.sorted] - Whether to sort the values.
  * @param {Boolean} [options.smartLabels] - Labels are shifted to minimise
  * overlapping the line.
@@ -229,6 +230,7 @@ export default ({
   xAxis,
   yAxis,
   area = false,
+  scatter = false,
   sorted = false,
   smartLabels = true,
 }) => {
@@ -250,10 +252,12 @@ export default ({
       ...map,
     },
     data.flat(),
-    { minValue: -Infinity, colors: data.length }
+    { minValue: -Infinity, colors: data.length, maxDepth: 2 }
   )
 
   data = map(data)
+
+  const hasLines = !scatter && !!data.find((line) => line.find((d) => d.curve))
 
   if (sorted) {
     data.sort((al, bl) => {
@@ -302,7 +306,7 @@ export default ({
 
   // prettier-ignore
   const axes = {
-    x: setupAxis(xAxis, data.flat().map((d) => d.x), false),
+    x: setupAxis(xAxis, data.flat().map((d) => d.x), !scatter),
     y: setupAxis(yAxis, data.flat().map((d) => d.y))
   }
 
@@ -331,24 +335,26 @@ export default ({
         )
     )
 
-  const lines = $.svg({
-    class: "lines",
-    viewBox,
-    preserveAspectRatio: "none",
-    style: (axes.x.hasOverflow || axes.y.hasOverflow) && "overflow: hidden;",
-  })(
-    data
-      .filter((line) => line.length > 0)
-      .map((line, i) =>
-        $.path({
-          "class": ["series", "series-" + i],
-          "vector-effect": "non-scaling-stroke",
-          "stroke": line[0].color[0],
-          "fill": "none",
-          "d": linePath(line, axes.x, axes.y, showGaps),
-        })
-      )
-  )
+  const lines =
+    hasLines &&
+    $.svg({
+      class: "lines",
+      viewBox,
+      preserveAspectRatio: "none",
+      style: (axes.x.hasOverflow || axes.y.hasOverflow) && "overflow: hidden;",
+    })(
+      data
+        .filter((line) => line.length > 0 && !!line.find((d) => d.curve))
+        .map((line, i) =>
+          $.path({
+            "class": ["series", "series-" + i],
+            "vector-effect": "non-scaling-stroke",
+            "stroke": line[0].color[0],
+            "fill": "none",
+            "d": linePath(line, axes.x, axes.y, showGaps),
+          })
+        )
+    )
 
   const points = $.svg({
     class: "points",
@@ -373,7 +379,6 @@ export default ({
               height: "1em",
               class: "symbol",
               color: data[0].color[0] !== d.color[0] && d.color[0],
-              attrs: d.attrs,
             })
           }
 
@@ -383,43 +388,52 @@ export default ({
 
             let dx = 0
             let dy = -1
+            let textAnchor
 
-            if (smartLabels && i > 0 && i < data.length - 1) {
-              const prev = data[i - 1]
-              const next = data[i + 1]
+            const prev = data[i - 1]
+            const next = data[i + 1]
 
-              if (
-                isFinite(next.x) &&
-                isFinite(prev.x) &&
-                isFinite(next.y) &&
-                isFinite(prev.y)
-              ) {
-                const nx = axes.x.scale(next.x)
-                const px = axes.x.scale(prev.x)
-                const ny = 1 - axes.y.scale(next.y)
-                const py = 1 - axes.y.scale(prev.y)
-                const pdx = x - px
-                const pdy = y - py
-                const ndx = nx - x
-                const ndy = ny - y
-                const nt = atan2(ndy, ndx)
-                const pt = atan2(pdy, pdx)
-                const theta = (nt + pt) / 2 - Math.PI / 2
+            if (smartLabels && (prev || next)) {
+              let nx = !!next && isFinite(next.x) && axes.x.scale(next.x)
+              let px = !!prev && isFinite(prev.x) && axes.x.scale(prev.x)
+              let ny = !!next && isFinite(next.y) && 1 - axes.y.scale(next.y)
+              let py = !!prev && isFinite(prev.y) && 1 - axes.y.scale(prev.y)
 
-                dx = Math.cos(theta)
-                dy = Math.sin(theta) * 0.67 - 0.33
+              if (nx === false || ny === false) {
+                nx = x + (x - px)
+                ny = y + (y - py)
+              }
+
+              if (px === false || py === false) {
+                px = x - (nx - x)
+                py = y - (ny - y)
+              }
+
+              const pdx = x - px
+              const pdy = y - py
+              const ndx = nx - x
+              const ndy = ny - y
+              const nt = atan2(ndy, ndx)
+              const pt = atan2(pdy, pdx)
+              const theta = (nt + pt) / 2 - Math.PI / 2
+
+              dx = Math.cos(theta)
+              dy = -0.75
+
               if (Math.abs(dx) > labelAnchorThreshold) {
                 textAnchor = dx > 0 ? "start" : "end"
                 dx = labelAnchorThreshold * (dx > 0 ? -1 : 1)
               }
             }
 
-            label = $.text({
-              class: "label",
-              dx: +dx.toFixed(2) + "em",
-              dy: +dy.toFixed(2) + "em",
+            if (d.r > 1) dy = dy * d.r
+            if (d.shape) dy -= 0.25
 
-              attrs: d.attrs,
+            label = $.text({
+              "class": "label",
+              "dx": +dx.toFixed(2) + "em",
+              "dy": +dy.toFixed(2) + "em",
+              "text-anchor": textAnchor,
             })(d.label)
           }
 
@@ -428,6 +442,7 @@ export default ({
               class: "point",
               x: percent(axes.x.scale(d.x)),
               y: percent(1 - axes.y.scale(d.y)),
+              attrs: d.attrs,
             })([shape, label])
           }
         })
@@ -441,7 +456,7 @@ export default ({
     $.div({
       class: [
         "chart",
-        area ? "chart-area" : "chart-line",
+        area ? "chart-area" : scatter ? "chart-scatter" : "chart-line",
         axes.x.label && "has-xaxis xaxis-w" + axes.x.width,
         axes.y.label && "has-yaxis yaxis-w" + axes.y.width,
       ],
