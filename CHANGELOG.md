@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.2](https://github.com/stephenhutchings/shown/compare/v1.1.1...v1.1.2) (2023-12-07)
+
+
+### Features
+
+* Allow labels on line charts ([837743e](https://github.com/stephenhutchings/shown/commit/837743e804b8830c9b0b71712ed0a0b4e24ded0b))
+
 ### [1.1.1](https://github.com/stephenhutchings/shown/compare/v1.1.0...v1.1.1) (2023-04-28)
 
 
