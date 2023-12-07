@@ -13,6 +13,10 @@
   fill: currentColor;
 }
 
+.shown :not([alignment-baseline]) {
+  alignment-baseline: inherit;
+}
+
 .shown .axis {
   fill-opacity: 0.9;
   user-select: none;

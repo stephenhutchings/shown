@@ -192,7 +192,7 @@ declare module "shown" {
      *   map: {
      *     x: (d) => d.x,
      *     y: (d) => d.y,
-     *     curve: "bump"
+     *     curve: "bump",
      *   }
      * })
      * @example
@@ -211,6 +211,23 @@ declare module "shown" {
      *   },
      *   xAxis: { label: ["A", "B", "C", "D", "E"], inset: 0.1 },
      * })
+     * @example
+     * shown.line({
+     *   title: "Point labels",
+     *   data: [
+     *      [3127, 2106, 1849, null, 4397, 3347],
+     *      [3952, 4222, 4640, 2579, 1521, 1342],
+     *   ],
+     *   map: {
+     *     curve: "monotone",
+     *     shape: "circle",
+     *     color: ["#d4a", "#f84"],
+     *     key: ["Type I", "Type II"],
+     *     label: true,
+     *   },
+     *   xAxis: { inset: 0.1 },
+     *   yAxis: { min: 0, label: (v) => Math.round(v / 1000) + "k" },
+     * })
      * @param options - Data and display options for the chart.
      * @param options.data - The data for this chart. Data can
      * be passed either as a flat array for a single line, or nested arrays
@@ -225,7 +242,10 @@ declare module "shown" {
      * @param [options.showGaps] - Points in the line with non-finite values are rendered as broken lines
      * where data is unavailable. Set to `false` to skip missing values instead.
      * @param [options.area] - Render the line chart as an area chart.
+     * @param [options.scatter] - Render the line chart as a scatter plot.
      * @param [options.sorted] - Whether to sort the values.
+     * @param [options.smartLabels] - Labels are shifted to minimise
+     * overlapping the line.
      * @returns Rendered chart
      */
     function line(options: {
@@ -237,7 +257,9 @@ declare module "shown" {
         yAxis?: AxisOptions;
         showGaps?: boolean;
         area?: boolean;
+        scatter?: boolean;
         sorted?: boolean;
+        smartLabels?: boolean;
     }): string;
     /**
      * Generate a pie chart.
@@ -315,6 +337,7 @@ declare module "shown" {
      *     x: (d) => d.x,
      *     y: (d) => d.y,
      *     shape: d => d.special ? "cross" : "circle",
+     *     label: d => d.special && "Special",
      *     attrs: (d) => d.special && {
      *       style: { color: "#fe772b" }
      *     }
@@ -389,7 +412,8 @@ declare module "shown" {
  * @property [label] - Convert the data into a formatted string.
  * The default function returns the value fixed to the same number of decimals
  * as the most precise value in the dataset. Return `false` to prevent this
- * label from being rendered.
+ * label from being rendered. Labels are hidden on line and scatter charts by
+ * default.
  * @property [tally] - Add an additional label summing the total values into a formatted string.
  * If true, the default function returns the value fixed to the same number of
  * decimals as the most precise value in the dataset. Return `false` to prevent

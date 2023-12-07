@@ -14,6 +14,8 @@ export const cos = Math.cos
 
 export const sin = Math.sin
 
+export const atan2 = Math.atan2
+
 export const abs = Math.abs
 
 export const pow = Math.pow

@@ -10,4 +10,13 @@ describe("map", () => {
       })
     ).toMatch('class="active" style="color:red" data-value="custom"')
   })
+
+  test("deduplicates attrs", () => {
+    expect(
+      join({
+        key: "custom",
+        attrs: { key: "override" },
+      })
+    ).toMatch('key="override"')
+  })
 })
