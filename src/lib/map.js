@@ -53,7 +53,8 @@ import { min, max, isFinite } from "./utils/math.js"
  * Convert the data into a formatted string.
  * The default function returns the value fixed to the same number of decimals
  * as the most precise value in the dataset. Return `false` to prevent this
- * label from being rendered.
+ * label from being rendered. Labels are hidden on line and scatter charts by
+ * default.
  * @property {Function|string[]|string|true} [tally]
  * Add an additional label summing the total values into a formatted string.
  * If true, the default function returns the value fixed to the same number of
