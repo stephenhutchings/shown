@@ -119,7 +119,8 @@ declare module "shown" {
      *     label: true,
      *     attrs: (d) => ({ "data-value": d })
      *   },
-     *   xAxis: { label: ["I", "II"] }
+     *   xAxis: { label: ["I", "II"] },
+     *   vertical: false
      * })
      * @param options - Data and display options for the chart.
      * @param options.data - The data for this chart. Data can
@@ -132,6 +133,7 @@ declare module "shown" {
      * @param [options.map] - Controls for transforming data. See {@link MapOptions} for more details.
      * @param [options.stack] - Whether to stack nested values or render them side-by-side. If values are
      * nested three-levels deep, items will always be stacked.
+     * @param [options.vertical] - Whether to render a vertical (columns) or horizontal layout.
      * @param [options.xAxis] - Overrides for the x-axis. See {@link AxisOptions} for more details.
      * @param [options.yAxis] - Overrides for the y-axis. See {@link AxisOptions} for more details.
      * @returns Rendered chart
@@ -142,6 +144,7 @@ declare module "shown" {
         description?: string;
         map?: MapOptions;
         stack?: boolean;
+        vertical?: boolean;
         xAxis?: AxisOptions;
         yAxis?: AxisOptions;
     }): string;
