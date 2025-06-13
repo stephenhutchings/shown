@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.4](https://github.com/stephenhutchings/shown/compare/v1.2.3...v1.2.4) (2025-06-13)
+
+
+### Bug Fixes
+
+* Migrate to `dominant-baseline` ([#7](https://github.com/stephenhutchings/shown/issues/7)) ([a562725](https://github.com/stephenhutchings/shown/commit/a5627251b95bd2fc574e278f481c557a3e4993b8))
+
 ### [1.2.3](https://github.com/stephenhutchings/shown/compare/v1.2.2...v1.2.3) (2023-12-07)
 
 
