@@ -364,7 +364,7 @@ export default ({
         "class": ["series", "series-" + j],
         "color": data[0]?.color[0],
         "text-anchor": "middle",
-        "alignment-baseline": "central",
+        "dominant-baseline": "central",
       })(
         data.map((d, i) => {
           if (!isFinite(d.x) || !isFinite(d.y)) return

@@ -13,8 +13,8 @@
   fill: currentColor;
 }
 
-.shown :not([alignment-baseline]) {
-  alignment-baseline: inherit;
+.shown :not([dominant-baseline]) {
+  dominant-baseline: inherit;
 }
 
 .shown .axis {

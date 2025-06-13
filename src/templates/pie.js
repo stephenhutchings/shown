@@ -129,7 +129,7 @@ export default ({
       "class": `segment segment-${i}`,
       "aria-label": `${d.label} (${percent(t)})`,
       "attrs": d.attrs,
-      "alignment-baseline": "central",
+      "dominant-baseline": "central",
     })([
       $.svg({
         viewBox: "0 0 100 100",

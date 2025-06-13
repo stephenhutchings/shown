@@ -311,7 +311,7 @@ export default (type, axis) => {
       : {
           "height": "100%",
           "text-anchor": "end",
-          "alignment-baseline": "central",
+          "dominant-baseline": "central",
         }
 
   const txtProps = type === "x" ? { y: "100%", dy: "1.5em" } : { x: "-0.5em" }
