@@ -1,16 +1,27 @@
 .shown svg,
-.symbol {
+.shown .symbol,
+.shown.symbol {
   overflow: visible;
 }
 
+.shown defs {
+  display: none;
+}
+
+.shown svg,
 .shown text {
   fill: currentColor;
 }
 
+.shown :not([dominant-baseline]) {
+  dominant-baseline: inherit;
+}
+
 .shown .axis {
-  color: #333;
+  fill-opacity: 0.9;
   user-select: none;
 }
+
 .shown .axis,
 .shown .series-label {
   font-size: 85%;
@@ -53,6 +64,20 @@
 
 .shown .chart-bar > div {
   padding-bottom: 0.5em;
+}
+
+.shown .chart-area .series,
+.shown .chart-line .series {
+  stroke-linecap: round;
+}
+
+.shown .areas,
+.shown .lines {
+  overflow: hidden;
+}
+
+.shown .areas {
+  opacity: 0.9;
 }
 
 .shown .has-xaxis > div,
@@ -106,8 +131,12 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1em;
-  margin: 0.75em auto 0;
+  margin: 0 auto;
   padding: 0;
+}
+
+.shown .legend:not(:first-child) {
+  margin-top: 1em;
 }
 
 .shown .legend-marker {
@@ -116,6 +145,32 @@
   margin-right: 0.5em;
 }
 
+.shown .legend-marker line {
+  stroke: currentColor;
+  fill: none;
+}
+
 .shown .symbol {
   font-size: 10px;
+}
+
+.shown .touch {
+  fill: transparent !important;
+  stroke: none !important;
+}
+
+.shown .symbol * {
+  vector-effect: non-scaling-stroke;
+}
+
+.shown#symbol-asterisk,
+.shown#symbol-cross {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.shown#symbol-asterisk circle {
+  fill: white;
+  stroke: none;
 }

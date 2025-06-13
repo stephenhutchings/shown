@@ -1,19 +1,33 @@
 .max-width-3.py2
-  h2 Get started
+  h2 Why use shown?
 
   p
     code shown
-    |  generates simple HTML and SVG charts. Use the library with static-site generators (SSG), or in server-side rendering (SSR) contexts to create self-contained, embeddable chart documents.
-    
+    |  generates simple HTML and SVG charts. The library works with static-site generators (SSG), or in server-side rendering (SSR) contexts to create self-contained, embeddable chart documents. It aims to fill a gap between unresponsive images and complex data visualization tools.
+
+  p.
+    The library offers a high-level API to generate charts, providing good results with minimal configuration. When more flexibility is required, expressive data mapping allows for fine-grained control. Plug and play data from different sources, mapping values as you need them.
+
   p.
     Charts adapt to different screen-sizes without any need for client-side JavaScript. Charts will expand and contract to fill their containers without affecting font size, so text remains legible across viewports.
   
   p.
-    JavaScript-free templates reduce bundle sizes and improve performance by avoiding the need to do expensive recalculations when a container resizes.
+    Charts render without client-side JavaScript, reducing bundle sizes and improving performance by avoiding expensive recalculations when a container resizes.
 
-  p.
-    The library offers a high-level API to generate charts, providing good results with minimal configuration. When more flexibility is required, an expressive data mapping syntax allows for fine-grained control.
+
+  h2 Getting started
 
   p
-    code shown
-    |  fills the gap between unresponsive images and complex data visualization tools.
+    | Install the library from NPM. You can then import and call the library as needed.
+
+  :hl
+    import shown from "shown";
+
+    shown.pie({ data: [60, 30, 10] });
+
+  h3 Styles
+
+  p.
+    All charts depend on a shared set of minimal CSS styles (<a href="https://github.com/stephenhutchings/shown/blob/master/src/css/shown.css"><code>/src/css/shown.css</code></a>). These base styles aren't included in the rendered charts to avoid multiple inclusions on pages that feature more than one chart. Import the styles separately so that styles are included once on each page.
+
+hr

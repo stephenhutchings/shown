@@ -1,21 +1,33 @@
 {
   "name": "shown",
-  "version": "0.3.1",
+  "version": "1.2.4",
   "description": "Statically-generated, responsive charts, without the need for client-side Javascript.",
+  "type": "module",
   "main": "dist/index.cjs",
   "module": "src/index.js",
-  "type": "module",
+  "types": "types/types.d.ts",
   "exports": {
     ".": {
       "require": "./dist/index.cjs",
       "import": "./src/index.js"
+    },
+    "./src/*": {
+      "import": "./src/*"
     }
   },
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "badge": "make-coverage-badge --output-path=coverage.svg",
-    "docs": "documentation build ./src/index.js -f html -g -o docs -t ./docs-theme/index.cjs",
-    "prepare": "esbuild src/index.js src/css/shown.css --bundle --platform=node --target=node10.4 --outdir=dist --out-extension:.js=.cjs"
+    "badge": "make-coverage-badge --output-path=docs/coverage.svg",
+    "dev": "run-p watch serve",
+    "watch": "nodemon --exec 'npm run build'",
+    "serve": "serve docs",
+    "build": "run-s build:**",
+    "build:lib": "esbuild src/index.js src/css/shown.css --bundle --platform=node --target=node10.4 --outdir=dist --out-extension:.js=.cjs",
+    "build:docs": "documentation build ./src/index.js -f html -g -o docs -t ./docs-theme/index.cjs",
+    "build:types": "jsdoc -p -t node_modules/tsd-jsdoc/dist -r ./src -d types",
+    "prepublishOnly": "npm run build",
+    "prerelease": "npm test",
+    "release": "standard-version"
   },
   "repository": {
     "type": "git",
@@ -23,6 +35,7 @@
   },
   "keywords": [
     "chart",
+    "svg",
     "plot",
     "pie",
     "bar",
@@ -48,10 +61,17 @@
     "documentation": "^13.2.5",
     "esbuild": "^0.14.38",
     "jest": "^28.0.3",
+    "jsdoc": "^3.6.11",
     "make-coverage-badge": "^1.2.0",
-    "pug": "^3.0.2"
+    "nodemon": "^2.0.22",
+    "npm-run-all": "^4.1.5",
+    "pug": "^3.0.2",
+    "serve": "^14.2.1",
+    "standard-version": "^9.5.0",
+    "tsd-jsdoc": "^2.5.0"
   },
   "files": [
+    "types/types.d.ts",
     "src/**/*.js",
     "src/**/*.css"
   ],
@@ -69,5 +89,16 @@
       "default",
       "github-actions"
     ]
+  },
+  "standard-version": {
+    "releaseCommitMessageFormat": "Chore: Release {{currentTag}}"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "**/dist/**",
+      "**/docs/**",
+      "**/*.ts"
+    ],
+    "delay": 2500
   }
 }

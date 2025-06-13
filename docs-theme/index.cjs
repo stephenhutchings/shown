@@ -36,7 +36,7 @@ const formatter = (comments, config) => {
     parameters: formatters.parameters,
 
     toUpperCase(s) {
-      return s[0].toUpperCase() + s.slice(1)
+      return s ? s[0].toUpperCase() + s.slice(1) : ""
     },
 
     md(ast, inline) {
@@ -69,6 +69,17 @@ module.exports = function (comments, config) {
   const template = path.join(__dirname, "index.pug")
   const iframe = path.join(__dirname, "iframe.pug")
 
+  const cachebust = Date.now().toString(32)
+
+  comments = comments
+    .filter((item) => item.kind !== "module")
+    .map((item) => ({
+      ...item,
+      name: item.name?.replace("module:shown.", ""),
+      namespace: item.namespace?.replace("module:shown.", ""),
+      alias: item.alias?.replace("module:shown.", ""),
+    }))
+
   hljs.configure(config.hljs || {})
 
   const format = formatter(comments, config)
@@ -80,7 +91,10 @@ module.exports = function (comments, config) {
       examples.forEach((el, i) => {
         const body = new Function("shown", "return " + el.description)(shown)
         el.path = `examples/${i + 1}/index.html`
-        el.contents = Buffer.from(pug.renderFile(iframe, { body }), "utf8")
+        el.contents = Buffer.from(
+          pug.renderFile(iframe, { body, cachebust }),
+          "utf8"
+        )
         el.result = body
       })
 
@@ -102,6 +116,7 @@ module.exports = function (comments, config) {
                   contents: Buffer.from(
                     pug.renderFile(template, {
                       docs: comments,
+                      cachebust,
                       links,
                       config,
                       format,

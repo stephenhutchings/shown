@@ -1,15 +1,19 @@
 import $ from "../lib/dom/index.js"
-import { get as getColor } from "../lib/colors.js"
-import utils from "../lib/utils.js"
+import { get as getColor } from "../lib/color.js"
+import sum from "../lib/utils/sum.js"
+import percent from "../lib/utils/percent.js"
+import toPrecision from "../lib/utils/to-precision.js"
 import Map from "../lib/map.js"
 import legendTemplate from "./legend.js"
 import { default as axisTemplate, setup as setupAxis } from "./axis.js"
+import { max } from "../lib/utils/math.js"
 import wrap from "./wrap.js"
 
 /**
  * Generate a bar chart.
+ * @alias module:shown.bar
  * @param {Object} options - Data and display options for the chart.
- * @param {number[]|Array[]} options.data - The data for this chart. Data can
+ * @param {any[]} options.data - The data for this chart. Data can
  * be passed either as a flat array of numbers, or a array of arrays for a
  * stacked bar chart.
  * @param {string} [options.title] - The title for this chart, set to the
@@ -28,7 +32,6 @@ import wrap from "./wrap.js"
  * @param {AxisOptions} [options.yAxis]
  * Overrides for the y-axis. See {@link AxisOptions} for more details.
  * @returns {string} Rendered chart
- *
  *
  * @example
  * shown.bar({
@@ -62,9 +65,9 @@ import wrap from "./wrap.js"
  *      [34.44, 14.79, 30.64, 18.31, 1.82],
  *   ],
  *   map: {
- *     width: (v, i) => v === 30.64 ? 0.8 : 0.6,
- *     label: (v, i) => v === 30.64 ? v.toFixed(1) : false,
- *     key: (v, i) => ["A", "B", "C", "D", "E"][i],
+ *     width: (v) => v === 30.64 ? 0.8 : 0.6,
+ *     label: (v) => v === 30.64 ? v.toFixed(1) : false,
+ *     key: ["A", "B", "C", "D", "E"],
  *   },
  *   stack: true,
  *   xAxis: { label: ["I", "II", "III"] }
@@ -87,8 +90,10 @@ import wrap from "./wrap.js"
  *   map: {
  *     key: ["In", "Out"],
  *     series: ["A", "B", "C"],
- *     tally: Math.round,
- *     label: Math.round,
+ *     value: Math.round,
+ *     tally: true,
+ *     label: true,
+ *     attrs: (d) => ({ "data-value": d })
  *   },
  *   xAxis: { label: ["I", "II"] },
  *   vertical: false
@@ -108,16 +113,18 @@ export default ({
   const daxis = vertical ? ["x", "y"] : ["y", "x"]
   const dsize = vertical ? ["width", "height"] : ["height", "width"]
 
+  // If the data is only one-level deep, it needs an initial wrapper
   data = data.map((v) => (Array.isArray(v) ? v : [v]))
 
-  if (!Array.isArray(data[0][0])) {
+  // If the data is only two-levels deep, wrap based on the `stack` option
+  if (data.length && !Array.isArray(data[0][0])) {
     data = stack ? data.map((d) => [d]) : data.map((d) => d.map((d) => [d]))
   } else {
     stack = true
   }
 
-  const maxStack = Math.max(...data.flat(1).map((d) => d.length))
-  const maxSeries = Math.max(...data.map((d) => d.length))
+  const maxStack = max(...data.flat(1).map((d) => d.length))
+  const maxSeries = max(...data.map((d) => d.length))
 
   // For unstacked charts, tally results rather than label.
   if (maxStack === 1 && (!map || !map.label)) {
@@ -128,31 +135,50 @@ export default ({
     }
   }
 
-  if (map && map.series && Array.isArray(map.key)) {
+  // Being triple-nested, bar charts need help to make an intuitive choice about
+  // which index to use when picking an item from an array.
+  if (Array.isArray(map?.key)) {
     const arr = map.key
-    map.key = (v, i, j) => arr[j]
+    map.key = (v, k, j, i) => arr[maxStack > 1 ? i : j]
+  }
+
+  if (Array.isArray(map?.series)) {
+    const arr = map.series
+    map.series = (v, k, j) => arr[j]
+  }
+
+  if (Array.isArray(map?.color)) {
+    const arr = map.color
+    map.color = (v, k, j, i) => arr[maxStack > 1 ? i : j]
   }
 
   map = new Map(
     {
-      color: (v, i, j) =>
-        getColor(maxStack === 1 ? i / (maxSeries - 1) : j / (maxStack - 1)),
+      // Other charts use the shallow index, but bar charts select a color
+      // from the deepest index, or second deepest if unstacked.
+      color: (v, k, j, i) => {
+        return getColor(
+          maxStack === 1 ? j / (maxSeries - 1) : i / (maxStack - 1)
+        )
+      },
       width: 0.6,
       ...map,
     },
-    data.flat(),
-    { sum: stack, minValue: 0.05 }
+    stack ? data.flat().map((d) => sum(d)) : data.flat(2),
+    { minValue: 0.05 }
   )
 
-  data = data.map(map)
+  data = map(data)
 
-  const maxWidth = Math.max(...data.flat(2).map((d) => d.width))
-
-  const values = data.flat().map(utils.sum)
+  const maxWidth = max(...data.flat(2).map((d) => d.width))
+  const values = data.flat().map((d) => sum(d))
 
   xAxis = {
     ticks: data.length,
-    hasSeries: map.series,
+    hasSeries: data
+      .flat(2)
+      .map((d) => d.series)
+      .some((f) => f),
     group: true,
     line: maxSeries > 1,
     ...xAxis,
@@ -172,9 +198,7 @@ export default ({
     axes.x.reverse = true
     axes.x.labelOffset = Math.max(
       ...axes.x.grid
-        .map((t) =>
-          utils.toPrecision(axes.x.min + (axes.x.max - axes.x.min) * t, 7)
-        )
+        .map((t) => toPrecision(axes.x.min + (axes.x.max - axes.x.min) * t, 7))
         .map(axes.x.label)
         .map((s) => (s ? s.toString().length * 0.45 : 0))
     )
@@ -193,8 +217,8 @@ export default ({
     data.map((series, k) =>
       $.svg(
         Object.fromEntries([
-          [daxis[0], utils.percent(axes.x.scale(k - 0.5))],
-          [dsize[0], utils.percent(axes.x.scale(1) - axes.x.scale(0))],
+          [daxis[0], percent(axes.x.scale(k - 0.5))],
+          [dsize[0], percent(axes.x.scale(1) - axes.x.scale(0))],
           ["class", ["group", "group-" + k]],
         ])
       )(
@@ -203,12 +227,12 @@ export default ({
           const w = maxWidth / maxSeries
           const x = g * (j + 1.5) + w * (j + 0.5)
 
-          const tally = map.tally(utils.sum(stack))
+          const tally = map.tally(sum(stack))
 
           return $.svg(
             Object.fromEntries([
-              [daxis[0], utils.percent(x)],
-              [dsize[0], utils.percent(w)],
+              [daxis[0], percent(x)],
+              [dsize[0], percent(w)],
               ["class", ["series", "series-" + j]],
             ])
           )([
@@ -219,16 +243,16 @@ export default ({
               const h = axes.y.scale(d.value)
               const y = axes.y.scale(
                 vertical
-                  ? axes.y.max - utils.sum(stack.slice(0, i + 1))
-                  : utils.sum(stack.slice(0, i))
+                  ? axes.y.max - sum(stack.slice(0, i + 1))
+                  : sum(stack.slice(0, i))
               )
 
               const rect = $.rect(
                 Object.fromEntries([
-                  [daxis[0], utils.percent(-w / 2)],
-                  [daxis[1], utils.percent(y)],
-                  [dsize[0], utils.percent(w)],
-                  [dsize[1], utils.percent(h)],
+                  [daxis[0], percent(-w / 2)],
+                  [daxis[1], percent(y)],
+                  [dsize[0], percent(w)],
+                  [dsize[1], percent(h)],
                   ["fill", d.color[0]],
                 ])
               )
@@ -237,25 +261,27 @@ export default ({
                 d.label &&
                 $.text(
                   Object.fromEntries([
-                    [daxis[1], utils.percent(y + h / 2)],
+                    [daxis[1], percent(y + h / 2)],
                     ["dy", "0.33em"],
                     ["color", d.color[1]],
                   ])
                 )(d.label)
 
-              return $.svg({ class: ["value", "value-" + i] })([rect, text])
+              return $.svg({
+                "class": ["value", "value-" + i],
+                "attrs": d.attrs,
+                "dominant-baseline": "central",
+              })([rect, text])
             }),
             tally &&
               $.text(
                 vertical
                   ? {
-                      y: utils.percent(
-                        axes.y.scale(axes.y.max - utils.sum(stack))
-                      ),
+                      y: percent(axes.y.scale(axes.y.max - sum(stack))),
                       dy: "-0.5em",
                     }
                   : {
-                      "x": utils.percent(axes.y.scale(utils.sum(stack))),
+                      "x": percent(axes.y.scale(sum(stack))),
                       "dx": "0.5em",
                       "dy": "0.33em",
                       "text-anchor": "start",
@@ -290,7 +316,7 @@ export default ({
         "chart-bar",
         axes[daxis[0]].label && "has-xaxis xaxis-w" + axes[daxis[0]].width,
         axes[daxis[1]].label && "has-yaxis yaxis-w" + axes[daxis[1]].width,
-        map.series && "has-series",
+        axes[daxis[0]].hasSeries && "has-series",
         vertical ? "vertical" : "horizontal",
       ],
     })([
@@ -318,7 +344,7 @@ export default ({
           bars,
         ])
       ),
-      legendTemplate(data.flat()),
+      legendTemplate({ data: data.flat() }),
     ])
   )
 }

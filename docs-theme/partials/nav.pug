@@ -1,9 +1,9 @@
-nav#toc.px2
-  .max-width-4.mx-auto.py2
+nav#toc
+  .scroll.max-width-4.mx-auto.p2
     ul.list-reset.h5.py1-ul.flex.m0
       each doc in docs
         - const hasMembers = doc.members.static.length || doc.members.instance.length
-        li.mr2
+        li.m0.mr2
           a(
             href=`#${format.slug(doc.namespace)}`
             class=[

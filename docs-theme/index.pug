@@ -17,10 +17,10 @@ html
 
     if config["project-description"]
       meta(name="description" content=config["project-description"])
-    
-    link(rel="stylesheet" href="assets/css/bass.css")
-    link(rel="stylesheet" href="assets/css/style.css")
-    link(rel="stylesheet" href="assets/css/code.css")
+
+    link(rel="stylesheet" href=`assets/css/bass.css?${cachebust}`)
+    link(rel="stylesheet" href=`assets/css/style.css?${cachebust}`)
+    link(rel="stylesheet" href=`assets/css/code.css?${cachebust}`)
     
     link(rel="icon" href="assets/favicon.png")
   

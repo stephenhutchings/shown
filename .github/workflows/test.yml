@@ -3,19 +3,22 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14, 16]
+
     steps:
-      - uses: actions/checkout@v2
-      
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
       - name: Install dependencies
         run: npm ci
 
       - name: Run tests
         run: npm test
-
-      - name: Create badge
-        run: npm run badge
-
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Update coverage badge
-          file_pattern: coverage.svg

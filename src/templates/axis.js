@@ -1,8 +1,26 @@
 import $ from "../lib/dom/index.js"
-import utils from "../lib/utils.js"
 
-// The number of ticks to use, in preferential order.
-const TICKCOUNT_ORDER = [5, 4, 6, 7, 8, 9, 3, 10, 11, 12, 13]
+import decimalPlaces from "../lib/utils/decimal-places.js"
+import magnitude from "../lib/utils/magnitude.js"
+import percent from "../lib/utils/percent.js"
+import toPrecision from "../lib/utils/to-precision.js"
+import {
+  isFinite,
+  isInteger,
+  floor,
+  ceil,
+  abs,
+  min,
+  max,
+  pow,
+} from "../lib/utils/math.js"
+
+// The number of ticks to use, in preferential order
+const TICKCOUNT_ORDER = [5, 6, 7, 8, 4, 9, 3, 10, 11, 12, 13]
+const MAX_PRECISION = 7
+
+// Primes under 10 are used to calculate divisions
+const LOW_PRIMES = [7, 5, 3, 2]
 
 /**
  * Calculate the transformed position after including the offset
@@ -27,11 +45,11 @@ const pad = (t, inset = 0) => inset + (1 - inset * 2) * t
  * this axis. The default value is a derived number between 2 and 13 that best
  * splits the difference between `min` and `max`.
  * @property {function|array} [label] - A function to map an axis
- * value to a label. The function is passed the current value and index as
+ * value to a label. The function is passed the current value, index and axis as
  * arguments. When supplying an array, the item at the corresponding index will
  * be selected
  * @property {function|array} [line] - A function to toggle an axis
- * line. The function is passed the current value and index as
+ * line. The function is passed the current value, index and axis as
  * arguments. When supplying an array, the item at the corresponding index will
  * be selected
  * @property {number} [inset=0] - The amount to inset the first and last tick
@@ -42,6 +60,54 @@ const pad = (t, inset = 0) => inset + (1 - inset * 2) * t
  */
 
 /**
+ * Calculate the scale to use when calculating bounds or ticks.
+ * @private
+ * @param {number} vmin
+ * @param {number} vmax
+ * @returns {number} scale
+ */
+const getScale = (vmin, vmax) => {
+  let m = max(magnitude(vmin), magnitude(vmax))
+
+  // The magnitude should be no greater than the difference
+  m = min(m, magnitude(vmax - vmin))
+
+  // Deal with integers from here
+  let scale = pow(10, m)
+
+  // If both values are integers and min is positive,
+  // all ticks should only occur at integer positions
+  if (isInteger(vmax) && isInteger(vmin) && vmin > 0 && scale === 1) {
+    return 1
+  }
+
+  vmin /= scale
+  vmax /= scale
+
+  let d = vmax - vmin
+
+  // Increase the scale when the difference is too small
+  // For example, min=0 and max=1 should have more than 2 ticks
+  if (d < 2) {
+    d *= 10
+    scale /= 10
+  } else if (d <= 3) {
+    d *= 5
+    scale /= 5
+  }
+
+  // Reduce by primes that neatly fit to help ensure tick counts
+  // in preferential order are not chosen when others fit better
+  LOW_PRIMES.forEach((p) => {
+    if (vmin > 0 || vmax < 0 ? d % p === 0 : vmin % p === 0 && vmax % p === 0) {
+      scale /= p
+    }
+  })
+
+  return scale
+}
+
+/**
  * Calculate the min and max bounds to contain the values. The precision
  * of the values is used to calculate appropriate containing bounds.
  * @private
@@ -49,41 +115,42 @@ const pad = (t, inset = 0) => inset + (1 - inset * 2) * t
  * @returns {number[]} bounds
  */
 const getBounds = (values) => {
-  let _min = utils.toPrecision(Math.min(...values), 9)
-  let _max = utils.toPrecision(Math.max(...values), 9)
+  if (values.length === 0) return [0, 1]
 
-  if (_min === _max) _min = 0
+  let vmin = toPrecision(min(...values), MAX_PRECISION)
+  let vmax = toPrecision(max(...values), MAX_PRECISION)
 
-  let p = Math.max(
-    Math.floor(Math.log10(Math.abs(_min))),
-    Math.floor(Math.log10(Math.abs(_max)))
-  )
+  if (vmin === vmax) {
+    // All values are zero
+    if (vmax === 0) return [0, 1]
 
-  if (_max !== _min && _min !== 0) {
-    p = Math.min(p, Math.floor(Math.log10(Math.abs(_max - _min))))
+    // The bounds should be between zero and max
+    if (vmin < 0) vmax = 0
+    else vmin = 0
   }
 
-  const f = Math.pow(10, p)
+  const f = getScale(vmin, vmax)
 
-  let min = utils.toPrecision(_min, -p)
-  let max = utils.toPrecision(_max, -p)
+  vmin = floor(vmin / f)
+  vmax = ceil(vmax / f)
 
-  if (max < _max) max += Math.ceil((_max - max) / f) * f
-  if (min > _min) min -= Math.ceil((min - _min) / f) * f
-
-  const d = utils.toPrecision((max - min) / f, 7)
+  const d = vmax - vmin
 
   // The distance should be divisible by a low prime number
-  // to produce a sensible number of ticks
-  if (d > 1 && d % 2 > 0 && d % 3 > 0 && d % 5 > 0 && d % 7 > 0) {
-    if (Math.abs(_max % f) > Math.abs(_min % f)) {
-      max += Math.abs(max % f)
+  // to produce a sensible number of ticks. If it isn't, adding
+  // one will ensure it is divisible by two.
+  if (d % 2 > 0 && !LOW_PRIMES.some((p) => d % p === 0)) {
+    if (abs(vmax) % 2 === 1) {
+      vmax += 1
     } else {
-      min -= Math.abs(min % f)
+      vmin -= 1
     }
   }
 
-  return [utils.toPrecision(min), utils.toPrecision(max)]
+  return [
+    toPrecision(vmin * f, MAX_PRECISION),
+    toPrecision(vmax * f, MAX_PRECISION),
+  ]
 }
 
 /**
@@ -91,26 +158,41 @@ const getBounds = (values) => {
  * divide the difference between min and max without requiring more
  * precision when cast as a string.
  * @private
- * @param {number} min
- * @param {number} max
- * @returns {number} ticks
+ * @param {number} vmin
+ * @param {number} vmax
+ * @returns {number} count
  */
-const getTicks = (min, max) => {
-  const d = max - min
-  const l = max.toString().length
+const getTicks = (vmin, vmax) => {
+  if (!isFinite(vmin) || !isFinite(vmax)) return 0
+  if (vmin === vmax) return 0
 
-  const p = Math.max(
-    Math.floor(Math.log10(Math.abs(min))),
-    Math.floor(Math.log10(Math.abs(max)))
-  )
+  const f = getScale(vmin, vmax)
+
+  vmin = toPrecision(vmin / f, MAX_PRECISION)
+  vmax = toPrecision(vmax / f, MAX_PRECISION)
+
+  let d = vmax - vmin
+
+  if (vmin >= 0 || vmax <= 0) {
+    LOW_PRIMES.forEach((p) => {
+      if (d > max(10, 10 * f) && d % p === 0) {
+        d /= p
+      }
+    })
+  }
+
+  const maxDecimals = decimalPlaces(toPrecision(d, MAX_PRECISION))
 
   return (
-    TICKCOUNT_ORDER.find(
-      (n) =>
-        utils.toPrecision(max % (d / (n - 1)), p) === 0 &&
-        utils.toPrecision(min % (d / (n - 1)), p) === 0 &&
-        l >= utils.toPrecision(d / (n - 1), 7).toString().length
-    ) || 2
+    TICKCOUNT_ORDER.find((n) => {
+      const mod = toPrecision(d / (n - 1), MAX_PRECISION)
+      const dec = toPrecision(mod, MAX_PRECISION)
+
+      return (
+        decimalPlaces(dec) <= maxDecimals &&
+        (vmin > 0 || vmax < 0 || (vmin % mod === 0 && vmax % mod === 0))
+      )
+    }) || 2
   )
 }
 
@@ -122,28 +204,35 @@ const getTicks = (min, max) => {
  * @returns {AxisOptions}
  */
 export const setup = (axis = {}, data, guessBounds = true) => {
-  let { min, max, ticks, label, line, spine, inset } = axis
-  let _min, _max, hasOverflow, width
+  let { min: vmin, max: vmax, ticks, label, line, spine, inset } = axis
+  let bmin, bmax, hasOverflow, width
 
-  const showLabel =
-    !!data || Number.isFinite(axis.min) || Number.isFinite(axis.max)
+  const showLabel = !!data || isFinite(axis.min) || isFinite(axis.max)
 
   if (data) {
     if (guessBounds) {
-      ;[_min, _max] = getBounds([min, max, ...data].filter(Number.isFinite))
+      const values = [vmin, vmax, ...data].filter(isFinite)
+
+      // Unless every number is an integer, assume zero should
+      // appear on either end of the scale
+      if (values.some((n) => !isInteger(n))) {
+        values.push(0)
+      }
+
+      ;[bmin, bmax] = getBounds(values)
     } else {
-      _min = Math.min(...data)
-      _max = Math.max(...data)
+      bmin = min(...data.filter(isFinite))
+      bmax = max(...data.filter(isFinite))
     }
   } else {
-    _min = 0
-    _max = ticks - 1
+    bmin = 0
+    bmax = ticks - 1
   }
 
-  hasOverflow = _min < min || _max > max
-  min = min ?? _min
-  max = max ?? _max
-  ticks = ticks ?? getTicks(min, max)
+  hasOverflow = bmin < vmin || bmax > vmax
+  vmin = vmin ?? bmin
+  vmax = vmax ?? bmax
+  ticks = ticks ?? getTicks(vmin, vmax)
   inset = inset ?? 0
 
   // If the label is an array, wrap in a function
@@ -154,7 +243,15 @@ export const setup = (axis = {}, data, guessBounds = true) => {
     const val = label
     label = () => val
   } else if (showLabel && !label) {
-    label = (v, i) => (ticks < 8 || i % 2 === 0) && utils.toPrecision(v, 7)
+    // Labels will only show if their length is the same or shorter
+    // than the min and max label lengths. If there are many ticks,
+    // only every second tick will be labeled.
+    const length = max(abs(vmax), abs(vmin)).toString().length
+
+    label = (v, i) =>
+      (ticks < 8 || i % 2 === 0) &&
+      abs(v).toString().length <= length &&
+      toPrecision(v, MAX_PRECISION)
   }
 
   // If the label is an array, wrap in a function
@@ -165,56 +262,38 @@ export const setup = (axis = {}, data, guessBounds = true) => {
     const val = line
     line = () => val
   } else if (!line) {
-    line = (v, i) => true
+    line = () => true
   }
 
   let grid = Array.from({ length: ticks }, (n, i) => i / (ticks - 1))
 
-  // If we cross zero, ensure zero is on the axis
-  if (min < 0 && max > 0 && !axis.ticks) {
-    const d = max - min
-    const z = -min / d
-
-    if (!grid.includes(z)) {
-      const limit = Math.min(-min, max)
-      const count = getTicks(-limit, limit)
-      const base = z > 0.5 ? -1 + 2 * z : 0
-
-      grid = Array.from({ length: count }, (n, i) => {
-        const t = i / (count - 1)
-        return base + ((t * limit) / d) * 2
-      })
-
-      while (utils.toPrecision(1 - grid[grid.length - 1], 7) >= grid[1]) {
-        grid.push(grid[grid.length - 1] + grid[1])
-      }
-
-      ticks = grid.length
-      spine = spine ?? true
-    }
-  }
-
   // If the axis displays groups, the inset shifts inwards
   if (axis.group) inset = (0.5 + inset) / ticks
 
-  const scale = (v) => pad((v - min) / (max - min), inset)
+  if (vmax === vmin) {
+    grid = [0.5]
+    inset = 0.5
+  }
+
+  const scale = (v) =>
+    vmax === vmin ? 0.5 : pad((v - vmin) / (vmax - vmin), inset)
 
   if (label) {
-    width = Math.max(
+    width = max(
       ...grid
-        .map((t) => min + t * (max - min))
+        .map((t) => vmin + t * (vmax - vmin))
         .map(label)
-        .filter((t) => t.length || Number.isFinite(t))
+        .filter((t) => t.length || isFinite(t))
         .map((t) => t.toString().length)
     )
   }
 
   return {
     ...axis,
+    min: vmin,
+    max: vmax,
     grid,
     ticks,
-    min,
-    max,
     label,
     line,
     inset,
@@ -229,101 +308,91 @@ export default (type, axis) => {
   const svgProps =
     type === "x"
       ? { "width": "100%", "text-anchor": "middle" }
-      : { "height": "100%", "text-anchor": "end" }
+      : {
+          "height": "100%",
+          "text-anchor": "end",
+          "dominant-baseline": "central",
+        }
 
-  const txtProps =
-    type === "x" ? { y: "100%", dy: "1.5em" } : { x: "-0.5em", dy: "0.33em" }
+  const txtProps = type === "x" ? { y: "100%", dy: "1.5em" } : { x: "-0.5em" }
 
-  const lineProps = type === "x" ? { y2: "100%" } : { x2: "100%" }
+  const line = (t, className, d) => {
+    const props = { class: className }
+    const v = t !== 0 && percent(t)
+
+    if (type === "x") {
+      props.x1 = v
+      props.x2 = v
+      props.y2 = percent(1)
+    } else {
+      props.y1 = v
+      props.y2 = v
+      props.x2 = percent(1)
+    }
+
+    if (d) {
+      const offset = (type === "x" ? [d, 0] : [0, -d]).join(" ")
+      props.transform = `translate(${offset})`
+    }
+
+    return $.line(props)
+  }
 
   if (axis.hasSeries && type === "x") txtProps.dy = "3em"
   if (axis.hasSeries && type === "y")
     txtProps.dx = -2 - axis.seriesOffset + "em"
 
   const children = axis.grid.map((t, i) => {
-    const v = utils.toPrecision(axis.min + (axis.max - axis.min) * t, 7)
+    const v = toPrecision(axis.min + (axis.max - axis.min) * t, MAX_PRECISION)
     const lines = []
 
     if (axis.label) {
-      const label = axis.label(v, i)
+      const label = axis.label(v, i, axis)
       if (label || label === 0)
         lines.push($.text({ class: "axis-label", ...txtProps })(label))
     }
 
-    if (axis.line(v, i)) {
+    if (axis.line(v, i, axis)) {
       if (axis.group) {
         if (axis.ticks !== 1) {
           const altOffset = (0.5 - axis.inset) / (axis.ticks - 1)
 
-          const altLProps =
-            type === "x"
-              ? {
-                  x1: utils.percent(-altOffset),
-                  x2: utils.percent(-altOffset),
-                }
-              : {
-                  y1: utils.percent(-altOffset),
-                  y2: utils.percent(-altOffset),
-                }
-          const altRProps =
-            type === "x"
-              ? { x1: utils.percent(altOffset), x2: utils.percent(altOffset) }
-              : { y1: utils.percent(altOffset), y2: utils.percent(altOffset) }
-
           lines.push(
-            (axis.inset || i > 0) &&
-              $.line({
-                class: "axis-line",
-                ...lineProps,
-                ...altLProps,
-              }),
-            i === axis.grid.length - 1 &&
-              $.line({
-                class: "axis-line",
-                ...lineProps,
-                ...altRProps,
-              })
+            (axis.inset || t > 0) &&
+              line(-altOffset, "axis-line", t === 0 && 0.5),
+            t === 1 && line(altOffset, "axis-line", -0.5)
           )
         }
       } else {
         lines.push(
-          $.line({
-            class: v == 0 ? "axis-base" : "axis-line",
-            ...lineProps,
-          })
+          line(
+            0,
+            v == 0 ? "axis-base" : "axis-line",
+            t === 0 ? 0.5 : t === 1 ? -0.5 : 0
+          )
         )
       }
     }
 
     return $.svg(
       type === "x"
-        ? { x: utils.percent(pad(axis.reverse ? 1 - t : t, axis.inset)) }
-        : { y: utils.percent(pad(axis.reverse ? t : 1 - t, axis.inset)) }
+        ? { x: percent(pad(axis.reverse ? 1 - t : t, axis.inset)) }
+        : { y: percent(pad(axis.reverse ? t : 1 - t, axis.inset)) }
     )(lines)
   })
 
   if (axis.spine) {
-    const spineProps = { class: "axis-spine", ...lineProps }
-
     // Add an initial line if the first line is inset
-    if (!axis.line(axis.min, 0) || pad(axis.grid[0], axis.inset) > 0) {
-      if (type === "x") {
-        children.unshift($.line(spineProps))
-      } else {
-        children.push($.line({ y1: "100%", y2: "100%", ...spineProps }))
-      }
+    if (!axis.line(axis.min, 0, axis) || pad(axis.grid[0], axis.inset) > 0) {
+      children.unshift(line(0, "axis-spine", 0.5))
     }
 
     // Add a final line if the last line is inset
     if (
-      !axis.line(axis.max, axis.ticks - 1) ||
+      !axis.line(axis.max, axis.ticks - 1, axis) ||
       pad(axis.grid[axis.grid.length - 1], axis.inset) < 1
     ) {
-      if (type === "x") {
-        children.push($.line({ x1: "100%", x2: "100%", ...spineProps }))
-      } else {
-        children.unshift($.line(spineProps))
-      }
+      children.push(line(1, "axis-spine", -0.5))
     }
   }
 

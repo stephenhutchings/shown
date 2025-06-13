@@ -1,6 +1,8 @@
+import { min, abs, clamp } from "../utils/math.js"
+
 const TENSION = 1 / 3
 
-const sign = (x) => (x < 0 ? -1 : 1)
+const sign = (v) => (v < 0 ? -1 : 1)
 
 const slope = (x0, y0, x1, y1, x2, y2) => {
   const h0 = x1 - x0
@@ -9,16 +11,15 @@ const slope = (x0, y0, x1, y1, x2, y2) => {
   const s1 = (y2 - y1) / (h1 || (h0 < 0 && -0))
   const p = (s0 * h1 + s1 * h0) / (h0 + h1)
 
-  return (
-    (sign(s0) + sign(s1)) *
-      Math.min(Math.abs(s0), Math.abs(s1), Math.abs(p) / 2) || 0
-  )
+  return (sign(s0) + sign(s1)) * min(abs(s0), abs(s1), abs(p) / 2) || 0
 }
 
 const curve = (x0, y0, x1, y1, s0, s1, alpha) => {
-  const dx0 = (x1 - x0) * alpha
-  const dx1 = (x1 - x0) * alpha
-  return ["C", x0 + dx0, y0 + dx0 * s0, x1 - dx1, y1 - dx1 * s1, x1, y1]
+  const ratio = abs((y1 - y0) / (x1 - x0))
+  const scale = clamp(ratio, 1, 1.5)
+  const delta = (x1 - x0) * alpha * scale
+
+  return ["C", x0 + delta, y0 + delta * s0, x1 - delta, y1 - delta * s1, x1, y1]
 }
 
 export default (points, alpha = TENSION) => {
@@ -31,6 +32,10 @@ export default (points, alpha = TENSION) => {
     p0 = p1 || points[i - 1]
     p1 = p2 || points[i + 0]
     p2 = points[i + 1]
+
+    if (!p0 && !p2) {
+      return m
+    }
 
     if (!p0) {
       p0 = [p1[0] - (p2[0] - p1[0]) / 2, p1[1] - (p2[1] - p1[1]) / 2]

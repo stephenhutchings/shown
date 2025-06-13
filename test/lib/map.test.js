@@ -1,4 +1,7 @@
+import { jest } from "@jest/globals"
+
 import map from "../../src/lib/map.js"
+import sum from "../../src/lib/utils/sum.js"
 
 describe("map", () => {
   test("to return a converter function", () => {
@@ -9,13 +12,15 @@ describe("map", () => {
     const m = { label: (v) => v + "" }
     const d = [[[1]]]
     const o = { minValue: 0 }
-    expect(map(m, d, o)(d)).toStrictEqual([
+
+    expect(map(m, d.flat(2), o)(d)).toStrictEqual([
       [[{ color: ["#0036b0", "#fff"], label: "1", tally: false, value: 1 }]],
     ])
   })
 
   test("to wrap non-functions", () => {
     const d = [1]
+
     expect(map({ a: [0], b: 0, c: "0" }, d)(d)).toStrictEqual([
       {
         a: 0,
@@ -31,8 +36,15 @@ describe("map", () => {
 
   test("to sum and respect `minValue`", () => {
     const d = [[1, 2]]
-    const o = { sum: true, minValue: 0.34 }
-    expect(map({}, d, o)(d)).toStrictEqual([
+    const o = { minValue: 0.34 }
+
+    expect(
+      map(
+        {},
+        d.map((d) => sum(d)),
+        o
+      )(d)
+    ).toStrictEqual([
       [
         {
           color: ["#0036b0", "#fff"],
@@ -48,5 +60,14 @@ describe("map", () => {
         },
       ],
     ])
+  })
+
+  test("warns about nested data", () => {
+    const d = [[]]
+
+    console.warn = jest.fn()
+    map({}, d)(d)
+
+    expect(console.warn).toHaveBeenCalled()
   })
 })

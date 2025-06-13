@@ -1,12 +1,13 @@
 import $ from "../lib/dom/index.js"
-import utils from "../lib/utils.js"
+import percent from "../lib/utils/percent.js"
+import sum from "../lib/utils/sum.js"
+import toPrecision from "../lib/utils/to-precision.js"
 import Map from "../lib/map.js"
 import wrap from "./wrap.js"
 import legendTemplate from "./legend.js"
+import { min, max, tau, cos, sin } from "../lib/utils/math.js"
 
-const tau = Math.PI * 2
-
-const arc = (t, r) => utils.percent((t % 1) * tau * r)
+const arc = (t, r) => percent((t % 1) * tau * r)
 
 /**
  * Calculate the bounds based on the portion of the circle
@@ -24,19 +25,20 @@ const getBounds = (t0, t1) => {
   if (t0 < 0.25 && t1 > 0.25) ts.push(0.25)
   if (t0 < 0.5 && t1 > 0.5) ts.push(0.5)
 
-  const xs = ts.map((t) => utils.toPrecision(Math.cos(t * tau) / 2))
-  const ys = ts.map((t) => utils.toPrecision(Math.sin(t * tau) / 2))
+  const xs = ts.map((t) => toPrecision(cos(t * tau) / 2))
+  const ys = ts.map((t) => toPrecision(sin(t * tau) / 2))
 
-  const maxX = Math.max(...xs)
-  const minX = Math.min(...xs)
-  const maxY = Math.max(...ys)
-  const minY = Math.min(...ys)
+  const maxX = max(...xs)
+  const minX = min(...xs)
+  const maxY = max(...ys)
+  const minY = min(...ys)
 
   return { x: minX, y: minY, w: maxX - minX, h: maxY - minY }
 }
 
 /**
  * Generate a pie chart.
+ * @alias module:shown.pie
  * @param {Object} options - Data and display options for the chart.
  * @param {number[]} options.data - The data for this chart. Values can sum to
  * any number, and percentages will be calculated as needed.
@@ -47,11 +49,11 @@ const getBounds = (t0, t1) => {
  * @param {boolean} [options.sorted] - Whether to sort the values.
  * @param {MapOptions} [options.map]
  * Controls for transforming data. See {@link MapOptions} for more details.
- * @returns {string} Rendered chart
  * @param {number} [options.startAngle] - The initial rotation of the chart.
  * Angle values should fall between zero and one.
  * @param {number} [options.endAngle] - The final rotation of the chart.
  * Angle values should fall between zero and one.
+ * @returns {string} Rendered chart
  *
  * @example
  * shown.pie({ data: [60, 30, 10] });
@@ -74,7 +76,11 @@ const getBounds = (t0, t1) => {
  *   data: [60, 30, 10],
  *   startAngle: -0.33,
  *   endAngle: 0.33,
- *   map: { width: 0.4, key: ["Item 1", "Item 2", "Item 3"] }
+ *   map: {
+ *     width: 0.4,
+ *     key: ["Item 1", "Item 2", "Item 3"],
+ *     attrs: (d) => ({ "data-value": d })
+ *   }
  * });
  */
 export default ({
@@ -102,13 +108,12 @@ export default ({
 
   const bounds = getBounds(startAngle, endAngle)
 
-  const values = data.map((d) => d.value)
-  const total = utils.sum(values)
+  const total = sum(data)
   const scale = endAngle - startAngle
 
   const segments = data.map((d, i) => {
     const t = (d.value / total) * scale
-    const o = startAngle + (utils.sum(values.slice(0, i)) / total) * scale
+    const o = startAngle + (sum(data.slice(0, i)) / total) * scale
 
     const radius = (1 - d.width / 2) / 2
     const dashoffset = arc(-o, radius)
@@ -117,12 +122,14 @@ export default ({
     const theta = tau * (o + t / 2)
     const shift = d.width === 1 && t < 0.25 ? 1.2 : 1
 
-    const x = Math.cos(theta) * shift * radius
-    const y = Math.sin(theta) * shift * radius
+    const x = cos(theta) * shift * radius
+    const y = sin(theta) * shift * radius
 
     return $.g({
       "class": `segment segment-${i}`,
-      "aria-label": `${d.label} (${utils.percent(t)})`,
+      "aria-label": `${d.label} (${percent(t)})`,
+      "attrs": d.attrs,
+      "dominant-baseline": "central",
     })([
       $.svg({
         viewBox: "0 0 100 100",
@@ -130,27 +137,24 @@ export default ({
         $.circle({
           "class": "segment-arc",
           "role": "presentation",
-          "r": utils.percent(radius),
+          "r": percent(radius),
           "stroke": d.color[0],
           "stroke-dasharray": dasharray,
           "stroke-dashoffset": dashoffset,
-          "stroke-width": utils.percent(d.width / 2),
+          "stroke-width": percent(d.width / 2),
           "fill": "none",
         })
       ),
       d.label &&
         $.text({
           class: "segment-label",
-          x: utils.percent(x),
-          y: utils.percent(y),
-          dy: "0.33em",
+          x: percent(x),
+          y: percent(y),
           role: "presentation",
           color: d.color[1],
         })(d.label),
     ])
   })
-
-  const legend = legendTemplate(data)
 
   return wrap(
     $.div({
@@ -171,16 +175,16 @@ export default ({
           title && $.title()(title),
           description && $.desc()(description),
           $.svg({
-            "x": utils.percent(0.5 - (bounds.x + bounds.w / 2) / bounds.w),
-            "y": utils.percent(0.5 - (bounds.y + bounds.h / 2) / bounds.h),
-            "width": utils.percent(1 / bounds.w),
-            "height": utils.percent(1 / bounds.h),
+            "x": percent(0.5 - (bounds.x + bounds.w / 2) / bounds.w),
+            "y": percent(0.5 - (bounds.y + bounds.h / 2) / bounds.h),
+            "width": percent(1 / bounds.w),
+            "height": percent(1 / bounds.h),
             "role": "presentation",
             "text-anchor": "middle",
           })(segments),
         ])
       ),
-      legend,
+      legendTemplate({ data }),
     ])
   )
 }

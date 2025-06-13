@@ -18,7 +18,7 @@ header h1 {
 }
 
 header h1 code {
-  color: white;
+  color: #fff;
 }
 
 header a {
@@ -43,12 +43,37 @@ header h1::before {
   top: 0;
   z-index: 1;
   height: 4em;
+  background: #fff;
 }
 
-#toc > div {
-  background-color: white;
-  background-clip: padding-box;
-  border-bottom: 1px solid #001d683b;
+#toc::before {
+  content: "";
+  position: absolute;
+  inset: 100% 1rem -1px;
+  background-color: #001d683b;
+  height: 1px;
+}
+
+#toc:after {
+  content: "";
+  position: absolute;
+  inset: 1rem 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    #fff,
+    #fff0 1rem,
+    #fff0 calc(100% - 1rem),
+    #fff
+  );
+}
+
+#toc .scroll {
+  overflow: auto;
+}
+
+#toc ul {
+  width: fit-content;
 }
 
 .documentation {
@@ -104,12 +129,8 @@ header h1::before {
   min-height: 100%;
 }
 
-.documentation h3 {
-  color: #000;
-}
-
-.border-bottom {
-  border-color: #ddd;
+#legend-examples + * .example-result iframe:not([style]) {
+  height: 3.5rem;
 }
 
 a {
@@ -182,23 +203,6 @@ p code {
   background: ghostwhite;
 }
 
-.width2 {
-  width: 1rem;
-}
-
-.input {
-  font-family: inherit;
-  display: block;
-  width: 100%;
-  height: 2rem;
-  padding: 0.5rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  font-size: 0.875rem;
-  border-radius: 3px;
-  box-sizing: border-box;
-}
-
 table {
   border-collapse: collapse;
   line-height: 1.25;
@@ -225,10 +229,6 @@ table {
 .prose-big {
   font-size: 18px;
   line-height: 30px;
-}
-
-.quiet {
-  opacity: 0.7;
 }
 
 pre.html {

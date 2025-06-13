@@ -12,4 +12,12 @@ describe("scatter", () => {
       )
     )
   })
+
+  test("guesses bounds", () => {
+    expect(scatter({ data: [[45, 45]] })).toEqual(
+      expect.stringContaining(
+        '<text class="axis-label" y="100%" dy="1.5em">50</text>'
+      )
+    )
+  })
 })
