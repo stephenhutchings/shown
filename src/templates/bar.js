@@ -234,6 +234,7 @@ export default ({
               [daxis[0], percent(x)],
               [dsize[0], percent(w)],
               ["class", ["series", "series-" + j]],
+              ["dominant-baseline", !vertical && "central"],
             ])
           )([
             ...stack.map((d, i) => {
@@ -262,7 +263,6 @@ export default ({
                 $.text(
                   Object.fromEntries([
                     [daxis[1], percent(y + h / 2)],
-                    ["dy", "0.33em"],
                     ["color", d.color[1]],
                   ])
                 )(d.label)
@@ -270,7 +270,7 @@ export default ({
               return $.svg({
                 "class": ["value", "value-" + i],
                 "attrs": d.attrs,
-                "dominant-baseline": "central",
+                "dominant-baseline": vertical && "central",
               })([rect, text])
             }),
             tally &&
@@ -283,7 +283,6 @@ export default ({
                   : {
                       "x": percent(axes.y.scale(sum(stack))),
                       "dx": "0.5em",
-                      "dy": "0.33em",
                       "text-anchor": "start",
                     }
               )(tally),
@@ -299,7 +298,6 @@ export default ({
                   : {
                       "class": "series-label",
                       "dx": "-1em",
-                      "dy": "0.33em",
                       "text-anchor": "end",
                     }
               )(stack[0].series),
