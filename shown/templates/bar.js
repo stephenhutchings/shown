@@ -233,7 +233,7 @@ export default ({
               return $.svg({
                 "class": ["value", "value-" + i],
                 "attrs": d.attrs,
-                "alignment-baseline": "central",
+                "dominant-baseline": "central",
               })([rect, text])
             }),
             tally &&
